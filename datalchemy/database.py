@@ -15,7 +15,7 @@ class DatabaseConnectionManager:
             A chave é o nome da conexão e o valor é outro dicionário com o engine SQLAlchemy e a factory de sessões.
 
     Examples:
-        >>> from SDSDG_Lib import DatabaseConnectionManager
+        >>> from datalchemy import DatabaseConnectionManager
 
         ### Configurações de conexões
         >>> configs = [
