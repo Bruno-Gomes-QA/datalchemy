@@ -3,10 +3,30 @@ name = "datalchemy"
 packages = [
     { include = "datalchemy" }
 ]
+license = "CoffeeWare"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Database",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Natural Language :: Portuguese",
+]
 version = "0.1.0"
 description = ""
 authors = ["Bruno-Gomes-QA <bruno.gomes.qa@gmail.com>"]
 readme = "README.md"
+
+[tool.poetry.urls]
+"Documentação" = "https://datalchemy.readthedocs.io/en/latest/"
+"Código" = "https://github.com/Bruno-Gomes-QA/datalchemy"
+"Bug Tracker" = "https://github.com/Bruno-Gomes-QA/datalchemy/issues"
 
 [tool.poetry.dependencies]
 python = "^3.12"
