@@ -9,12 +9,5 @@ build:
     python: "3.12"
 
   jobs:
-    post_create_environment:
-      - sudo apt update
-      - sudo apt -y install pipx
-      - pipx ensurepath
-      - pipx install poetry
-      - poetry config virtualenvs.create false
-
     post_install:
-      - poetry install --only doc
+      - pip install -r docs/requirements.txt
