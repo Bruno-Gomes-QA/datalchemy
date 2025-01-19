@@ -14,11 +14,11 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Instalar Poetry
-        run: pip install poetry
+      - name: Instalar pipx
+        run: sudo apt update && sudo apt -y install pipx && pipx ensurepath
 
-      - name: Check pyproject.toml
-        run: pip install --upgrade poetry
+      - name: Instalar poetry
+        run: pipx install poetry
 
       - name: Instalar dependências do projeto
         run: poetry install --without doc
