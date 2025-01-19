@@ -1,9 +1,14 @@
-# Datalchemy - Simplificando a Geração de Dados Sintéticos Orientados por Semântica
+<img src="https://datalchemy.readthedocs.io/en/latest/assets/DATALCHEMY_.png" width="200">
+
+# Datalchemy
+
+### Simplificando a Geração de Dados Sintéticos Orientados por Semântica
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Pytest](https://img.shields.io/badge/pytest-%23ffffff.svg?style=for-the-badge&logo=pytest&logoColor=2f9fe3)
 ![ChatGPT](https://img.shields.io/badge/chatGPT-74aa9c?style=for-the-badge&logo=openai&logoColor=white)
 ![PyPi](https://img.shields.io/badge/pypi-%23ececec.svg?style=for-the-badge&logo=pypi&logoColor=1f73b7)
+[![codecov](https://codecov.io/gh/Bruno-Gomes-QA/datalchemy/graph/badge.svg?token=sYf3a0mhbR)](https://codecov.io/gh/Bruno-Gomes-QA/datalchemy)
 
 ## 📌 O que é o Datalchemy?
 
