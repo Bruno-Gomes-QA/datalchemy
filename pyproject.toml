@@ -1,0 +1,60 @@
+[tool.poetry]
+name = "datalchemy"
+packages = [
+    { include = "datalchemy" }
+]
+version = "0.1.0"
+description = ""
+authors = ["Bruno-Gomes-QA <bruno.gomes.qa@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+sqlacodegen = "^2.3.0.post1"
+pymysql = "^1.1.1"
+psycopg2-binary = "^2.8.0"
+streamlit = "^1.41.1"
+openai = "^1.59.6"
+cryptography = "^44.0.0"
+tiktoken = "^0.8.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+pytest-cov = "^6.0.0"
+blue = "^0.9.1"
+isort = "^5.13.2"
+taskipy = "^1.14.1"
+pytest-mysql = "^3.1.0"
+python-dotenv = "^1.0.1"
+
+
+[tool.poetry.group.doc.dependencies]
+mkdocs-material = "^9.5.49"
+mkdocstrings = "^0.27.0"
+mkdocstrings-python = "^1.13.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.init_options]
+pythonpath = "."
+addopts = "--doctest-modules"
+
+[tool.isort]
+profile = "black"
+line_length = 79
+
+[tool.taskipy.tasks]
+lint = "blue . && isort ."
+docs = "mkdocs serve"
+pre_test = "task lint"
+test = "pytest -s -x --cov=sdsdg_lib -vv"
+post_test = "coverage html"
+
+[project.optional-dependencies]
+mysql = ["pymysql>=1.0.0", "mysqlclient>=2.1.0"]
+postgresql = ["psycopg2-binary>=2.9.0"]
+sqlite = []  # SQLite não precisa de dependências extras
+all = ["pymysql>=1.0.0", "mysqlclient>=2.1.0", "psycopg2-binary>=2.9.0"]
