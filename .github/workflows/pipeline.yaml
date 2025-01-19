@@ -18,7 +18,7 @@ jobs:
         run: pip install poetry
 
       - name: Check pyproject.toml
-        run: cat pyproject.toml
+        run: pip install --upgrade poetry
 
       - name: Instalar dependências do projeto
         run: poetry install --without doc

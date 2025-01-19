@@ -19,7 +19,7 @@ classifiers = [
     "Natural Language :: Portuguese",
 ]
 version = "0.1.0"
-description = ""
+description = "Uma biblioteca para facilitar a geração de dados sintéticos orientados por semântica e a integração com bancos SQL."
 authors = ["Bruno-Gomes-QA <bruno.gomes.qa@gmail.com>"]
 readme = "README.md"
 
