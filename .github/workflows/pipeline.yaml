@@ -17,8 +17,10 @@ jobs:
       - name: Instalar Poetry
         run: pip install poetry
 
-      - name: Instalar dependências do projeto
+      - name: Check pyproject.toml
         run: poetry check
+
+      - name: Instalar dependências do projeto
         run: poetry install --without doc
 
       - name: Rodar os testes
