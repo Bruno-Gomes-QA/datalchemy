@@ -5,6 +5,9 @@ edit_uri: tree/master/docs
 
 theme:
   name: material
+  language: pt-BR
+  logo: assets/DATALCHEMY_.png
+  favicon: assets/DATALCHEMY_.png
 
 markdown_extensions:
   - attr_list
