@@ -71,7 +71,7 @@ line_length = 79
 lint = "blue . && isort ."
 docs = "mkdocs serve"
 pre_test = "task lint"
-test = "pytest -s -x --cov=sdsdg_lib -vv"
+test = "pytest -s -x --cov=datalchemy -vv"
 post_test = "coverage html"
 
 [project.optional-dependencies]

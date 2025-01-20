@@ -1,0 +1,14 @@
+blue==0.9.1
+cryptography==44.0.0
+isort==5.13.2
+openai==1.59.6
+psycopg2-binary==2.8.0
+pymysql==1.1.1
+pytest-cov==6.0.0
+pytest-mysql==3.1.0
+pytest==8.3.4
+python-dotenv==1.0.1
+sqlacodegen==2.3.0.post1
+streamlit==1.41.1
+taskipy==1.14.1
+tiktoken==0.8.0

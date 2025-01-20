@@ -14,17 +14,11 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Instalar pipx
-        run: sudo apt update && sudo apt -y install pipx && pipx ensurepath
-
-      - name: Instalar poetry
-        run: pipx install poetry
-
-      - name: Instalar dependências do projeto
-        run: poetry install --without doc
+      - name: Instalar dependencias
+        run: pip install -r .github/requirements.txt
 
       - name: Rodar os testes
-        run: poetry run task test --cov-report=xml
+        run: pytest -s -x --cov=datalchemy -vv --cov-report=xml
 
       - name: Subir cobertura para o codecov
         uses: codecov/codecov-action@v5
