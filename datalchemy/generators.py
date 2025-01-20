@@ -3,6 +3,7 @@ import subprocess
 
 import tiktoken
 from openai import OpenAI
+from sqlalchemy import inspect
 
 from .database import DatabaseConnectionManager
 
@@ -78,8 +79,8 @@ Se as IDs são auto-increment então não devem ser geradas na resposta.
             raise ValueError(
                 f"O banco de dados '{db_name}' não foi encontrado no gerenciador."
             )
-
-        database_structure = self.generate_models(db_name)
+        engine = self.manager.get_engine(db_name)
+        database_structure = self.get_metadata(engine)
 
         database_structure_tokens = self.count_tokens(
             database_structure, model
@@ -89,8 +90,8 @@ Se as IDs são auto-increment então não devem ser geradas na resposta.
         res_tokens = (
             max_tokens
             - (database_structure_tokens + content_tokens + prompt_tokens)
-            - 40
-        )   # Overhead
+            - 40 # Overhead
+        )   
 
         if res_tokens < 1000:
             raise ValueError(
@@ -187,6 +188,47 @@ Se as IDs são auto-increment então não devem ser geradas na resposta.
             )
         except Exception as e:
             raise RuntimeError(f'Erro inesperado ao gerar models: {str(e)}')
+
+    @staticmethod
+    def get_metadata(self, engine):
+        """
+        Retorna a estrutura do banco de dados a partir dos metadados.
+
+        :param engine: Instância do SQLAlchemy Engine conectada ao banco de dados.
+        :return: Dicionário contendo informações sobre tabelas, colunas e chaves estrangeiras.
+        """
+        inspector = inspect(engine)
+        metadata = {}
+
+        for table_name in inspector.get_table_names():
+            table_info = {
+                'columns': [],
+                'foreign_keys': [],
+            }
+
+            # Adiciona informações das colunas
+            for column in inspector.get_columns(table_name):
+                table_info['columns'].append(
+                    {
+                        'name': column['name'],
+                        'type': str(column['type']),
+                        'nullable': column['nullable'],
+                    }
+                )
+
+            # Adiciona informações das chaves estrangeiras
+            for fk in inspector.get_foreign_keys(table_name):
+                table_info['foreign_keys'].append(
+                    {
+                        'column': fk['constrained_columns'],
+                        'referenced_table': fk['referred_table'],
+                        'referenced_column': fk['referred_columns'],
+                    }
+                )
+
+            metadata[table_name] = table_info
+
+        return metadata
 
     @staticmethod
     def count_tokens(msg: str, model: str = 'gpt-3.5-turbo-16k'):
