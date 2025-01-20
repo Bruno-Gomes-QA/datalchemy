@@ -1,7 +1,6 @@
 # Datalchemy - Simplificando a Geração de Dados Sintéticos Orientados por Semântica
 
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
-![Pytest](https://img.shields.io/badge/pytest-%23ffffff.svg?style=for-the-badge&logo=pytest&logoColor=2f9fe3)
+[![CI](https://github.com/Bruno-Gomes-QA/datalchemy/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/Bruno-Gomes-QA/datalchemy/actions/workflows/pipeline.yaml)
 [![Documentation Status](https://readthedocs.org/projects/datalchemy/badge/?version=latest)](https://datalchemy.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/Bruno-Gomes-QA/datalchemy/graph/badge.svg?token=sYf3a0mhbR)](https://codecov.io/gh/Bruno-Gomes-QA/datalchemy)
 
