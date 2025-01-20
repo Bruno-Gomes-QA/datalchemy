@@ -1,10 +1,12 @@
-# Datalchemy - Simplificando a Geração de Dados Sintéticos Orientados por Semântica
+<img src="https://datalchemy.readthedocs.io/en/latest/assets/DATALCHEMY_.png" width="200">
+
+# Datalchemy 
 
 [![CI](https://github.com/Bruno-Gomes-QA/datalchemy/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/Bruno-Gomes-QA/datalchemy/actions/workflows/pipeline.yaml)
 [![Documentation Status](https://readthedocs.org/projects/datalchemy/badge/?version=latest)](https://datalchemy.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/Bruno-Gomes-QA/datalchemy/graph/badge.svg?token=sYf3a0mhbR)](https://codecov.io/gh/Bruno-Gomes-QA/datalchemy)
 
-## 📌 O que é o Datalchemy?
+## 📌 O que é?
 
 Datalchemy é uma biblioteca poderosa e intuitiva para facilitar a geração de dados sintéticos com base na estrutura do banco de dados do usuário. Ideal para desenvolvedores, cientistas de dados e equipes de QA que precisam criar dados consistentes, seguros e prontos para uso em testes ou protótipos.
 
@@ -26,13 +28,13 @@ Configure múltiplas conexões e gere dados de forma rápida com uma interface i
 ### 🔒 Dados Seguros e Anonimizados
 Gera dados que seguem as melhores práticas de segurança e anonimização, atendendo a normas como LGPD e GDPR.
 
-### 🚀 Como pode te ajudar?
+## 🚀 Como pode te ajudar?
 - Testes Automatizados: Gere cenários realistas com dados consistentes para validar a aplicação sem acessar dados reais.
 - Desenvolvimento de Prototótipos: Popule rapidamente bancos de dados de desenvolvimento ou sandbox.
 - Treinamento de Modelos de IA: Crie dados sintéticos com características específicas para treinar seus modelos.
 - Análise de Dados: Simule cenários completos sem interferir no ambiente de produção.
 
-### 🛠️ Como começar?
+## 🛠️ Como começar?
 Siga estas etapas simples para utilizar a biblioteca:
 
 - Instalação
