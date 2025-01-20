@@ -1,14 +1,11 @@
-<img src="https://datalchemy.readthedocs.io/en/latest/assets/DATALCHEMY_.png" width="200">
 
-# Datalchemy 
+# Datalchemy <img src="https://datalchemy.readthedocs.io/en/latest/assets/DATALCHEMY_.png" width="100">
 
 [![CI](https://github.com/Bruno-Gomes-QA/datalchemy/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/Bruno-Gomes-QA/datalchemy/actions/workflows/pipeline.yaml)
 [![Documentation Status](https://readthedocs.org/projects/datalchemy/badge/?version=latest)](https://datalchemy.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/Bruno-Gomes-QA/datalchemy/graph/badge.svg?token=sYf3a0mhbR)](https://codecov.io/gh/Bruno-Gomes-QA/datalchemy)
 
-## 📌 O que é?
-
-Datalchemy é uma biblioteca poderosa e intuitiva para facilitar a geração de dados sintéticos com base na estrutura do banco de dados do usuário. Ideal para desenvolvedores, cientistas de dados e equipes de QA que precisam criar dados consistentes, seguros e prontos para uso em testes ou protótipos.
+📌 Datalchemy é uma biblioteca poderosa e intuitiva para facilitar a geração de dados sintéticos com base na estrutura do banco de dados do usuário. Ideal para desenvolvedores, cientistas de dados e equipes de QA que precisam criar dados consistentes, seguros e prontos para uso em testes ou protótipos.
 
 ## ✨ Principais Funcionalidades
 
