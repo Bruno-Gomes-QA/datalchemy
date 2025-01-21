@@ -1,5 +1,6 @@
 import os
 import subprocess
+import json
 
 import tiktoken
 from openai import OpenAI
@@ -31,6 +32,7 @@ class Generators:
         model: str = 'gpt-3.5-turbo-16k',
         max_tokens: int = 16385,
         temp: float = 0.3,
+        qtd_lines: int = 100,
     ):
         """
         Gera dados semânticos usando o modelo OpenAI com base em um prompt.
@@ -38,43 +40,21 @@ class Generators:
         Args:
             db_name (str): Nome do banco de dados associado à geração de dados.
             prompt (str): Mensagem enviada ao modelo para geração de dados.
-            model (str): Modelo OpenAI a ser utilizado (default: 'gpt-3.5-turbo').
-            max_tokens (int): Número máximo de tokens permitidos na resposta (default: 4096).
+            model (str): Modelo OpenAI a ser utilizado.
+            max_tokens (int): Número máximo de tokens permitidos na resposta, recomendamos não alterar essa quantidade, pois a função realiza o cálculo automático e administra os tokens para melhor performance na reposta.
             temp (float): Grau de criatividade da resposta (default: 0.3).
 
         Returns:
-            str: Resposta gerada pelo modelo OpenAI.
+            str: Resposta em JSON com os dados gerados.
 
         Raises:
             ValueError: Se o banco de dados não for encontrado.
             RuntimeError: Se ocorrer um erro na comunicação com a API da OpenAI.
         """
-        content = """
-Você é um assistente especializado em geração de dados sintéticos. Sua tarefa é gerar resultados no formato JSON seguindo estas regras:
 
-Formato: Responda apenas em JSON. Não inclua explicações ou comentários.
-Estrutura: Os dados devem seguir a estrutura fornecida (tabelas, colunas e relações) e respeitar constraints (e.g., NOT NULL, UNIQUE, FK).
-Relações: Mantenha consistência nas FK e nas relações entre tabelas.
-Quantidade de Dados: Gere 10 registros por tabela, salvo especificação no prompt. Respeite a coerência dos dados. Ex.: Produtos devem pertencer a departamentos válidos.
-Formato do JSON:
-Ordem: Primeiro tabelas de FK referenciadas, depois dependentes.
-Exemplo:
-{
-    "tabela": {
-        "atributos": ["coluna1", "coluna2"],
-        "valores": [
-            [v1, v2],
-            [v3, v4]
-        ]
-    }
-}
-Inconsistências: Retorne {} para solicitações inválidas ou com conflitos.
-Exemplos do Usuário: Baseie-se em exemplos fornecidos e gere dados consistentes.
-Segurança: Anonimize dados sensíveis (e.g., CPFs, e-mails) e siga regras como GDPR/LGPD.
-Plausibilidade: Gere dados realistas (e.g., sem preços negativos).
-Idioma: Gere em pt-BR, salvo solicitação contrária.
-Se as IDs são auto-increment então não devem ser geradas na resposta.
-"""
+
+        contents = self.read_prompts()
+
         if db_name not in self.manager.connections:
             raise ValueError(
                 f"O banco de dados '{db_name}' não foi encontrado no gerenciador."
@@ -82,51 +62,56 @@ Se as IDs são auto-increment então não devem ser geradas na resposta.
         engine = self.manager.get_engine(db_name)
         database_structure = self.get_metadata(engine)
 
-        database_structure_tokens = self.count_tokens(
-            database_structure, model
-        )
-        content_tokens = self.count_tokens(content, model)
-        prompt_tokens = self.count_tokens(prompt, model)
-        res_tokens = (
-            max_tokens
-            - (database_structure_tokens + content_tokens + prompt_tokens)
-            - 40 # Overhead
-        )   
-
-        if res_tokens < 1000:
-            raise ValueError(
-                f'Quantidade de tokens restantes menor que o mínimo de 1000: tokens restantes = {res_tokens}'
-            )
+        
         try:
-            # Envia o prompt para o modelo
+            tables_in_prompt = self.fetch_model_response(prompt, contents.get("get_tables_in_user_prompt"), database_structure, model, max_tokens, temp)
+            tables_in_prompt_ = self.get_parental_tables(tables_in_prompt, database_structure)
+            database_structure_in_prompt = self.filter_tables(database_structure, tables_in_prompt_)
+            return database_structure_in_prompt
+        except Exception as e:
+            raise RuntimeError(f'Erro ao gerar dados: {str(e)}')
+
+    def fetch_model_response(self, prompt: str, content: str, database_structure: dict, model: str, max_tokens: int, temp: float):
+        try:
+            database_structure_tokens = self.count_tokens(
+                str(database_structure), model
+            )
+            content_tokens = self.count_tokens(content, model)
+            prompt_tokens = self.count_tokens(prompt, model)
+            res_tokens = (
+                max_tokens
+                - (database_structure_tokens + content_tokens + prompt_tokens)
+                - 40 # Overhead
+            )   
+            if res_tokens < 1000:
+                raise ValueError(
+                    f'Quantidade de tokens restantes menor que o mínimo de 1000: tokens restantes = {res_tokens}'
+                )
             response = self.openai_client.chat.completions.create(
                 model=model,
                 messages=[
                     {
+                        'role': 'system',
+                        'content': f'<ESTRUTURA_DO_BANCO> {database_structure}',
+                    },  # Estrutura do banco de dados solicitado
+                    {
                         'role': 'system',  # Prompt para o modelo seguir as regras e entregar a melhor resposta no formato adequado
                         'content': content,
                     },
-                    {
-                        'role': 'system',
-                        'content': database_structure,
-                    },  # Estrutura do banco de dados solicitado
                     {'role': 'user', 'content': prompt},  # Prompt do usuário
                 ],
                 max_tokens=res_tokens,
                 temperature=temp,
             )
 
-            # Extrai o resultado da resposta
-            result = response.choices[0].message.content
-
-            # Salva no histórico
-            gen_key = f'gen{len(self.history) + 1}'
-            self.history[gen_key] = {'prompt': prompt, 'result': result}
-
-            return result
-
         except Exception as e:
-            raise RuntimeError(f'Erro ao gerar dados: {str(e)}')
+                    raise RuntimeError(f'Erro ao gerar dados: {str(e)}')
+        
+        result = response.choices[0].message.content
+        gen_key = f'gen{len(self.history) + 1}'
+        self.history[gen_key] = {'prompt': prompt, 'result': result}
+
+        return result
 
     def generate_models(self, db_name: str, save_to_file: bool = False):
         """
@@ -190,7 +175,7 @@ Se as IDs são auto-increment então não devem ser geradas na resposta.
             raise RuntimeError(f'Erro inesperado ao gerar models: {str(e)}')
 
     @staticmethod
-    def get_metadata(self, engine):
+    def get_metadata(engine):
         """
         Retorna a estrutura do banco de dados a partir dos metadados.
 
@@ -231,9 +216,58 @@ Se as IDs são auto-increment então não devem ser geradas na resposta.
         return metadata
 
     @staticmethod
+    def get_parental_tables(llm_response, db_structure):
+        """
+        Valida se todas as tabelas pai necessárias para as tabelas filhas na resposta da LLM estão presentes.
+        Se uma tabela pai estiver ausente, ela será adicionada na primeira posição.
+
+        :param llm_response_json: JSON contendo a resposta da LLM.
+        :param db_structure_json: JSON contendo a estrutura do banco de dados.
+        :return: JSON atualizado com as tabelas pai adicionadas.
+        """
+        llm_response_json = json.loads(llm_response)
+        
+        tables = llm_response_json.get("tables", [])
+        updated_tables = list(tables)
+
+        for i, table in enumerate(tables):
+            # Verifique se a tabela está na estrutura do banco
+            if table in db_structure:
+                # Verifique as chaves estrangeiras da tabela
+                table_ = db_structure.get(table)
+                foreign_keys = table_.get("foreign_keys")
+                for fk in foreign_keys:
+                    # Extraia a tabela pai referenciada
+                    parent_table = fk.get("referenced_table")
+                    if parent_table and parent_table not in updated_tables:
+                        # Adicione a tabela pai no início da lista
+                        updated_tables.insert(0, parent_table)
+
+        return updated_tables
+
+
+    @staticmethod
     def count_tokens(msg: str, model: str = 'gpt-3.5-turbo-16k'):
         try:
             encoding = tiktoken.encoding_for_model(model)   # Inicia o tiktoken
             return len(encoding.encode(msg))
         except Exception as e:
             raise RuntimeError(f'Erro inesperado contar tokens: {str(e)}')
+
+    @staticmethod
+    def read_prompts():
+
+        return {
+            "get_tables_in_user_prompt": "Com base na estrutura do banco de dados fornecida e no contexto do prompt do usuário, identifique as tabelas relevantes para a geração de dados.\nCertifique-se de:\n- Considerar as tabelas mencionadas no prompt e que estejam relacionadas via constraints (e.g., FK, NOT NULL).\n- A ordem das tabelas é importante, tabela pai primeiro e tabelas filhas em seguida. Deixe a resposta na ordem de hierarquia das tabelas, mesmo que a tabela pai não tenha sido mencionada no prompt, sempre ordernar\n- Se nenhuma tabela fizer sentido com base no prompt e na estrutura do banco, retorne um JSON no formato:\n\n{\n   \"e\": \"Breve explicação do motivo.\"\n}\n\n- Não inclua explicações ou comentários adicionais, apenas o JSON solicitado. Retorne apenas um JSON contendo os nomes das tabelas no seguinte formato:\n\n{\n   \"tables\": [\n      \"nome_da_tabela1\",\n      \"nome_da_tabela2\"\n   ]\n}\n"
+        }
+
+    @staticmethod
+    def filter_tables(database_structure: dict, tables_to_keep: list):
+        """
+        Filtra o dicionário para manter apenas as tabelas especificadas.
+
+        :param database_structure: O dicionário original contendo a estrutura completa.
+        :param tables_to_keep: Uma lista das tabelas que devem ser mantidas.
+        :return: Um novo dicionário contendo apenas as tabelas filtradas.
+        """
+        return {key: value for key, value in database_structure.items() if key in tables_to_keep}
