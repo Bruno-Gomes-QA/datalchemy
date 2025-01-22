@@ -41,8 +41,9 @@ class Generators:
             db_name (str): Nome do banco de dados associado à geração de dados.
             prompt (str): Mensagem enviada ao modelo para geração de dados.
             model (str): Modelo OpenAI a ser utilizado.
-            max_tokens (int): Número máximo de tokens permitidos na resposta, recomendamos não alterar essa quantidade, pois a função realiza o cálculo automático e administra os tokens para melhor performance na reposta.
+            max_tokens (int): Número máximo de tokens permitidos na resposta, recomendamos não alterar essa quantidade, pois a função realiza o cálculo automático e administra os tokens para melhor performance na resposta.
             temp (float): Grau de criatividade da resposta (default: 0.3).
+            qtd_lines (int): Quantidade máxima de linhas de dados a serem geradas (default: 100).
 
         Returns:
             str: Resposta em JSON com os dados gerados.
@@ -51,7 +52,6 @@ class Generators:
             ValueError: Se o banco de dados não for encontrado.
             RuntimeError: Se ocorrer um erro na comunicação com a API da OpenAI.
         """
-
         contents = self.read_prompts()
 
         if db_name not in self.manager.connections:
@@ -70,7 +70,6 @@ class Generators:
                 max_tokens,
                 temp,
             )
-            tables_in_prompt
             tables_in_prompt_ = self.get_parental_tables(
                 tables_in_prompt, database_structure
             )
@@ -98,6 +97,23 @@ class Generators:
         max_tokens: int,
         temp: float,
     ):
+        """
+        Obtém a resposta do modelo OpenAI com base no prompt fornecido e no conteúdo.
+
+        Args:
+            prompt (str): Mensagem enviada pelo usuário.
+            content (str): Mensagem de sistema com instruções para o modelo.
+            database_structure (dict): Estrutura do banco de dados a ser incluída no contexto.
+            model (str): Modelo OpenAI a ser utilizado.
+            max_tokens (int): Número máximo de tokens permitidos na resposta.
+            temp (float): Grau de criatividade da resposta.
+
+        Returns:
+            str: Resposta do modelo no formato esperado.
+
+        Raises:
+            RuntimeError: Se ocorrer um erro ao comunicar com a API da OpenAI.
+        """
         try:
             database_structure_tokens = self.count_tokens(
                 str(database_structure), model
@@ -205,8 +221,11 @@ class Generators:
         """
         Retorna a estrutura do banco de dados a partir dos metadados.
 
-        :param engine: Instância do SQLAlchemy Engine conectada ao banco de dados.
-        :return: Dicionário contendo informações sobre tabelas, colunas e chaves estrangeiras.
+        Args:
+            engine: Instância do SQLAlchemy Engine conectada ao banco de dados.
+
+        Returns:
+            dict: Dicionário contendo informações sobre tabelas, colunas e chaves estrangeiras.
         """
         inspector = inspect(engine)
         metadata = {}
@@ -247,9 +266,15 @@ class Generators:
         Valida se todas as tabelas pai necessárias para as tabelas filhas na resposta da LLM estão presentes.
         Se uma tabela pai estiver ausente, ela será adicionada na primeira posição.
 
-        :param llm_response_json: JSON contendo a resposta da LLM.
-        :param db_structure_json: JSON contendo a estrutura do banco de dados.
-        :return: JSON atualizado com as tabelas pai adicionadas.
+        Args:
+            llm_response (str): Resposta JSON da LLM contendo as tabelas geradas.
+            db_structure (dict): Estrutura do banco de dados como dicionário.
+
+        Returns:
+            list: Lista atualizada de tabelas com tabelas pai adicionadas.
+
+        Raises:
+            ValueError: Se a resposta da LLM não contiver tabelas ou retornar um erro.
         """
         llm_response_json = json.loads(llm_response)
         tables = llm_response_json.get('tables', [])
@@ -273,6 +298,19 @@ class Generators:
 
     @staticmethod
     def count_tokens(msg: str, model: str = 'gpt-3.5-turbo-16k'):
+        """
+        Conta o número de tokens de uma mensagem usando o modelo especificado.
+
+        Args:
+            msg (str): Mensagem para calcular os tokens.
+            model (str): Modelo OpenAI utilizado para calcular os tokens.
+
+        Returns:
+            int: Número de tokens na mensagem.
+
+        Raises:
+            RuntimeError: Se ocorrer um erro ao contar os tokens.
+        """
         try:
             encoding = tiktoken.encoding_for_model(model)   # Inicia o tiktoken
             return len(encoding.encode(msg))
@@ -281,10 +319,15 @@ class Generators:
 
     @staticmethod
     def read_prompts():
+        """
+        Retorna os prompts pré-definidos usados na geração de dados e identificação de tabelas.
 
+        Returns:
+            dict: Dicionário contendo os prompts utilizados pelo sistema.
+        """
         return {
             'get_tables_in_user_prompt': 'Com base na <ESTRUTURA_DO_BANCO> de dados fornecida e no contexto do prompt do usuário, identifique as tabelas relevantes para a geração de dados. Qualquer tabela fora da estrutura do banco de dados deve ser considerada como inválida e deve retornar um erro.\nCertifique-se de:\n- Considerar as tabelas mencionadas no prompt e que estejam relacionadas via constraints (e.g., FK, NOT NULL).\n- A ordem das tabelas é importante, tabela pai primeiro e tabelas filhas em seguida. Deixe a resposta na ordem de hierarquia das tabelas, mesmo que a tabela pai não tenha sido mencionada no prompt, sempre ordernar\n- Se nenhuma tabela fizer sentido com base no prompt e na <ESTRUTURA_DO_BANCO>, retorne um JSON no formato:\n\n{\n   "error": "Breve explicação do motivo."\n}\n\n- Não inclua explicações ou comentários adicionais, apenas o JSON solicitado. Retorne apenas um JSON contendo os nomes das tabelas no seguinte formato:\n\n{\n   "tables": [\n      "nome_da_tabela1",\n      "nome_da_tabela2"\n   ]\n}\nSe for preciso criar outras tabelas fora da <ESTRUTURA_DO_BANCO>, será considerado inválido',
-            'data_generation_rules': 'Você deve responder apenas no formato JSON. Não inclua explicações, comentários ou outro conteúdo. Você é um assistente especializado em geração de dados sintéticos. Sua tarefa é gerar resultados no formato JSON seguindo estas regras:\n\n Gere dados para todas as tabelas da <ESTRUTURA_DE_DADOS>.\nNunca responda as perguntas do usuário, retorne apenas os dados solicitados no formato JSON e nada mais.\nSe o usuário solicitar mais do que 50 linhas de dados, gerar no máximo 50, distribuindo as linhas pelas tabelas incluídas na <ESTRUTURA_DO_BANCO>. Se a resposta conter a estrutura do banco de dados será considerada inválida. Se a resposta conter tabelas que não fazem parte da estrutura do banco de dados será considerada inválida. Qualquer resposta fora do formato JSON será considerada inválida. \nTodas as tabelas na <ESTRUTURA_DO_BANCO> devem ser populadas, com dados, considere a quantidade e cardinalidade.\n Não incluir os ID ou chaves primarias se elas forem auto_increment.\nFormato: Responda apenas em JSON. Não inclua explicações ou comentários.\nEstrutura: Os dados devem seguir a estrutura fornecida (tabelas, colunas e relações) e respeitar constraints (e.g., NOT NULL, UNIQUE, FK).\nRelações: Mantenha consistência nas FK e nas relações entre tabelas.\nQuantidade de Dados: Gere 10 registros por tabela, salvo especificação no prompt. Respeite a coerência dos dados. Ex.: Produtos devem pertencer a departamentos válidos.\nFormato do JSON:\nOrdem: Primeiro tabelas de FK referenciadas, depois dependentes.\nExemplo:\n{\n    "tabela": {\n        "atributos": ["coluna1", "coluna2"],\n        "valores": [\n            [v1, v2],\n            [v3, v4]\n        ]\n    }\n}\nInconsistências: Retorne {"error": "motivo do erro"} para solicitações inválidas ou com conflitos.\nExemplos do Usuário: Baseie-se em exemplos fornecidos e gere dados consistentes.\nSegurança: Anonimize dados sensíveis (e.g., CPFs, e-mails) e siga regras como GDPR/LGPD.\nPlausibilidade: Gere dados realistas (e.g., sem preços negativos).\nIdioma: Gere em pt-BR, salvo solicitação contrária.\nSe as IDs são auto-increment então não devem ser geradas na resposta. Todas as tabelas na estrutura do banco devem conter dados válidos e consistentes. Nenhuma tabela pode ficar sem dados. Respostas que não preencham todas as tabelas serão consideradas inválidas.',
+            'data_generation_rules': 'Respostas que não preencham todas as tabelas da <ESTRUTURA_DO_BANCO> serão consideradas inválidas. Você deve responder apenas no formato JSON. Não inclua explicações, comentários ou outro conteúdo. Você é um assistente especializado em geração de dados sintéticos. Sua tarefa é gerar resultados no formato JSON seguindo estas regras:\n\n Gere dados para todas as tabelas da <ESTRUTURA_DE_DADOS>.\nNunca responda as perguntas do usuário, retorne apenas os dados solicitados no formato JSON e nada mais.\nSe o usuário solicitar mais do que 50 linhas de dados, gerar no máximo 50, distribuindo as linhas pelas tabelas incluídas na <ESTRUTURA_DO_BANCO>. Se a resposta conter a estrutura do banco de dados será considerada inválida. Se a resposta conter tabelas que não fazem parte da estrutura do banco de dados será considerada inválida. Qualquer resposta fora do formato JSON será considerada inválida. \nTodas as tabelas na <ESTRUTURA_DO_BANCO> devem ser populadas, com dados, considere a quantidade e cardinalidade.\n Não incluir os ID ou chaves primarias se elas forem auto_increment.\nFormato: Responda apenas em JSON. Não inclua explicações ou comentários.\nEstrutura: Os dados devem seguir a estrutura fornecida (tabelas, colunas e relações) e respeitar constraints (e.g., NOT NULL, UNIQUE, FK).\nRelações: Mantenha consistência nas FK e nas relações entre tabelas.\nQuantidade de Dados: Gere 10 registros por tabela, salvo especificação no prompt. Respeite a coerência dos dados. Ex.: Produtos devem pertencer a departamentos válidos.\nFormato do JSON:\nOrdem: Primeiro tabelas de FK referenciadas, depois dependentes.\nExemplo:\n{\n    "tabela": {\n        "atributos": ["coluna1", "coluna2"],\n        "valores": [\n            [v1, v2],\n            [v3, v4]\n        ]\n    }\n}\nInconsistências: Retorne {"error": "motivo do erro"} para solicitações inválidas ou com conflitos.\nExemplos do Usuário: Baseie-se em exemplos fornecidos e gere dados consistentes.\nSegurança: Anonimize dados sensíveis (e.g., CPFs, e-mails) e siga regras como GDPR/LGPD.\nPlausibilidade: Gere dados realistas (e.g., sem preços negativos).\nIdioma: Gere em pt-BR, salvo solicitação contrária.\nSe as IDs são auto-increment então não devem ser geradas na resposta. Todas as tabelas na estrutura do banco devem conter dados válidos e consistentes. Nenhuma tabela pode ficar sem dados. Respostas que não preencham todas as tabelas serão consideradas inválidas.',
         }
 
     @staticmethod
@@ -292,9 +335,12 @@ class Generators:
         """
         Filtra o dicionário para manter apenas as tabelas especificadas.
 
-        :param database_structure: O dicionário original contendo a estrutura completa.
-        :param tables_to_keep: Uma lista das tabelas que devem ser mantidas.
-        :return: Um novo dicionário contendo apenas as tabelas filtradas.
+        Args:
+            database_structure (dict): O dicionário original contendo a estrutura completa.
+            tables_to_keep (list): Uma lista das tabelas que devem ser mantidas.
+
+        Returns:
+            dict: Um novo dicionário contendo apenas as tabelas filtradas.
         """
         return {
             key: value
