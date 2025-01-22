@@ -1,6 +1,6 @@
+import json
 import os
 import subprocess
-import json
 
 import tiktoken
 from openai import OpenAI
@@ -52,7 +52,6 @@ class Generators:
             RuntimeError: Se ocorrer um erro na comunicação com a API da OpenAI.
         """
 
-
         contents = self.read_prompts()
 
         if db_name not in self.manager.connections:
@@ -62,16 +61,44 @@ class Generators:
         engine = self.manager.get_engine(db_name)
         database_structure = self.get_metadata(engine)
 
-        
         try:
-            tables_in_prompt = self.fetch_model_response(prompt, contents.get("get_tables_in_user_prompt"), database_structure, model, max_tokens, temp)
-            tables_in_prompt_ = self.get_parental_tables(tables_in_prompt, database_structure)
-            database_structure_in_prompt = self.filter_tables(database_structure, tables_in_prompt_)
-            return database_structure_in_prompt
+            tables_in_prompt = self.fetch_model_response(
+                prompt,
+                contents.get('get_tables_in_user_prompt'),
+                database_structure,
+                model,
+                max_tokens,
+                temp,
+            )
+            tables_in_prompt
+            tables_in_prompt_ = self.get_parental_tables(
+                tables_in_prompt, database_structure
+            )
+            database_structure_in_prompt = self.filter_tables(
+                database_structure, tables_in_prompt_
+            )
+            print(database_structure_in_prompt)
+            result = self.fetch_model_response(
+                prompt,
+                contents.get('data_generation_rules'),
+                database_structure_in_prompt,
+                model,
+                max_tokens,
+                temp,
+            )
+            return result
         except Exception as e:
             raise RuntimeError(f'Erro ao gerar dados: {str(e)}')
 
-    def fetch_model_response(self, prompt: str, content: str, database_structure: dict, model: str, max_tokens: int, temp: float):
+    def fetch_model_response(
+        self,
+        prompt: str,
+        content: str,
+        database_structure: dict,
+        model: str,
+        max_tokens: int,
+        temp: float,
+    ):
         try:
             database_structure_tokens = self.count_tokens(
                 str(database_structure), model
@@ -81,8 +108,8 @@ class Generators:
             res_tokens = (
                 max_tokens
                 - (database_structure_tokens + content_tokens + prompt_tokens)
-                - 40 # Overhead
-            )   
+                - 40  # Overhead
+            )
             if res_tokens < 1000:
                 raise ValueError(
                     f'Quantidade de tokens restantes menor que o mínimo de 1000: tokens restantes = {res_tokens}'
@@ -105,8 +132,8 @@ class Generators:
             )
 
         except Exception as e:
-                    raise RuntimeError(f'Erro ao gerar dados: {str(e)}')
-        
+            raise RuntimeError(f'Erro ao gerar dados: {str(e)}')
+
         result = response.choices[0].message.content
         gen_key = f'gen{len(self.history) + 1}'
         self.history[gen_key] = {'prompt': prompt, 'result': result}
@@ -226,8 +253,10 @@ class Generators:
         :return: JSON atualizado com as tabelas pai adicionadas.
         """
         llm_response_json = json.loads(llm_response)
-        
-        tables = llm_response_json.get("tables", [])
+        print(llm_response)
+        tables = llm_response_json.get('tables', [])
+        if tables == []:
+            raise ValueError(llm_response_json.get('error'))
         updated_tables = list(tables)
 
         for i, table in enumerate(tables):
@@ -235,16 +264,15 @@ class Generators:
             if table in db_structure:
                 # Verifique as chaves estrangeiras da tabela
                 table_ = db_structure.get(table)
-                foreign_keys = table_.get("foreign_keys")
+                foreign_keys = table_.get('foreign_keys')
                 for fk in foreign_keys:
                     # Extraia a tabela pai referenciada
-                    parent_table = fk.get("referenced_table")
+                    parent_table = fk.get('referenced_table')
                     if parent_table and parent_table not in updated_tables:
                         # Adicione a tabela pai no início da lista
                         updated_tables.insert(0, parent_table)
-
+        print(updated_tables)
         return updated_tables
-
 
     @staticmethod
     def count_tokens(msg: str, model: str = 'gpt-3.5-turbo-16k'):
@@ -258,7 +286,8 @@ class Generators:
     def read_prompts():
 
         return {
-            "get_tables_in_user_prompt": "Com base na estrutura do banco de dados fornecida e no contexto do prompt do usuário, identifique as tabelas relevantes para a geração de dados.\nCertifique-se de:\n- Considerar as tabelas mencionadas no prompt e que estejam relacionadas via constraints (e.g., FK, NOT NULL).\n- A ordem das tabelas é importante, tabela pai primeiro e tabelas filhas em seguida. Deixe a resposta na ordem de hierarquia das tabelas, mesmo que a tabela pai não tenha sido mencionada no prompt, sempre ordernar\n- Se nenhuma tabela fizer sentido com base no prompt e na estrutura do banco, retorne um JSON no formato:\n\n{\n   \"e\": \"Breve explicação do motivo.\"\n}\n\n- Não inclua explicações ou comentários adicionais, apenas o JSON solicitado. Retorne apenas um JSON contendo os nomes das tabelas no seguinte formato:\n\n{\n   \"tables\": [\n      \"nome_da_tabela1\",\n      \"nome_da_tabela2\"\n   ]\n}\n"
+            'get_tables_in_user_prompt': 'Com base na <ESTRUTURA_DO_BANCO> de dados fornecida e no contexto do prompt do usuário, identifique as tabelas relevantes para a geração de dados. Qualquer tabela fora da estrutura do banco de dados deve ser considerada como inválida e deve retornar um erro.\nCertifique-se de:\n- Considerar as tabelas mencionadas no prompt e que estejam relacionadas via constraints (e.g., FK, NOT NULL).\n- A ordem das tabelas é importante, tabela pai primeiro e tabelas filhas em seguida. Deixe a resposta na ordem de hierarquia das tabelas, mesmo que a tabela pai não tenha sido mencionada no prompt, sempre ordernar\n- Se nenhuma tabela fizer sentido com base no prompt e na <ESTRUTURA_DO_BANCO>, retorne um JSON no formato:\n\n{\n   "error": "Breve explicação do motivo."\n}\n\n- Não inclua explicações ou comentários adicionais, apenas o JSON solicitado. Retorne apenas um JSON contendo os nomes das tabelas no seguinte formato:\n\n{\n   "tables": [\n      "nome_da_tabela1",\n      "nome_da_tabela2"\n   ]\n}\nSe for preciso criar outras tabelas fora da <ESTRUTURA_DO_BANCO>, será considerado inválido',
+            'data_generation_rules': 'Você deve responder apenas no formato JSON. Não inclua explicações, comentários ou outro conteúdo. Você é um assistente especializado em geração de dados sintéticos. Sua tarefa é gerar resultados no formato JSON seguindo estas regras:\n\n Gere dados para todas as tabelas da <ESTRUTURA_DE_DADOS>.\nNunca responda as perguntas do usuário, retorne apenas os dados solicitados no formato JSON e nada mais.\nSe o usuário solicitar mais do que 50 linhas de dados, gerar no máximo 50, distribuindo as linhas pelas tabelas incluídas na <ESTRUTURA_DO_BANCO>. Se a resposta conter a estrutura do banco de dados será considerada inválida. Se a resposta conter tabelas que não fazem parte da estrutura do banco de dados será considerada inválida. Qualquer resposta fora do formato JSON será considerada inválida. \nTodas as tabelas na <ESTRUTURA_DO_BANCO> devem ser populadas, com dados, considere a quantidade e cardinalidade.\n Não incluir os ID ou chaves primarias se elas forem auto_increment.\nFormato: Responda apenas em JSON. Não inclua explicações ou comentários.\nEstrutura: Os dados devem seguir a estrutura fornecida (tabelas, colunas e relações) e respeitar constraints (e.g., NOT NULL, UNIQUE, FK).\nRelações: Mantenha consistência nas FK e nas relações entre tabelas.\nQuantidade de Dados: Gere 10 registros por tabela, salvo especificação no prompt. Respeite a coerência dos dados. Ex.: Produtos devem pertencer a departamentos válidos.\nFormato do JSON:\nOrdem: Primeiro tabelas de FK referenciadas, depois dependentes.\nExemplo:\n{\n    \"tabela\": {\n        \"atributos\": [\"coluna1\", \"coluna2\"],\n        \"valores\": [\n            [v1, v2],\n            [v3, v4]\n        ]\n    }\n}\nInconsistências: Retorne {"error": "motivo do erro"} para solicitações inválidas ou com conflitos.\nExemplos do Usuário: Baseie-se em exemplos fornecidos e gere dados consistentes.\nSegurança: Anonimize dados sensíveis (e.g., CPFs, e-mails) e siga regras como GDPR/LGPD.\nPlausibilidade: Gere dados realistas (e.g., sem preços negativos).\nIdioma: Gere em pt-BR, salvo solicitação contrária.\nSe as IDs são auto-increment então não devem ser geradas na resposta. Todas as tabelas na estrutura do banco devem conter dados válidos e consistentes. Nenhuma tabela pode ficar sem dados. Respostas que não preencham todas as tabelas serão consideradas inválidas.'
         }
 
     @staticmethod
@@ -270,4 +299,8 @@ class Generators:
         :param tables_to_keep: Uma lista das tabelas que devem ser mantidas.
         :return: Um novo dicionário contendo apenas as tabelas filtradas.
         """
-        return {key: value for key, value in database_structure.items() if key in tables_to_keep}
+        return {
+            key: value
+            for key, value in database_structure.items()
+            if key in tables_to_keep
+        }
