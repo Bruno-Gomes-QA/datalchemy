@@ -23,6 +23,6 @@ generator = Generators(db_m, OPENAI_API_KEY=os.getenv('OPENAI_API_KEY'))
 
 res = generator.generate_data(
     'main_db',
-    'Estou desenvolvendo um aplicativo para e-commerce de eletronicos, principalmente celulares, poderia gerar alguns dados de produtos.'
+    'Estou desenvolvendo um aplicativo para e-commerce de eletronicos, principalmente celulares, poderia gerar alguns dados de produtos.',
 )
 print(res)
