@@ -29,7 +29,7 @@ readme = "README.md"
 "Bug Tracker" = "https://github.com/Bruno-Gomes-QA/datalchemy/issues"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.12.7,<3.13"
 sqlacodegen = "^2.3.0.post1"
 pymysql = "^1.1.1"
 psycopg2-binary = "^2.8.0"
@@ -37,6 +37,7 @@ streamlit = "^1.41.1"
 openai = "^1.59.6"
 cryptography = "^44.0.0"
 tiktoken = "^0.8.0"
+sdv = "^1.17.4"
 
 
 [tool.poetry.group.dev.dependencies]
