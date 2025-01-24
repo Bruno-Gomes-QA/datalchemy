@@ -55,7 +55,10 @@ class DatabaseConnectionManager:
         """
         self.configs = configs
         self.connections = {}
-
+        if len(self.configs) > 5:
+            raise ValueError(
+                f'Número máximo de conexões permitidas: 5\nNúmero de conexões obtidas:{len(configs)}'
+            )
         for config in configs:
             try:
                 self.add_connection(config)
@@ -74,7 +77,11 @@ class DatabaseConnectionManager:
         Raises:
             ValueError: Se o dicionário de configuração estiver incompleto ou contiver valores inválidos.
         """
-
+        print(f'Configs {len(self.connections)}')
+        if len(self.connections) > 4:
+            raise ValueError(
+                f'Número máximo de conexões permitidas: 5\nNúmero de conexões obtidas:{len(self.connections)}'
+            )
         try:
             config_v, missing_keys = self.validate_requirements_keys(config)
             if config_v:
@@ -258,3 +265,6 @@ class DatabaseConnectionManager:
                 raise ValueError("O campo 'password' deve ser uma string.")
 
         return config, None
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close_all_connections()
