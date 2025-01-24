@@ -9,11 +9,7 @@ from datalchemy import DatabaseConnectionManager
 def db_configs():
     """Fixture com configurações para os testes."""
     return [
-        {
-            'name': 'test_db_1',
-            'dialect': 'sqlite',
-            'database': ':memory:',
-        },
+        {'name': 'test_db_1', 'dialect': 'sqlite', 'database': ':memory:'},
         {
             'name': 'test_db_2',
             'dialect': 'mysql+pymysql',
@@ -70,6 +66,27 @@ def test_add_connection_missing_keys():
         match='Configuração inválida, valores ausentes ou vazios: database',
     ):
         manager.add_connection(incomplete_config)
+
+
+def test_add_connection_password_type_error():
+    """Testa se uma exceção é levantada ao adicionar conexão com configuração incompleta."""
+    manager = DatabaseConnectionManager([])
+
+    type_error_config = {
+        'name': 'test_db_3',
+        'dialect': 'postgresql',
+        'username': 'admin',
+        'password': 123,
+        'host': 'localhost',
+        'port': 5432,
+        'database': 'postgres_db',
+    }
+
+    with pytest.raises(
+        ValueError,
+        match="O campo 'password' deve ser uma string.",
+    ):
+        manager.add_connection(type_error_config)
 
 
 def test_get_session(db_configs):
@@ -138,3 +155,41 @@ def test_build_connection_url():
         DatabaseConnectionManager.build_connection_url(postgres_config)
         == postgres_url
     )
+
+
+def test_create_add_5_plus_conn_give_error():
+    configs = [
+        {'name': 'test_db_1', 'dialect': 'sqlite', 'database': ':memory:'},
+        {'name': 'test_db_2', 'dialect': 'sqlite', 'database': ':memory:'},
+        {'name': 'test_db_3', 'dialect': 'sqlite', 'database': ':memory:'},
+        {'name': 'test_db_4', 'dialect': 'sqlite', 'database': ':memory:'},
+        {'name': 'test_db_5', 'dialect': 'sqlite', 'database': ':memory:'},
+    ]
+    manager = DatabaseConnectionManager(configs)
+    new_config = {
+        'name': 'test_db_6',
+        'dialect': 'sqlite',
+        'database': ':memory:',
+    }
+
+    with pytest.raises(
+        ValueError,
+        match='Número máximo de conexões permitidas: 5\nNúmero de conexões obtidas:5',
+    ):
+        manager.add_connection(new_config)
+
+
+def test_create_manager_with_5_plus_conn_return_raise():
+    configs = [
+        {'name': 'test_db_1', 'dialect': 'sqlite', 'database': ':memory:'},
+        {'name': 'test_db_2', 'dialect': 'sqlite', 'database': ':memory:'},
+        {'name': 'test_db_3', 'dialect': 'sqlite', 'database': ':memory:'},
+        {'name': 'test_db_4', 'dialect': 'sqlite', 'database': ':memory:'},
+        {'name': 'test_db_5', 'dialect': 'sqlite', 'database': ':memory:'},
+        {'name': 'test_db_6', 'dialect': 'sqlite', 'database': ':memory:'},
+    ]
+    with pytest.raises(
+        ValueError,
+        match='Número máximo de conexões permitidas: 5\nNúmero de conexões obtidas:6',
+    ):
+        manager = DatabaseConnectionManager(configs)

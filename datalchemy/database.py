@@ -77,7 +77,8 @@ class DatabaseConnectionManager:
         Raises:
             ValueError: Se o dicionário de configuração estiver incompleto ou contiver valores inválidos.
         """
-        if len(self.connections) > 5:
+        print(f'Configs {len(self.connections)}')
+        if len(self.connections) > 4:
             raise ValueError(
                 f'Número máximo de conexões permitidas: 5\nNúmero de conexões obtidas:{len(self.connections)}'
             )
