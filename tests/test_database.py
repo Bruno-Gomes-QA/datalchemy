@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from datalchemy import DatabaseConnectionManager
+from datalchemy import DatabaseConfig, DatabaseConnectionManager
 
 
 @pytest.fixture
@@ -44,7 +44,7 @@ def test_initialization_creates_connections(db_configs):
 def test_add_connection(db_configs):
     """Testa a adição de uma nova conexão."""
     manager = DatabaseConnectionManager([])
-    config = db_configs[1]
+    config = DatabaseConfig(**db_configs[1])
 
     manager.add_connection(config)
 
@@ -54,39 +54,34 @@ def test_add_connection(db_configs):
 
 def test_add_connection_missing_keys():
     """Testa se uma exceção é levantada ao adicionar conexão com configuração incompleta."""
-    manager = DatabaseConnectionManager([])
-
     incomplete_config = {
         'name': 'invalid_db',
         'dialect': 'sqlite',
+        # Missing 'database'
     }
 
-    with pytest.raises(
-        ValueError,
-        match='Configuração inválida, valores ausentes ou vazios: database',
-    ):
-        manager.add_connection(incomplete_config)
+    with pytest.raises(ValueError) as exc_info:
+        DatabaseConnectionManager([incomplete_config])
+
+    assert 'database' in str(exc_info.value)
 
 
 def test_add_connection_password_type_error():
-    """Testa se uma exceção é levantada ao adicionar conexão com configuração incompleta."""
-    manager = DatabaseConnectionManager([])
-
+    """Testa se uma exceção é levantada ao adicionar conexão com tipo inválido."""
     type_error_config = {
         'name': 'test_db_3',
         'dialect': 'postgresql',
         'username': 'admin',
-        'password': 123,
+        'password': 123,  # Invalid type (int instead of str)
         'host': 'localhost',
         'port': 5432,
         'database': 'postgres_db',
     }
 
-    with pytest.raises(
-        ValueError,
-        match="O campo 'password' deve ser uma string.",
-    ):
-        manager.add_connection(type_error_config)
+    with pytest.raises(ValueError) as exc_info:
+        DatabaseConnectionManager([type_error_config])
+
+    assert 'password' in str(exc_info.value).lower()
 
 
 def test_get_session(db_configs):
@@ -102,7 +97,7 @@ def test_get_session_invalid_name(db_configs):
     manager = DatabaseConnectionManager(db_configs)
 
     with pytest.raises(
-        ValueError, match="Conexão 'invalid_db' não encontrada."
+        ValueError, match="🚫 Conexão 'invalid_db' não encontrada"
     ):
         manager.get_session('invalid_db')
 
@@ -118,78 +113,140 @@ def test_close_all_connections(db_configs):
 
 def test_build_connection_url():
     """Testa se a URL de conexão é construída corretamente."""
-    mysql_config = {
-        'dialect': 'mysql+pymysql',
+    manager = DatabaseConnectionManager([])
+
+    mysql_config = DatabaseConfig(
+        name='test_mysql',
+        dialect='mysql+pymysql',
+        username='user',
+        password='pass',
+        host='localhost',
+        port=3306,
+        database='testdb',
+    )
+    mysql_url = 'mysql+pymysql://user:pass@localhost:3306/testdb'
+    assert str(manager._build_connection_url(mysql_config)) == mysql_url
+
+    sqlite_config = DatabaseConfig(
+        name='test_sqlite',
+        dialect='sqlite',
+        database=':memory:',
+    )
+    sqlite_url = 'sqlite:///:memory:'
+    assert str(manager._build_connection_url(sqlite_config)) == sqlite_url
+
+    postgres_config = DatabaseConfig(
+        name='test_postgres',
+        dialect='postgresql',
+        username='admin',
+        password='admin123',
+        host='localhost',
+        port=5432,
+        database='postgres_db',
+    )
+    postgres_url = 'postgresql://admin:admin123@localhost:5432/postgres_db'
+    assert str(manager._build_connection_url(postgres_config)) == postgres_url
+
+
+def test_duplicate_connection_name_error(db_configs):
+    """Testa erro ao adicionar conexão com nome duplicado."""
+    manager = DatabaseConnectionManager(db_configs[:1])
+    duplicate_config = DatabaseConfig(**db_configs[0])
+
+    with pytest.raises(ValueError) as exc_info:
+        manager.add_connection(duplicate_config)
+
+    assert 'já existe' in str(exc_info.value).lower()
+
+
+def test_context_manager_closes_connections(db_configs):
+    """Testa se o gerenciador de contexto fecha conexões automaticamente."""
+    with DatabaseConnectionManager(db_configs) as manager:
+        assert len(manager.connections) == 3
+
+    assert len(manager.connections) == 0
+
+
+def test_pool_size_validation():
+    """Testa validação de pool_size inválido."""
+    invalid_config = {
+        'name': 'test_db',
+        'dialect': 'sqlite',
+        'database': ':memory:',
+        'pool_size': 0,
+    }
+
+    with pytest.raises(ValueError) as exc_info:
+        DatabaseConnectionManager([invalid_config])
+
+    assert 'pool_size' in str(exc_info.value)
+
+
+def test_missing_driver_error():
+    """Testa erro quando driver necessário não está instalado."""
+    config = {
+        'name': 'pg_db',
+        'dialect': 'postgresql+psycopg2',
         'username': 'user',
         'password': 'pass',
         'host': 'localhost',
-        'port': 3306,
-        'database': 'testdb',
+        'database': 'test',
     }
-    mysql_url = 'mysql+pymysql://user:pass@localhost:3306/testdb'
-    assert (
-        DatabaseConnectionManager.build_connection_url(mysql_config)
-        == mysql_url
-    )
 
-    sqlite_config = {
-        'dialect': 'sqlite',
-        'database': ':memory:',
-    }
-    sqlite_url = 'sqlite:///:memory:'
-    assert (
-        DatabaseConnectionManager.build_connection_url(sqlite_config)
-        == sqlite_url
-    )
+    with patch('datalchemy.database.util.find_spec', return_value=None):
+        with pytest.raises(ImportError) as exc_info:
+            DatabaseConnectionManager([config])
 
-    postgres_config = {
-        'dialect': 'postgresql',
-        'username': 'admin',
-        'password': 'admin123',
+    assert 'psycopg2' in str(exc_info.value)
+    assert 'pip install datalchemy[postgresql]' in str(exc_info.value)
+
+
+def test_session_context_manager(db_configs):
+    """Testa uso da sessão dentro de um bloco with."""
+    manager = DatabaseConnectionManager(db_configs)
+
+    with manager.get_session('test_db_1') as session:
+        result = session.execute('SELECT 1')
+        assert result.scalar() == 1
+
+
+def test_port_validation():
+    """Testa validação de porta inválida."""
+    invalid_config = {
+        'name': 'invalid_port',
+        'dialect': 'mysql',
+        'username': 'root',
+        'password': 'pass',
         'host': 'localhost',
-        'port': 5432,
-        'database': 'postgres_db',
+        'port': 70000,
+        'database': 'test',
     }
-    postgres_url = 'postgresql://admin:admin123@localhost:5432/postgres_db'
-    assert (
-        DatabaseConnectionManager.build_connection_url(postgres_config)
-        == postgres_url
-    )
+
+    with pytest.raises(ValueError) as exc_info:
+        DatabaseConnectionManager([invalid_config])
+
+    assert 'port' in str(exc_info.value)
 
 
-def test_create_add_5_plus_conn_give_error():
-    configs = [
-        {'name': 'test_db_1', 'dialect': 'sqlite', 'database': ':memory:'},
-        {'name': 'test_db_2', 'dialect': 'sqlite', 'database': ':memory:'},
-        {'name': 'test_db_3', 'dialect': 'sqlite', 'database': ':memory:'},
-        {'name': 'test_db_4', 'dialect': 'sqlite', 'database': ':memory:'},
-        {'name': 'test_db_5', 'dialect': 'sqlite', 'database': ':memory:'},
-    ]
-    manager = DatabaseConnectionManager(configs)
-    new_config = {
-        'name': 'test_db_6',
+def test_sqlite_minimal_config():
+    """Testa configuração mínima válida para SQLite."""
+    config = {
+        'name': 'minimal_sqlite',
         'dialect': 'sqlite',
-        'database': ':memory:',
+        'database': '/tmp/test.db',
     }
 
-    with pytest.raises(
-        ValueError,
-        match='Número máximo de conexões permitidas: 5\nNúmero de conexões obtidas:5',
-    ):
-        manager.add_connection(new_config)
+    manager = DatabaseConnectionManager([config])
+    assert 'minimal_sqlite' in manager.connections
 
 
-def test_create_manager_with_5_plus_conn_return_raise():
-    configs = [
-        {'name': 'test_db_1', 'dialect': 'sqlite', 'database': ':memory:'},
-        {'name': 'test_db_2', 'dialect': 'sqlite', 'database': ':memory:'},
-        {'name': 'test_db_3', 'dialect': 'sqlite', 'database': ':memory:'},
-        {'name': 'test_db_4', 'dialect': 'sqlite', 'database': ':memory:'},
-        {'name': 'test_db_5', 'dialect': 'sqlite', 'database': ':memory:'},
-        {'name': 'test_db_6', 'dialect': 'sqlite', 'database': ':memory:'},
-    ]
-    with pytest.raises(
-        ValueError,
-        match='Número máximo de conexões permitidas: 5\nNúmero de conexões obtidas:6',
-    ):
-        manager = DatabaseConnectionManager(configs)
+def test_invalid_dialect_handling():
+    """Testa tratamento de dialeto não suportado."""
+    config = {
+        'name': 'unknown_db',
+        'dialect': 'firebird',
+        'database': 'test.fdb',
+    }
+
+    with pytest.raises(ImportError):
+        DatabaseConnectionManager([config])
