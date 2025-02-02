@@ -1,270 +1,186 @@
-import subprocess
-from typing import Dict, List, Union
+"""
+🎩 Módulo para gerenciar as Conexões
 
-from sqlalchemy import create_engine, exc
-from sqlalchemy.orm import sessionmaker
+Gerencie conexões de forma inteligente e prepare-se para a geração de dados sintéticos!
+"""
+
+from importlib import util
+from typing import Dict, List, Optional
+
+from pydantic import BaseModel, ValidationError, conint, constr
+from sqlalchemy import create_engine
+from sqlalchemy.engine import URL, Engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.orm.session import Session
+
+
+class DatabaseConfig(BaseModel):
+    """
+    🔧 Configuração para Conexão com Banco de Dados
+
+    Crie conexões poderosas com esses parâmetros mágicos:
+
+    Args:
+        name: Um nome único e memorável para sua conexão (ex: 'meu_banco_heroi')
+        dialect: Dialeto SQLAlchemy + driver (ex: 'mysql+pymysql', 'postgresql+psycopg2')
+        database: Nome do banco de dados
+        username: Seu usuário (não necessário para SQLite)
+        password: Senha secreta (não necessário para SQLite)
+        host: Endereço do servidor (não necessário para SQLite)
+        port: Porta de acesso (1-65535, não necessário para SQLite)
+        pool_size: Quantidade de conexões simultâneas (padrão: 5)
+        max_overflow: Conexões extras para momentos de pico (padrão: 10)
+
+    Exemplos de Dialetos:
+        - 🐘 PostgreSQL: postgresql+psycopg2
+        - 🐬 MySQL: mysql+pymysql
+        - 🏺 Oracle: oracle+cx_oracle
+        - 🏰 SQL Server: mssql+pyodbc
+        - 🧪 SQLite: sqlite (não precisa de driver)
+    """
+
+    name: constr(min_length=3, max_length=50)
+    dialect: str
+    database: str
+    username: Optional[str] = None
+    password: Optional[str] = None
+    host: Optional[str] = None
+    port: Optional[conint(gt=0, lt=65536)] = None
+    pool_size: conint(gt=0) = 5
+    max_overflow: conint(ge=0) = 10
 
 
 class DatabaseConnectionManager:
     """
-    Esta classe gerencia conexões com múltiplos bancos de dados, suporta diferentes dialetos, e facilita operações.
+    🧙‍♂️ Mestre das Conexões - Gerencia múltiplos bancos de dados com facilidade
 
-    Attributes:
-        connections (dict):
-            Dicionário contendo as conexões ativas.
-            A chave é o nome da conexão e o valor é outro dicionário com o engine SQLAlchemy e a factory de sessões.
+    Args:
+        connections: Dicionário de conexões ativas
+        configs: Lista de configurações validadas
 
-    Examples:
-        >>> from datalchemy import DatabaseConnectionManager
+    Exemplo:
 
-        ### Configurações de conexões
-        >>> configs = [
-                {
-                    "name": "main_db",
-                    "dialect": "mysql",
-                    "username": "root",
-                    "password": "password",
-                    "host": "localhost",
-                    "port": 3306,
-                    "database": "meu_banco"
-                },
-                {
-                    "name": "analytics_db",
-                    "dialect": "postgresql",
-                    "username": "admin",
-                    "password": "admin123",
-                    "host": "analytics.server.com",
-                    "port": 5432,
-                    "database": "analytics"
-                }
-            ]
+    ```python
+    config = {
+        'name': 'meu_banco',
+        'dialect': 'postgresql+psycopg2',
+        'username': 'merlin',
+        'password': 'abracadabra',
+        'host': 'localhost',
+        'database': 'magic_data'
+    }
 
-        ### Cria o gerenciador de conexões
-            >>> db_manager = DatabaseConnectionManager(configs)
-
-        ### Obtém uma sessão para uma das conexões
-            >>> session = db_manager.get_session("main_db")
+    manager = DatabaseConnectionManager([config])
+    with manager.get_session('meu_banco') as sessao:
+        sessao.execute('SELECT 1')
+    ```
     """
 
-    def __init__(self, configs: List[Dict[str, Union[str, int]]]):
+    DIALECT_REQUIREMENTS = {
+        'mysql': ['pymysql'],
+        'postgresql': ['psycopg2'],
+        'oracle': ['cx_oracle'],
+        'mssql': ['pyodbc'],
+        'sqlite': [],
+    }
+
+    def __init__(self, configs: List[Dict]):
         """
-        Inicializa o gerenciador de conexões com base nas configurações fornecidas.
+        Inicia a classe, com as conexões fornecidas
 
         Args:
-            configs (list): Uma lista de configurações para conexão com bancos de dados.
+            configs: Lista de configurações de conexão
+
+        Raises:
+            ValueError: Se alguma configuração estiver incorreta
+            ImportError: Se faltar algum driver necessário
+
+        Dica: Instale grupos de dependências com pip install datalchemy[dialeto]
         """
-        self.configs = configs
-        self.connections = {}
-        if len(self.configs) > 5:
-            raise ValueError(
-                f'Número máximo de conexões permitidas: 5\nNúmero de conexões obtidas:{len(configs)}'
-            )
+        self.connections: Dict[str, Dict] = {}
+        self.configs: List[DatabaseConfig] = []
+
         for config in configs:
             try:
-                self.add_connection(config)
-            except Exception as e:
-                raise ValueError(
-                    f"Erro ao adicionar conexão {config.get('name', '<sem_nome>')}: {e}"
-                )
+                validated_config = DatabaseConfig(**config)
+                self.add_connection(validated_config)
+            except ValidationError as e:
+                raise ValueError(f'📜 Configuração inválida: {e}') from e
 
-    def add_connection(self, config: Dict[str, Union[str, int]]):
+    def add_connection(self, config: DatabaseConfig):
         """
-        Adiciona uma nova conexão ao gerenciador e gera os modelos correspondentes.
+        Adiciona uma nova conexão
 
         Args:
-            config (dict): Configurações para a conexão com o banco de dados.
+            config: Configuração validada do banco de dados
 
         Raises:
-            ValueError: Se o dicionário de configuração estiver incompleto ou contiver valores inválidos.
+            ImportError: Se o driver necessário não estiver instalado
+            ValueError: Se o nome da conexão já existir
         """
-        print(f'Configs {len(self.connections)}')
-        if len(self.connections) > 4:
+        if config.name in self.connections:
             raise ValueError(
-                f'Número máximo de conexões permitidas: 5\nNúmero de conexões obtidas:{len(self.connections)}'
+                f"✨ A conexão '{config.name}' já existe! Escolha outro nome"
             )
-        try:
-            config_v, missing_keys = self.validate_requirements_keys(config)
-            if config_v:
-                connection_string = self.build_connection_url(config)
-                engine = create_engine(connection_string)
-                Session = sessionmaker(bind=engine)
-                self.connections[config['name']] = {
-                    'engine': engine,
-                    'session': Session,
-                }
 
-            else:
-                raise ValueError(
-                    f"Configuração inválida, valores ausentes ou vazios: {', '.join(missing_keys)}"
-                )
-        except subprocess.SubprocessError as e:
-            if 'Access denied' in str(e):
-                raise PermissionError(
-                    f'Acesso negado. '
-                    'Verifique suas credenciais de autenticação.'
-                )
+        self._check_driver_installation(config.dialect)
+        connection_url = self._build_connection_url(config)
+        engine = create_engine(connection_url)
 
-    def get_session(self, name: str):
-        """
-        Retorna uma sessão para o banco de dados especificado.
+        self.connections[config.name] = {
+            'engine': engine,
+            'session_factory': scoped_session(sessionmaker(bind=engine)),
+        }
+        self.configs.append(config)
 
-        Args:
-            name (str): Nome da conexão configurada.
-
-        Returns:
-            sqlalchemy.orm.session.Session: Uma sessão para o banco de dados especificado.
-
-        Raises:
-            ValueError: Se a conexão especificada não for encontrada.
-        """
+    def get_session(self, name: str) -> Session:
+        """🔮 Retorna uma sessão ativa para consultas e transações."""
         if name not in self.connections:
-            raise ValueError(f"Conexão '{name}' não encontrada.")
-        try:
-            return self.connections[name]['session']()
-        except Exception as e:
-            raise RuntimeError(
-                f"Erro ao criar sessão para conexão '{name}': {e}"
-            )
+            raise ValueError(f"🚫 Conexão '{name}' não encontrada")
+        return self.connections[name]['session_factory']()
 
-    def get_engine(self, name: str):
-        """
-        Retorna a engine para o banco de dados especificado.
-
-        Args:
-            name (str): Nome da conexão configurada.
-
-        Returns:
-            sqlalchemy.engine.Engine: A engine para o banco de dados especificado.
-
-        Raises:
-            ValueError: Se a conexão especificada não for encontrada.
-        """
+    def get_engine(self, name: str) -> Engine:
+        """🔩 Retorna a engine SQLAlchemy de uma conexão específica."""
         if name not in self.connections:
-            raise ValueError(f"Conexão '{name}' não encontrada.")
-        try:
-            return self.connections[name]['engine']
-        except Exception as e:
-            raise RuntimeError(
-                f"Erro ao criar engine para conexão '{name}': {e}"
-            )
+            raise ValueError(f"🚫 Conexão '{name}' não encontrada")
+        return self.connections[name]['engine']
 
     def close_all_connections(self):
-        """
-        Fecha todas as conexões gerenciadas.
-        """
-        for name, conn in self.connections.items():
-            try:
-                conn['engine'].dispose()
-            except Exception as e:
-                raise ValueError(f"Erro ao fechar conexão '{name}': {e}")
-        self.connections.clear()
+        """⏳ Fecha todas as conexões abertas."""
+        for name in list(self.connections.keys()):
+            self.connections[name]['engine'].dispose()
+            self.connections[name]['session_factory'].close_all()
+            self.connections[name]['session_factory'].remove()
+            del self.connections[name]
 
-    def get_config_by_name(self, name):
-        """
-        Busca uma configuração pelo nome.
+    def _build_connection_url(self, config: DatabaseConfig) -> str:
+        """🔗 Constrói a URL de conexão SQLAlchemy."""
+        return URL.create(
+            drivername=config.dialect,
+            username=config.username,
+            password=config.password,
+            host=config.host,
+            port=config.port,
+            database=config.database,
+        )
 
-        Args:
-            name (str): Nome da configuração a ser buscada.
+    def _check_driver_installation(self, dialect: str):
+        """🔍 Verifica se os pacotes necessários estão instalados."""
+        base_dialect = dialect.split('+')[0].lower()
+        required = self.DIALECT_REQUIREMENTS.get(base_dialect, [])
 
-        Returns:
-            dict: Configuração correspondente ao nome fornecido.
-
-        Raises:
-            ValueError: Se nenhuma configuração for encontrada com o nome fornecido.
-        """
-        for config in self.configs:
-            if config.get('name') == name:
-                return config
-        raise ValueError(f"Configuração com o nome '{name}' não encontrada.")
-
-    @staticmethod
-    def build_connection_url(config: Dict[str, Union[str, int]]) -> str:
-        """
-        Constrói uma URL de conexão a partir das configurações fornecidas.
-
-        Args:
-            config (dict): Configurações para a conexão com o banco de dados.
-
-        Returns:
-            str: URL de conexão no formato esperado por SQLAlchemy.
-
-        Raises:
-            ValueError: Se o dicionário de configuração estiver incompleto.
-        """
-
-        if config.get('dialect') == 'sqlite':
-            url = f"{config['dialect']}:///{config['database']}"
-        else:
-            url = (
-                f"{config['dialect']}://{config['username']}:{config['password']}@"
-                f"{config['host']}:{config['port']}/{config['database']}"
-            )
-
-        return url
-
-    @staticmethod
-    def validate_requirements_keys(config):
-        """
-        Valida as chaves e valores de configuração antes de estabelecer uma conexão.
-
-        Args:
-            config (dict): Configuração para a conexão com o banco de dados.
-
-        Returns:
-            tuple: (config, None) se válido; (None, missing_keys) se inválido.
-
-        Raises:
-            ValueError: Se houver erros de validação nos valores fornecidos.
-        """
-        required_keys = ['name', 'dialect', 'database']
-        is_sqlite = config.get('dialect') == 'sqlite'
-
-        # Chaves adicionais obrigatórias para bancos que não são SQLite
-        if not is_sqlite:
-            required_keys.extend(['username', 'password', 'host', 'port'])
-
-        # Verifica chaves ausentes
-        missing_keys = [key for key in required_keys if not config.get(key)]
-        if missing_keys:
-            return None, missing_keys
-
-        # Validações adicionais para valores
-        if not isinstance(config['name'], str) or not config['name'].strip():
-            raise ValueError("O campo 'name' deve ser uma string não vazia.")
-
-        if config['dialect'] not in ['sqlite', 'mysql+pymysql', 'postgresql']:
-            raise ValueError(
-                f"Dialeto '{config['dialect']}' não suportado. Use 'sqlite', 'mysql' ou 'postgresql'."
-            )
-
-        if not is_sqlite:
-            if (
-                not isinstance(config['host'], str)
-                or not config['host'].strip()
-            ):
-                raise ValueError(
-                    "O campo 'host' deve ser uma string não vazia."
+        for package in required:
+            if not util.find_spec(package):
+                install_cmd = f'pip install datalchemy[{base_dialect}]'
+                raise ImportError(
+                    f'🧙‍♂️ Componente mágico faltando!\n'
+                    f'Driver necessário: {package}\n'
+                    f'Fórmula de instalação: {install_cmd}\n'
+                    f'Dialeto usado: {dialect}'
                 )
 
-            if not isinstance(config['port'], int) or not (
-                1 <= config['port'] <= 65535
-            ):
-                raise ValueError(
-                    "O campo 'port' deve ser um número inteiro entre 1 e 65535."
-                )
+    def __enter__(self):
+        return self
 
-            if (
-                not isinstance(config['username'], str)
-                or not config['username'].strip()
-            ):
-                raise ValueError(
-                    "O campo 'username' deve ser uma string não vazia."
-                )
-
-            if not isinstance(config['password'], str):
-                raise ValueError("O campo 'password' deve ser uma string.")
-
-        return config, None
-
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.close_all_connections()
