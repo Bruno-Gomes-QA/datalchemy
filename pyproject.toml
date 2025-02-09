@@ -39,6 +39,7 @@ cryptography = "^44.0.0"
 tiktoken = "^0.8.0"
 sdv = "^1.17.4"
 pydantic = "^2.10.6"
+peft = "^0.14.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -77,13 +78,10 @@ test = "pytest -s -x --cov=datalchemy -vv"
 post_test = "coverage html"
 
 [tool.poetry.extras]
-postgresql = ["psycopg2-binary >=2.9.9"]
-mysql = [
-    "pymysql >=1.1.0",
-    "mysqlclient >=2.2.0; platform_machine != 'aarch64'"
-]
-oracle = ["cx-oracle >=8.3.0"]
-mssql = ["pyodbc >=4.0.39"]
+postgresql = ["psycopg2-binary"]
+mysql = ["pymysql", "mysqlclient"]
+oracle = ["cx-oracle"]
+mssql = ["pyodbc"]
 all = [
     "psycopg2-binary",
     "pymysql",

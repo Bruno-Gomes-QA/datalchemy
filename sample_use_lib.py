@@ -19,10 +19,10 @@ configs = [
 ]
 
 db_m = DatabaseConnectionManager(configs)
-generator = Generators(db_m, OPENAI_API_KEY=os.getenv('OPENAI_API_KEY'))
+generator = Generators(db_m, 'bruno-gomes-qa/datalchemy-model')
 
 res = generator.generate_data(
     'main_db',
-    'Gere produtos',
+    'Gere 10 produtos para 3 departamentos distintos',
 )
 print(res)
