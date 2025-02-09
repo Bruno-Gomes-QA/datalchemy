@@ -1,0 +1,542 @@
+[
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'email', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate 10 clients.",
+        "output": "{\"clients\": {\"columns\": [\"id\", \"name\", \"email\"], \"values\": [[1, \"Alice Johnson\", \"alice.johnson@example.com\"], [2, \"Bob Smith\", \"bob.smith@example.com\"], [3, \"Charlie Brown\", \"charlie.brown@example.com\"], [4, \"David Lee\", \"david.lee@example.com\"], [5, \"Emma Wilson\", \"emma.wilson@example.com\"], [6, \"Frank White\", \"frank.white@example.com\"], [7, \"Grace Adams\", \"grace.adams@example.com\"], [8, \"Henry Clark\", \"henry.clark@example.com\"], [9, \"Isabella Young\", \"isabella.young@example.com\"], [10, \"Jack Turner\", \"jack.turner@example.com\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Generate 10 records for 'customers'.",
+        "output": "{\"error\": \"Table 'customers' not found in database structure.\"}"
+    },
+    {
+        "input": "Apenas um texto aleatório.",
+        "output": "{\"error\": \"Invalid input format. Ensure proper JSON structure.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Just generate some random data.",
+        "output": "{\"error\": \"Invalid request. Please specify a valid table and data constraints.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Generate 1,000,000 records.",
+        "output": "{\"error\": \"Requested data volume exceeds the allowed limit (Max: 100).\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate an 'address' column for clients.",
+        "output": "{\"error\": \"Column 'address' not found in table 'clients'.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate orders for a non-existing client ID.",
+        "output": "{\"error\": \"Foreign key constraint violation: 'client_id' does not match existing 'clients' table.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'salary', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate employee salaries as text.",
+        "output": "{\"error\": \"Invalid data type: 'salary' expects a DECIMAL, but received STRING.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Delete duplicate records.",
+        "output": "{\"error\": \"Invalid operation: This model only supports data generation.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate a product with a negative price.",
+        "output": "{\"error\": \"Invalid value: 'price' must be positive.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(100)', 'nullable': False}]}} <USER_REQUEST> Generate a product name with 300 characters.",
+        "output": "{\"error\": \"Value too long for column 'name' (Max: 100 chars).\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False, 'auto_increment': True}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate IDs starting from 1000.",
+        "output": "{\"error\": \"ID column 'id' is auto_increment. Do not provide manual values.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'email', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate 10 clients.",
+        "output": "{\"clients\": {\"columns\": [\"id\", \"name\", \"email\"], \"values\": [[1, \"Alice Johnson\", \"alice.johnson@example.com\"], [2, \"Bob Smith\", \"bob.smith@example.com\"], [3, \"Charlie Brown\", \"charlie.brown@example.com\"], [4, \"David Lee\", \"david.lee@example.com\"], [5, \"Emma Wilson\", \"emma.wilson@example.com\"], [6, \"Frank White\", \"frank.white@example.com\"], [7, \"Grace Adams\", \"grace.adams@example.com\"], [8, \"Henry Clark\", \"henry.clark@example.com\"], [9, \"Isabella Young\", \"isabella.young@example.com\"], [10, \"Jack Turner\", \"jack.turner@example.com\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Generate 10 records for 'customers'.",
+        "output": "{\"error\": \"Table 'customers' not found in database structure.\"}"
+    },
+    {
+        "input": "Apenas um texto aleatório sem estrutura JSON.",
+        "output": "{\"error\": \"Invalid input format. Ensure proper JSON structure.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Just generate some random data.",
+        "output": "{\"error\": \"Invalid request. Please specify a valid table and data constraints.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Generate 1,000,000 records.",
+        "output": "{\"error\": \"Requested data volume exceeds the allowed limit (Max: 100).\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate orders for clients.",
+        "output": "{\"error\": \"Cannot generate 'orders' because 'clients' has no records.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate an 'address' column for clients.",
+        "output": "{\"error\": \"Column 'address' not found in table 'clients'.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate orders for a non-existing client ID.",
+        "output": "{\"error\": \"Foreign key constraint violation: 'client_id' does not match existing 'clients' table.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'salary', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate employee salaries as text.",
+        "output": "{\"error\": \"Invalid data type: 'salary' expects a DECIMAL, but received STRING.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'users': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'password', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate data for 'users'.",
+        "output": "{\"error\": \"Permission denied: Cannot generate data for restricted table 'users'.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Delete duplicate records.",
+        "output": "{\"error\": \"Invalid operation: This model only supports data generation.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate a product with a negative price.",
+        "output": "{\"error\": \"Invalid value: 'price' must be positive.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(100)', 'nullable': False}]}} <USER_REQUEST> Generate a product name with 300 characters.",
+        "output": "{\"error\": \"Value too long for column 'name' (Max: 100 chars).\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False, 'auto_increment': True}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate IDs starting from 1000.",
+        "output": "{\"error\": \"ID column 'id' is auto_increment. Do not provide manual values.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}, 'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 5 clients and their orders.",
+        "output": "{\"clients\": {\"columns\": [\"id\", \"name\"], \"values\": [[1, \"Alice Johnson\"], [2, \"Bob Smith\"], [3, \"Charlie Brown\"], [4, \"David Lee\"], [5, \"Emma Wilson\"]]}, \"orders\": {\"columns\": [\"id\", \"client_id\"], \"values\": [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'role', 'type': 'VARCHAR(255)', 'nullable': False}]}, 'departments': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Populate all tables with 100 records each.",
+        "output": "{\"employees\": {\"columns\": [\"id\", \"name\", \"role\"], \"values\": [[1, \"Employee 1\", \"Engineer\"], [2, \"Employee 2\", \"Engineer\"], [3, \"Employee 3\", \"Engineer\"], [4, \"Employee 4\", \"Engineer\"], [5, \"Employee 5\", \"Engineer\"], [6, \"Employee 6\", \"Engineer\"], [7, \"Employee 7\", \"Engineer\"], [8, \"Employee 8\", \"Engineer\"], [9, \"Employee 9\", \"Engineer\"], [10, \"Employee 10\", \"Engineer\"], [11, \"Employee 11\", \"Engineer\"], [12, \"Employee 12\", \"Engineer\"], [13, \"Employee 13\", \"Engineer\"], [14, \"Employee 14\", \"Engineer\"], [15, \"Employee 15\", \"Engineer\"], [16, \"Employee 16\", \"Engineer\"], [17, \"Employee 17\", \"Engineer\"], [18, \"Employee 18\", \"Engineer\"], [19, \"Employee 19\", \"Engineer\"], [20, \"Employee 20\", \"Engineer\"], [21, \"Employee 21\", \"Engineer\"], [22, \"Employee 22\", \"Engineer\"], [23, \"Employee 23\", \"Engineer\"], [24, \"Employee 24\", \"Engineer\"], [25, \"Employee 25\", \"Engineer\"], [26, \"Employee 26\", \"Engineer\"], [27, \"Employee 27\", \"Engineer\"], [28, \"Employee 28\", \"Engineer\"], [29, \"Employee 29\", \"Engineer\"], [30, \"Employee 30\", \"Engineer\"], [31, \"Employee 31\", \"Engineer\"], [32, \"Employee 32\", \"Engineer\"], [33, \"Employee 33\", \"Engineer\"], [34, \"Employee 34\", \"Engineer\"], [35, \"Employee 35\", \"Engineer\"], [36, \"Employee 36\", \"Engineer\"], [37, \"Employee 37\", \"Engineer\"], [38, \"Employee 38\", \"Engineer\"], [39, \"Employee 39\", \"Engineer\"], [40, \"Employee 40\", \"Engineer\"], [41, \"Employee 41\", \"Engineer\"], [42, \"Employee 42\", \"Engineer\"], [43, \"Employee 43\", \"Engineer\"], [44, \"Employee 44\", \"Engineer\"], [45, \"Employee 45\", \"Engineer\"], [46, \"Employee 46\", \"Engineer\"], [47, \"Employee 47\", \"Engineer\"], [48, \"Employee 48\", \"Engineer\"], [49, \"Employee 49\", \"Engineer\"], [50, \"Employee 50\", \"Engineer\"], [51, \"Employee 51\", \"Engineer\"], [52, \"Employee 52\", \"Engineer\"], [53, \"Employee 53\", \"Engineer\"], [54, \"Employee 54\", \"Engineer\"], [55, \"Employee 55\", \"Engineer\"], [56, \"Employee 56\", \"Engineer\"], [57, \"Employee 57\", \"Engineer\"], [58, \"Employee 58\", \"Engineer\"], [59, \"Employee 59\", \"Engineer\"], [60, \"Employee 60\", \"Engineer\"], [61, \"Employee 61\", \"Engineer\"], [62, \"Employee 62\", \"Engineer\"], [63, \"Employee 63\", \"Engineer\"], [64, \"Employee 64\", \"Engineer\"], [65, \"Employee 65\", \"Engineer\"], [66, \"Employee 66\", \"Engineer\"], [67, \"Employee 67\", \"Engineer\"], [68, \"Employee 68\", \"Engineer\"], [69, \"Employee 69\", \"Engineer\"], [70, \"Employee 70\", \"Engineer\"], [71, \"Employee 71\", \"Engineer\"], [72, \"Employee 72\", \"Engineer\"], [73, \"Employee 73\", \"Engineer\"], [74, \"Employee 74\", \"Engineer\"], [75, \"Employee 75\", \"Engineer\"], [76, \"Employee 76\", \"Engineer\"], [77, \"Employee 77\", \"Engineer\"], [78, \"Employee 78\", \"Engineer\"], [79, \"Employee 79\", \"Engineer\"], [80, \"Employee 80\", \"Engineer\"], [81, \"Employee 81\", \"Engineer\"], [82, \"Employee 82\", \"Engineer\"], [83, \"Employee 83\", \"Engineer\"], [84, \"Employee 84\", \"Engineer\"], [85, \"Employee 85\", \"Engineer\"], [86, \"Employee 86\", \"Engineer\"], [87, \"Employee 87\", \"Engineer\"], [88, \"Employee 88\", \"Engineer\"], [89, \"Employee 89\", \"Engineer\"], [90, \"Employee 90\", \"Engineer\"], [91, \"Employee 91\", \"Engineer\"], [92, \"Employee 92\", \"Engineer\"], [93, \"Employee 93\", \"Engineer\"], [94, \"Employee 94\", \"Engineer\"], [95, \"Employee 95\", \"Engineer\"], [96, \"Employee 96\", \"Engineer\"], [97, \"Employee 97\", \"Engineer\"], [98, \"Employee 98\", \"Engineer\"], [99, \"Employee 99\", \"Engineer\"], [100, \"Employee 100\", \"Engineer\"]]}, \"departments\": {\"columns\": [\"id\", \"name\"], \"values\": [[1, \"Department 1\"], [2, \"Department 2\"], [3, \"Department 3\"], [4, \"Department 4\"], [5, \"Department 5\"], [6, \"Department 6\"], [7, \"Department 7\"], [8, \"Department 8\"], [9, \"Department 9\"], [10, \"Department 10\"], [11, \"Department 11\"], [12, \"Department 12\"], [13, \"Department 13\"], [14, \"Department 14\"], [15, \"Department 15\"], [16, \"Department 16\"], [17, \"Department 17\"], [18, \"Department 18\"], [19, \"Department 19\"], [20, \"Department 20\"], [21, \"Department 21\"], [22, \"Department 22\"], [23, \"Department 23\"], [24, \"Department 24\"], [25, \"Department 25\"], [26, \"Department 26\"], [27, \"Department 27\"], [28, \"Department 28\"], [29, \"Department 29\"], [30, \"Department 30\"], [31, \"Department 31\"], [32, \"Department 32\"], [33, \"Department 33\"], [34, \"Department 34\"], [35, \"Department 35\"], [36, \"Department 36\"], [37, \"Department 37\"], [38, \"Department 38\"], [39, \"Department 39\"], [40, \"Department 40\"], [41, \"Department 41\"], [42, \"Department 42\"], [43, \"Department 43\"], [44, \"Department 44\"], [45, \"Department 45\"], [46, \"Department 46\"], [47, \"Department 47\"], [48, \"Department 48\"], [49, \"Department 49\"], [50, \"Department 50\"], [51, \"Department 51\"], [52, \"Department 52\"], [53, \"Department 53\"], [54, \"Department 54\"], [55, \"Department 55\"], [56, \"Department 56\"], [57, \"Department 57\"], [58, \"Department 58\"], [59, \"Department 59\"], [60, \"Department 60\"], [61, \"Department 61\"], [62, \"Department 62\"], [63, \"Department 63\"], [64, \"Department 64\"], [65, \"Department 65\"], [66, \"Department 66\"], [67, \"Department 67\"], [68, \"Department 68\"], [69, \"Department 69\"], [70, \"Department 70\"], [71, \"Department 71\"], [72, \"Department 72\"], [73, \"Department 73\"], [74, \"Department 74\"], [75, \"Department 75\"], [76, \"Department 76\"], [77, \"Department 77\"], [78, \"Department 78\"], [79, \"Department 79\"], [80, \"Department 80\"], [81, \"Department 81\"], [82, \"Department 82\"], [83, \"Department 83\"], [84, \"Department 84\"], [85, \"Department 85\"], [86, \"Department 86\"], [87, \"Department 87\"], [88, \"Department 88\"], [89, \"Department 89\"], [90, \"Department 90\"], [91, \"Department 91\"], [92, \"Department 92\"], [93, \"Department 93\"], [94, \"Department 94\"], [95, \"Department 95\"], [96, \"Department 96\"], [97, \"Department 97\"], [98, \"Department 98\"], [99, \"Department 99\"], [100, \"Department 100\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate exactly 5 products.",
+        "output": "{\"products\": {\"columns\": [\"id\", \"name\", \"price\"], \"values\": [[1, \"Laptop\", 1200.0], [2, \"Smartphone\", 800.0], [3, \"Tablet\", 500.0], [4, \"Smartwatch\", 300.0], [5, \"Headphones\", 150.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'category', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate products in the 'electronics' category with prices between 500 and 2000.",
+        "output": "{\"products\": {\"columns\": [\"id\", \"name\", \"category\", \"price\"], \"values\": [[1, \"Laptop\", \"electronics\", 1200.0], [2, \"Smartphone\", \"electronics\", 800.0], [3, \"Tablet\", \"electronics\", 600.0], [4, \"Gaming Console\", \"electronics\", 1500.0], [5, \"Monitor\", \"electronics\", 700.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}, 'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate orders only for existing clients.",
+        "output": "{\"orders\": {\"columns\": [\"id\", \"client_id\"], \"values\": [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'transactions': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'transaction_date', 'type': 'TIMESTAMP', 'nullable': True}]}} <USER_REQUEST> Generate financial transactions from the last 6 months.",
+        "output": "{\"transactions\": {\"columns\": [\"id\", \"amount\", \"transaction_date\"], \"values\": [[1, 150.75, \"2023-08-15 14:30:00\"], [2, 200.5, \"2023-09-10 10:45:00\"], [3, 320.0, \"2023-10-05 16:20:00\"], [4, 540.9, \"2023-11-22 11:10:00\"], [5, 125.0, \"2023-12-01 09:05:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'category', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate 5 products, each from a different category.",
+        "output": "{\"products\": {\"columns\": [\"id\", \"name\", \"category\", \"price\"], \"values\": [[1, \"Smartphone\", \"Electronics\", 1200.0], [2, \"Jeans\", \"Clothing\", 50.0], [3, \"Sofa\", \"Furniture\", 500.0], [4, \"Basketball\", \"Sports\", 30.0], [5, \"Laptop\", \"Computers\", 1500.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'status', 'type': 'VARCHAR(50)', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 10 orders with different statuses ('pending', 'shipped', 'delivered').",
+        "output": "{\"orders\": {\"columns\": [\"id\", \"client_id\", \"status\"], \"values\": [[1, 1, \"pending\"], [2, 2, \"shipped\"], [3, 3, \"delivered\"], [4, 4, \"pending\"], [5, 5, \"shipped\"], [6, 6, \"delivered\"], [7, 7, \"pending\"], [8, 8, \"shipped\"], [9, 9, \"delivered\"], [10, 10, \"pending\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'role', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'salary', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate 5 employees with different roles.",
+        "output": "{\"employees\": {\"columns\": [\"id\", \"name\", \"role\", \"salary\"], \"values\": [[1, \"Alice Johnson\", \"Software Engineer\", 8000.0], [2, \"Bob Smith\", \"Project Manager\", 9500.0], [3, \"Charlie Brown\", \"HR Specialist\", 6000.0], [4, \"David Lee\", \"Marketing Manager\", 7200.0], [5, \"Emma Wilson\", \"Data Scientist\", 8700.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'payments': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'order_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'payment_method', 'type': 'VARCHAR(50)', 'nullable': False}], 'foreign_keys': [{'column': ['order_id'], 'referenced_table': 'orders', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 5 payments using different methods ('credit card', 'paypal', 'bank transfer').",
+        "output": "{\"payments\": {\"columns\": [\"id\", \"order_id\", \"amount\", \"payment_method\"], \"values\": [[1, 1, 150.0, \"credit card\"], [2, 2, 200.0, \"paypal\"], [3, 3, 300.0, \"bank transfer\"], [4, 4, 120.0, \"credit card\"], [5, 5, 180.0, \"paypal\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'bank_transactions': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'account_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'currency', 'type': 'VARCHAR(10)', 'nullable': False}], 'foreign_keys': [{'column': ['account_id'], 'referenced_table': 'accounts', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 5 transactions in different currencies ('USD', 'EUR', 'BRL').",
+        "output": "{\"bank_transactions\": {\"columns\": [\"id\", \"account_id\", \"amount\", \"currency\"], \"values\": [[1, 101, 1000.0, \"USD\"], [2, 102, 750.5, \"EUR\"], [3, 103, 2000.0, \"BRL\"], [4, 104, 500.0, \"USD\"], [5, 105, 1300.0, \"EUR\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'hotel_reservations': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'guest_name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'room_type', 'type': 'VARCHAR(50)', 'nullable': False}, {'name': 'check_in', 'type': 'TIMESTAMP', 'nullable': False}, {'name': 'check_out', 'type': 'TIMESTAMP', 'nullable': False}]}} <USER_REQUEST> Generate 5 hotel reservations with different room types.",
+        "output": "{\"hotel_reservations\": {\"columns\": [\"id\", \"guest_name\", \"room_type\", \"check_in\", \"check_out\"], \"values\": [[1, \"Alice Johnson\", \"Single\", \"2024-06-10 14:00:00\", \"2024-06-15 12:00:00\"], [2, \"Bob Smith\", \"Double\", \"2024-07-01 15:00:00\", \"2024-07-05 11:00:00\"], [3, \"Charlie Brown\", \"Suite\", \"2024-08-05 13:00:00\", \"2024-08-10 12:00:00\"], [4, \"David Lee\", \"Penthouse\", \"2024-09-12 14:00:00\", \"2024-09-20 11:00:00\"], [5, \"Emma Wilson\", \"Double\", \"2024-10-01 15:00:00\", \"2024-10-07 12:00:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'email', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate 10 clients.",
+        "output": "{\"clients\": {\"columns\": [\"id\", \"name\", \"email\"], \"values\": [[1, \"Alice Johnson\", \"alice.johnson@example.com\"], [2, \"Bob Smith\", \"bob.smith@example.com\"], [3, \"Charlie Brown\", \"charlie.brown@example.com\"], [4, \"David Lee\", \"david.lee@example.com\"], [5, \"Emma Wilson\", \"emma.wilson@example.com\"], [6, \"Frank White\", \"frank.white@example.com\"], [7, \"Grace Adams\", \"grace.adams@example.com\"], [8, \"Henry Clark\", \"henry.clark@example.com\"], [9, \"Isabella Young\", \"isabella.young@example.com\"], [10, \"Jack Turner\", \"jack.turner@example.com\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Generate 10 records for 'customers'.",
+        "output": "{\"error\": \"Table 'customers' not found in database structure.\"}"
+    },
+    {
+        "input": "Apenas um texto aleatório sem estrutura JSON.",
+        "output": "{\"error\": \"Invalid input format. Ensure proper JSON structure.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Just generate some random data.",
+        "output": "{\"error\": \"Invalid request. Please specify a valid table and data constraints.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Generate 1,000,000 records.",
+        "output": "{\"error\": \"Requested data volume exceeds the allowed limit (Max: 100).\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate orders for clients.",
+        "output": "{\"error\": \"Cannot generate 'orders' because 'clients' has no records.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate an 'address' column for clients.",
+        "output": "{\"error\": \"Column 'address' not found in table 'clients'.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate orders for a non-existing client ID.",
+        "output": "{\"error\": \"Foreign key constraint violation: 'client_id' does not match existing 'clients' table.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'salary', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate employee salaries as text.",
+        "output": "{\"error\": \"Invalid data type: 'salary' expects a DECIMAL, but received STRING.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'users': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'password', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate data for 'users'.",
+        "output": "{\"error\": \"Permission denied: Cannot generate data for restricted table 'users'.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Delete duplicate records.",
+        "output": "{\"error\": \"Invalid operation: This model only supports data generation.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate a product with a negative price.",
+        "output": "{\"error\": \"Invalid value: 'price' must be positive.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(100)', 'nullable': False}]}} <USER_REQUEST> Generate a product name with 300 characters.",
+        "output": "{\"error\": \"Value too long for column 'name' (Max: 100 chars).\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False, 'auto_increment': True}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate IDs starting from 1000.",
+        "output": "{\"error\": \"ID column 'id' is auto_increment. Do not provide manual values.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}, 'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 5 clients and their orders.",
+        "output": "{\"clients\": {\"columns\": [\"id\", \"name\"], \"values\": [[1, \"Alice Johnson\"], [2, \"Bob Smith\"], [3, \"Charlie Brown\"], [4, \"David Lee\"], [5, \"Emma Wilson\"]]}, \"orders\": {\"columns\": [\"id\", \"client_id\"], \"values\": [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'role', 'type': 'VARCHAR(255)', 'nullable': False}]}, 'departments': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Populate all tables with 100 records each.",
+        "output": "{\"employees\": {\"columns\": [\"id\", \"name\", \"role\"], \"values\": [[1, \"Employee 1\", \"Engineer\"], [2, \"Employee 2\", \"Engineer\"], [3, \"Employee 3\", \"Engineer\"], [4, \"Employee 4\", \"Engineer\"], [5, \"Employee 5\", \"Engineer\"], [6, \"Employee 6\", \"Engineer\"], [7, \"Employee 7\", \"Engineer\"], [8, \"Employee 8\", \"Engineer\"], [9, \"Employee 9\", \"Engineer\"], [10, \"Employee 10\", \"Engineer\"], [11, \"Employee 11\", \"Engineer\"], [12, \"Employee 12\", \"Engineer\"], [13, \"Employee 13\", \"Engineer\"], [14, \"Employee 14\", \"Engineer\"], [15, \"Employee 15\", \"Engineer\"], [16, \"Employee 16\", \"Engineer\"], [17, \"Employee 17\", \"Engineer\"], [18, \"Employee 18\", \"Engineer\"], [19, \"Employee 19\", \"Engineer\"], [20, \"Employee 20\", \"Engineer\"], [21, \"Employee 21\", \"Engineer\"], [22, \"Employee 22\", \"Engineer\"], [23, \"Employee 23\", \"Engineer\"], [24, \"Employee 24\", \"Engineer\"], [25, \"Employee 25\", \"Engineer\"], [26, \"Employee 26\", \"Engineer\"], [27, \"Employee 27\", \"Engineer\"], [28, \"Employee 28\", \"Engineer\"], [29, \"Employee 29\", \"Engineer\"], [30, \"Employee 30\", \"Engineer\"], [31, \"Employee 31\", \"Engineer\"], [32, \"Employee 32\", \"Engineer\"], [33, \"Employee 33\", \"Engineer\"], [34, \"Employee 34\", \"Engineer\"], [35, \"Employee 35\", \"Engineer\"], [36, \"Employee 36\", \"Engineer\"], [37, \"Employee 37\", \"Engineer\"], [38, \"Employee 38\", \"Engineer\"], [39, \"Employee 39\", \"Engineer\"], [40, \"Employee 40\", \"Engineer\"], [41, \"Employee 41\", \"Engineer\"], [42, \"Employee 42\", \"Engineer\"], [43, \"Employee 43\", \"Engineer\"], [44, \"Employee 44\", \"Engineer\"], [45, \"Employee 45\", \"Engineer\"], [46, \"Employee 46\", \"Engineer\"], [47, \"Employee 47\", \"Engineer\"], [48, \"Employee 48\", \"Engineer\"], [49, \"Employee 49\", \"Engineer\"], [50, \"Employee 50\", \"Engineer\"], [51, \"Employee 51\", \"Engineer\"], [52, \"Employee 52\", \"Engineer\"], [53, \"Employee 53\", \"Engineer\"], [54, \"Employee 54\", \"Engineer\"], [55, \"Employee 55\", \"Engineer\"], [56, \"Employee 56\", \"Engineer\"], [57, \"Employee 57\", \"Engineer\"], [58, \"Employee 58\", \"Engineer\"], [59, \"Employee 59\", \"Engineer\"], [60, \"Employee 60\", \"Engineer\"], [61, \"Employee 61\", \"Engineer\"], [62, \"Employee 62\", \"Engineer\"], [63, \"Employee 63\", \"Engineer\"], [64, \"Employee 64\", \"Engineer\"], [65, \"Employee 65\", \"Engineer\"], [66, \"Employee 66\", \"Engineer\"], [67, \"Employee 67\", \"Engineer\"], [68, \"Employee 68\", \"Engineer\"], [69, \"Employee 69\", \"Engineer\"], [70, \"Employee 70\", \"Engineer\"], [71, \"Employee 71\", \"Engineer\"], [72, \"Employee 72\", \"Engineer\"], [73, \"Employee 73\", \"Engineer\"], [74, \"Employee 74\", \"Engineer\"], [75, \"Employee 75\", \"Engineer\"], [76, \"Employee 76\", \"Engineer\"], [77, \"Employee 77\", \"Engineer\"], [78, \"Employee 78\", \"Engineer\"], [79, \"Employee 79\", \"Engineer\"], [80, \"Employee 80\", \"Engineer\"], [81, \"Employee 81\", \"Engineer\"], [82, \"Employee 82\", \"Engineer\"], [83, \"Employee 83\", \"Engineer\"], [84, \"Employee 84\", \"Engineer\"], [85, \"Employee 85\", \"Engineer\"], [86, \"Employee 86\", \"Engineer\"], [87, \"Employee 87\", \"Engineer\"], [88, \"Employee 88\", \"Engineer\"], [89, \"Employee 89\", \"Engineer\"], [90, \"Employee 90\", \"Engineer\"], [91, \"Employee 91\", \"Engineer\"], [92, \"Employee 92\", \"Engineer\"], [93, \"Employee 93\", \"Engineer\"], [94, \"Employee 94\", \"Engineer\"], [95, \"Employee 95\", \"Engineer\"], [96, \"Employee 96\", \"Engineer\"], [97, \"Employee 97\", \"Engineer\"], [98, \"Employee 98\", \"Engineer\"], [99, \"Employee 99\", \"Engineer\"], [100, \"Employee 100\", \"Engineer\"]]}, \"departments\": {\"columns\": [\"id\", \"name\"], \"values\": [[1, \"Department 1\"], [2, \"Department 2\"], [3, \"Department 3\"], [4, \"Department 4\"], [5, \"Department 5\"], [6, \"Department 6\"], [7, \"Department 7\"], [8, \"Department 8\"], [9, \"Department 9\"], [10, \"Department 10\"], [11, \"Department 11\"], [12, \"Department 12\"], [13, \"Department 13\"], [14, \"Department 14\"], [15, \"Department 15\"], [16, \"Department 16\"], [17, \"Department 17\"], [18, \"Department 18\"], [19, \"Department 19\"], [20, \"Department 20\"], [21, \"Department 21\"], [22, \"Department 22\"], [23, \"Department 23\"], [24, \"Department 24\"], [25, \"Department 25\"], [26, \"Department 26\"], [27, \"Department 27\"], [28, \"Department 28\"], [29, \"Department 29\"], [30, \"Department 30\"], [31, \"Department 31\"], [32, \"Department 32\"], [33, \"Department 33\"], [34, \"Department 34\"], [35, \"Department 35\"], [36, \"Department 36\"], [37, \"Department 37\"], [38, \"Department 38\"], [39, \"Department 39\"], [40, \"Department 40\"], [41, \"Department 41\"], [42, \"Department 42\"], [43, \"Department 43\"], [44, \"Department 44\"], [45, \"Department 45\"], [46, \"Department 46\"], [47, \"Department 47\"], [48, \"Department 48\"], [49, \"Department 49\"], [50, \"Department 50\"], [51, \"Department 51\"], [52, \"Department 52\"], [53, \"Department 53\"], [54, \"Department 54\"], [55, \"Department 55\"], [56, \"Department 56\"], [57, \"Department 57\"], [58, \"Department 58\"], [59, \"Department 59\"], [60, \"Department 60\"], [61, \"Department 61\"], [62, \"Department 62\"], [63, \"Department 63\"], [64, \"Department 64\"], [65, \"Department 65\"], [66, \"Department 66\"], [67, \"Department 67\"], [68, \"Department 68\"], [69, \"Department 69\"], [70, \"Department 70\"], [71, \"Department 71\"], [72, \"Department 72\"], [73, \"Department 73\"], [74, \"Department 74\"], [75, \"Department 75\"], [76, \"Department 76\"], [77, \"Department 77\"], [78, \"Department 78\"], [79, \"Department 79\"], [80, \"Department 80\"], [81, \"Department 81\"], [82, \"Department 82\"], [83, \"Department 83\"], [84, \"Department 84\"], [85, \"Department 85\"], [86, \"Department 86\"], [87, \"Department 87\"], [88, \"Department 88\"], [89, \"Department 89\"], [90, \"Department 90\"], [91, \"Department 91\"], [92, \"Department 92\"], [93, \"Department 93\"], [94, \"Department 94\"], [95, \"Department 95\"], [96, \"Department 96\"], [97, \"Department 97\"], [98, \"Department 98\"], [99, \"Department 99\"], [100, \"Department 100\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate exactly 5 products.",
+        "output": "{\"products\": {\"columns\": [\"id\", \"name\", \"price\"], \"values\": [[1, \"Laptop\", 1200.0], [2, \"Smartphone\", 800.0], [3, \"Tablet\", 500.0], [4, \"Smartwatch\", 300.0], [5, \"Headphones\", 150.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'category', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate products in the 'electronics' category with prices between 500 and 2000.",
+        "output": "{\"products\": {\"columns\": [\"id\", \"name\", \"category\", \"price\"], \"values\": [[1, \"Laptop\", \"electronics\", 1200.0], [2, \"Smartphone\", \"electronics\", 800.0], [3, \"Tablet\", \"electronics\", 600.0], [4, \"Gaming Console\", \"electronics\", 1500.0], [5, \"Monitor\", \"electronics\", 700.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}, 'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate orders only for existing clients.",
+        "output": "{\"orders\": {\"columns\": [\"id\", \"client_id\"], \"values\": [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'transactions': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'transaction_date', 'type': 'TIMESTAMP', 'nullable': True}]}} <USER_REQUEST> Generate financial transactions from the last 6 months.",
+        "output": "{\"transactions\": {\"columns\": [\"id\", \"amount\", \"transaction_date\"], \"values\": [[1, 150.75, \"2023-08-15 14:30:00\"], [2, 200.5, \"2023-09-10 10:45:00\"], [3, 320.0, \"2023-10-05 16:20:00\"], [4, 540.9, \"2023-11-22 11:10:00\"], [5, 125.0, \"2023-12-01 09:05:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'category', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate 5 products, each from a different category.",
+        "output": "{\"products\": {\"columns\": [\"id\", \"name\", \"category\", \"price\"], \"values\": [[1, \"Smartphone\", \"Electronics\", 1200.0], [2, \"Jeans\", \"Clothing\", 50.0], [3, \"Sofa\", \"Furniture\", 500.0], [4, \"Basketball\", \"Sports\", 30.0], [5, \"Laptop\", \"Computers\", 1500.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'status', 'type': 'VARCHAR(50)', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 10 orders with different statuses ('pending', 'shipped', 'delivered').",
+        "output": "{\"orders\": {\"columns\": [\"id\", \"client_id\", \"status\"], \"values\": [[1, 1, \"pending\"], [2, 2, \"shipped\"], [3, 3, \"delivered\"], [4, 4, \"pending\"], [5, 5, \"shipped\"], [6, 6, \"delivered\"], [7, 7, \"pending\"], [8, 8, \"shipped\"], [9, 9, \"delivered\"], [10, 10, \"pending\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'role', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'salary', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate 5 employees with different roles.",
+        "output": "{\"employees\": {\"columns\": [\"id\", \"name\", \"role\", \"salary\"], \"values\": [[1, \"Alice Johnson\", \"Software Engineer\", 8000.0], [2, \"Bob Smith\", \"Project Manager\", 9500.0], [3, \"Charlie Brown\", \"HR Specialist\", 6000.0], [4, \"David Lee\", \"Marketing Manager\", 7200.0], [5, \"Emma Wilson\", \"Data Scientist\", 8700.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'payments': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'order_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'payment_method', 'type': 'VARCHAR(50)', 'nullable': False}], 'foreign_keys': [{'column': ['order_id'], 'referenced_table': 'orders', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 5 payments using different methods ('credit card', 'paypal', 'bank transfer').",
+        "output": "{\"payments\": {\"columns\": [\"id\", \"order_id\", \"amount\", \"payment_method\"], \"values\": [[1, 1, 150.0, \"credit card\"], [2, 2, 200.0, \"paypal\"], [3, 3, 300.0, \"bank transfer\"], [4, 4, 120.0, \"credit card\"], [5, 5, 180.0, \"paypal\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'bank_transactions': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'account_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'currency', 'type': 'VARCHAR(10)', 'nullable': False}], 'foreign_keys': [{'column': ['account_id'], 'referenced_table': 'accounts', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 5 transactions in different currencies ('USD', 'EUR', 'BRL').",
+        "output": "{\"bank_transactions\": {\"columns\": [\"id\", \"account_id\", \"amount\", \"currency\"], \"values\": [[1, 101, 1000.0, \"USD\"], [2, 102, 750.5, \"EUR\"], [3, 103, 2000.0, \"BRL\"], [4, 104, 500.0, \"USD\"], [5, 105, 1300.0, \"EUR\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'hotel_reservations': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'guest_name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'room_type', 'type': 'VARCHAR(50)', 'nullable': False}, {'name': 'check_in', 'type': 'TIMESTAMP', 'nullable': False}, {'name': 'check_out', 'type': 'TIMESTAMP', 'nullable': False}]}} <USER_REQUEST> Generate 5 hotel reservations with different room types.",
+        "output": "{\"hotel_reservations\": {\"columns\": [\"id\", \"guest_name\", \"room_type\", \"check_in\", \"check_out\"], \"values\": [[1, \"Alice Johnson\", \"Single\", \"2024-06-10 14:00:00\", \"2024-06-15 12:00:00\"], [2, \"Bob Smith\", \"Double\", \"2024-07-01 15:00:00\", \"2024-07-05 11:00:00\"], [3, \"Charlie Brown\", \"Suite\", \"2024-08-05 13:00:00\", \"2024-08-10 12:00:00\"], [4, \"David Lee\", \"Penthouse\", \"2024-09-12 14:00:00\", \"2024-09-20 11:00:00\"], [5, \"Emma Wilson\", \"Double\", \"2024-10-01 15:00:00\", \"2024-10-07 12:00:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'email', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate 10 clients.",
+        "output": "{\"clients\": {\"columns\": [\"id\", \"name\", \"email\"], \"values\": [[1, \"Alice Johnson\", \"alice.johnson@example.com\"], [2, \"Bob Smith\", \"bob.smith@example.com\"], [3, \"Charlie Brown\", \"charlie.brown@example.com\"], [4, \"David Lee\", \"david.lee@example.com\"], [5, \"Emma Wilson\", \"emma.wilson@example.com\"], [6, \"Frank White\", \"frank.white@example.com\"], [7, \"Grace Adams\", \"grace.adams@example.com\"], [8, \"Henry Clark\", \"henry.clark@example.com\"], [9, \"Isabella Young\", \"isabella.young@example.com\"], [10, \"Jack Turner\", \"jack.turner@example.com\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Generate 10 records for 'customers'.",
+        "output": "{\"error\": \"Table 'customers' not found in database structure.\"}"
+    },
+    {
+        "input": "Apenas um texto aleatório sem estrutura JSON.",
+        "output": "{\"error\": \"Invalid input format. Ensure proper JSON structure.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Just generate some random data.",
+        "output": "{\"error\": \"Invalid request. Please specify a valid table and data constraints.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Generate 1,000,000 records.",
+        "output": "{\"error\": \"Requested data volume exceeds the allowed limit (Max: 100).\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate orders for clients.",
+        "output": "{\"error\": \"Cannot generate 'orders' because 'clients' has no records.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate an 'address' column for clients.",
+        "output": "{\"error\": \"Column 'address' not found in table 'clients'.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate orders for a non-existing client ID.",
+        "output": "{\"error\": \"Foreign key constraint violation: 'client_id' does not match existing 'clients' table.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'salary', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate employee salaries as text.",
+        "output": "{\"error\": \"Invalid data type: 'salary' expects a DECIMAL, but received STRING.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'users': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'password', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate data for 'users'.",
+        "output": "{\"error\": \"Permission denied: Cannot generate data for restricted table 'users'.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Delete duplicate records.",
+        "output": "{\"error\": \"Invalid operation: This model only supports data generation.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate a product with a negative price.",
+        "output": "{\"error\": \"Invalid value: 'price' must be positive.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(100)', 'nullable': False}]}} <USER_REQUEST> Generate a product name with 300 characters.",
+        "output": "{\"error\": \"Value too long for column 'name' (Max: 100 chars).\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False, 'auto_increment': True}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate IDs starting from 1000.",
+        "output": "{\"error\": \"ID column 'id' is auto_increment. Do not provide manual values.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}, 'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 5 clients and their orders.",
+        "output": "{\"clients\": {\"columns\": [\"id\", \"name\"], \"values\": [[1, \"Alice Johnson\"], [2, \"Bob Smith\"], [3, \"Charlie Brown\"], [4, \"David Lee\"], [5, \"Emma Wilson\"]]}, \"orders\": {\"columns\": [\"id\", \"client_id\"], \"values\": [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'role', 'type': 'VARCHAR(255)', 'nullable': False}]}, 'departments': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Populate all tables with 100 records each.",
+        "output": "{\"employees\": {\"columns\": [\"id\", \"name\", \"role\"], \"values\": [[1, \"Employee 1\", \"Engineer\"], [2, \"Employee 2\", \"Engineer\"], [3, \"Employee 3\", \"Engineer\"], [4, \"Employee 4\", \"Engineer\"], [5, \"Employee 5\", \"Engineer\"], [6, \"Employee 6\", \"Engineer\"], [7, \"Employee 7\", \"Engineer\"], [8, \"Employee 8\", \"Engineer\"], [9, \"Employee 9\", \"Engineer\"], [10, \"Employee 10\", \"Engineer\"], [11, \"Employee 11\", \"Engineer\"], [12, \"Employee 12\", \"Engineer\"], [13, \"Employee 13\", \"Engineer\"], [14, \"Employee 14\", \"Engineer\"], [15, \"Employee 15\", \"Engineer\"], [16, \"Employee 16\", \"Engineer\"], [17, \"Employee 17\", \"Engineer\"], [18, \"Employee 18\", \"Engineer\"], [19, \"Employee 19\", \"Engineer\"], [20, \"Employee 20\", \"Engineer\"], [21, \"Employee 21\", \"Engineer\"], [22, \"Employee 22\", \"Engineer\"], [23, \"Employee 23\", \"Engineer\"], [24, \"Employee 24\", \"Engineer\"], [25, \"Employee 25\", \"Engineer\"], [26, \"Employee 26\", \"Engineer\"], [27, \"Employee 27\", \"Engineer\"], [28, \"Employee 28\", \"Engineer\"], [29, \"Employee 29\", \"Engineer\"], [30, \"Employee 30\", \"Engineer\"], [31, \"Employee 31\", \"Engineer\"], [32, \"Employee 32\", \"Engineer\"], [33, \"Employee 33\", \"Engineer\"], [34, \"Employee 34\", \"Engineer\"], [35, \"Employee 35\", \"Engineer\"], [36, \"Employee 36\", \"Engineer\"], [37, \"Employee 37\", \"Engineer\"], [38, \"Employee 38\", \"Engineer\"], [39, \"Employee 39\", \"Engineer\"], [40, \"Employee 40\", \"Engineer\"], [41, \"Employee 41\", \"Engineer\"], [42, \"Employee 42\", \"Engineer\"], [43, \"Employee 43\", \"Engineer\"], [44, \"Employee 44\", \"Engineer\"], [45, \"Employee 45\", \"Engineer\"], [46, \"Employee 46\", \"Engineer\"], [47, \"Employee 47\", \"Engineer\"], [48, \"Employee 48\", \"Engineer\"], [49, \"Employee 49\", \"Engineer\"], [50, \"Employee 50\", \"Engineer\"], [51, \"Employee 51\", \"Engineer\"], [52, \"Employee 52\", \"Engineer\"], [53, \"Employee 53\", \"Engineer\"], [54, \"Employee 54\", \"Engineer\"], [55, \"Employee 55\", \"Engineer\"], [56, \"Employee 56\", \"Engineer\"], [57, \"Employee 57\", \"Engineer\"], [58, \"Employee 58\", \"Engineer\"], [59, \"Employee 59\", \"Engineer\"], [60, \"Employee 60\", \"Engineer\"], [61, \"Employee 61\", \"Engineer\"], [62, \"Employee 62\", \"Engineer\"], [63, \"Employee 63\", \"Engineer\"], [64, \"Employee 64\", \"Engineer\"], [65, \"Employee 65\", \"Engineer\"], [66, \"Employee 66\", \"Engineer\"], [67, \"Employee 67\", \"Engineer\"], [68, \"Employee 68\", \"Engineer\"], [69, \"Employee 69\", \"Engineer\"], [70, \"Employee 70\", \"Engineer\"], [71, \"Employee 71\", \"Engineer\"], [72, \"Employee 72\", \"Engineer\"], [73, \"Employee 73\", \"Engineer\"], [74, \"Employee 74\", \"Engineer\"], [75, \"Employee 75\", \"Engineer\"], [76, \"Employee 76\", \"Engineer\"], [77, \"Employee 77\", \"Engineer\"], [78, \"Employee 78\", \"Engineer\"], [79, \"Employee 79\", \"Engineer\"], [80, \"Employee 80\", \"Engineer\"], [81, \"Employee 81\", \"Engineer\"], [82, \"Employee 82\", \"Engineer\"], [83, \"Employee 83\", \"Engineer\"], [84, \"Employee 84\", \"Engineer\"], [85, \"Employee 85\", \"Engineer\"], [86, \"Employee 86\", \"Engineer\"], [87, \"Employee 87\", \"Engineer\"], [88, \"Employee 88\", \"Engineer\"], [89, \"Employee 89\", \"Engineer\"], [90, \"Employee 90\", \"Engineer\"], [91, \"Employee 91\", \"Engineer\"], [92, \"Employee 92\", \"Engineer\"], [93, \"Employee 93\", \"Engineer\"], [94, \"Employee 94\", \"Engineer\"], [95, \"Employee 95\", \"Engineer\"], [96, \"Employee 96\", \"Engineer\"], [97, \"Employee 97\", \"Engineer\"], [98, \"Employee 98\", \"Engineer\"], [99, \"Employee 99\", \"Engineer\"], [100, \"Employee 100\", \"Engineer\"]]}, \"departments\": {\"columns\": [\"id\", \"name\"], \"values\": [[1, \"Department 1\"], [2, \"Department 2\"], [3, \"Department 3\"], [4, \"Department 4\"], [5, \"Department 5\"], [6, \"Department 6\"], [7, \"Department 7\"], [8, \"Department 8\"], [9, \"Department 9\"], [10, \"Department 10\"], [11, \"Department 11\"], [12, \"Department 12\"], [13, \"Department 13\"], [14, \"Department 14\"], [15, \"Department 15\"], [16, \"Department 16\"], [17, \"Department 17\"], [18, \"Department 18\"], [19, \"Department 19\"], [20, \"Department 20\"], [21, \"Department 21\"], [22, \"Department 22\"], [23, \"Department 23\"], [24, \"Department 24\"], [25, \"Department 25\"], [26, \"Department 26\"], [27, \"Department 27\"], [28, \"Department 28\"], [29, \"Department 29\"], [30, \"Department 30\"], [31, \"Department 31\"], [32, \"Department 32\"], [33, \"Department 33\"], [34, \"Department 34\"], [35, \"Department 35\"], [36, \"Department 36\"], [37, \"Department 37\"], [38, \"Department 38\"], [39, \"Department 39\"], [40, \"Department 40\"], [41, \"Department 41\"], [42, \"Department 42\"], [43, \"Department 43\"], [44, \"Department 44\"], [45, \"Department 45\"], [46, \"Department 46\"], [47, \"Department 47\"], [48, \"Department 48\"], [49, \"Department 49\"], [50, \"Department 50\"], [51, \"Department 51\"], [52, \"Department 52\"], [53, \"Department 53\"], [54, \"Department 54\"], [55, \"Department 55\"], [56, \"Department 56\"], [57, \"Department 57\"], [58, \"Department 58\"], [59, \"Department 59\"], [60, \"Department 60\"], [61, \"Department 61\"], [62, \"Department 62\"], [63, \"Department 63\"], [64, \"Department 64\"], [65, \"Department 65\"], [66, \"Department 66\"], [67, \"Department 67\"], [68, \"Department 68\"], [69, \"Department 69\"], [70, \"Department 70\"], [71, \"Department 71\"], [72, \"Department 72\"], [73, \"Department 73\"], [74, \"Department 74\"], [75, \"Department 75\"], [76, \"Department 76\"], [77, \"Department 77\"], [78, \"Department 78\"], [79, \"Department 79\"], [80, \"Department 80\"], [81, \"Department 81\"], [82, \"Department 82\"], [83, \"Department 83\"], [84, \"Department 84\"], [85, \"Department 85\"], [86, \"Department 86\"], [87, \"Department 87\"], [88, \"Department 88\"], [89, \"Department 89\"], [90, \"Department 90\"], [91, \"Department 91\"], [92, \"Department 92\"], [93, \"Department 93\"], [94, \"Department 94\"], [95, \"Department 95\"], [96, \"Department 96\"], [97, \"Department 97\"], [98, \"Department 98\"], [99, \"Department 99\"], [100, \"Department 100\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate exactly 5 products.",
+        "output": "{\"products\": {\"columns\": [\"id\", \"name\", \"price\"], \"values\": [[1, \"Laptop\", 1200.0], [2, \"Smartphone\", 800.0], [3, \"Tablet\", 500.0], [4, \"Smartwatch\", 300.0], [5, \"Headphones\", 150.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'category', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate products in the 'electronics' category with prices between 500 and 2000.",
+        "output": "{\"products\": {\"columns\": [\"id\", \"name\", \"category\", \"price\"], \"values\": [[1, \"Laptop\", \"electronics\", 1200.0], [2, \"Smartphone\", \"electronics\", 800.0], [3, \"Tablet\", \"electronics\", 600.0], [4, \"Gaming Console\", \"electronics\", 1500.0], [5, \"Monitor\", \"electronics\", 700.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}, 'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate orders only for existing clients.",
+        "output": "{\"orders\": {\"columns\": [\"id\", \"client_id\"], \"values\": [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'transactions': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'transaction_date', 'type': 'TIMESTAMP', 'nullable': True}]}} <USER_REQUEST> Generate financial transactions from the last 6 months.",
+        "output": "{\"transactions\": {\"columns\": [\"id\", \"amount\", \"transaction_date\"], \"values\": [[1, 150.75, \"2023-08-15 14:30:00\"], [2, 200.5, \"2023-09-10 10:45:00\"], [3, 320.0, \"2023-10-05 16:20:00\"], [4, 540.9, \"2023-11-22 11:10:00\"], [5, 125.0, \"2023-12-01 09:05:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'category', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate 5 products, each from a different category.",
+        "output": "{\"products\": {\"columns\": [\"id\", \"name\", \"category\", \"price\"], \"values\": [[1, \"Smartphone\", \"Electronics\", 1200.0], [2, \"Jeans\", \"Clothing\", 50.0], [3, \"Sofa\", \"Furniture\", 500.0], [4, \"Basketball\", \"Sports\", 30.0], [5, \"Laptop\", \"Computers\", 1500.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'status', 'type': 'VARCHAR(50)', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 10 orders with different statuses ('pending', 'shipped', 'delivered').",
+        "output": "{\"orders\": {\"columns\": [\"id\", \"client_id\", \"status\"], \"values\": [[1, 1, \"pending\"], [2, 2, \"shipped\"], [3, 3, \"delivered\"], [4, 4, \"pending\"], [5, 5, \"shipped\"], [6, 6, \"delivered\"], [7, 7, \"pending\"], [8, 8, \"shipped\"], [9, 9, \"delivered\"], [10, 10, \"pending\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'role', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'salary', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate 5 employees with different roles.",
+        "output": "{\"employees\": {\"columns\": [\"id\", \"name\", \"role\", \"salary\"], \"values\": [[1, \"Alice Johnson\", \"Software Engineer\", 8000.0], [2, \"Bob Smith\", \"Project Manager\", 9500.0], [3, \"Charlie Brown\", \"HR Specialist\", 6000.0], [4, \"David Lee\", \"Marketing Manager\", 7200.0], [5, \"Emma Wilson\", \"Data Scientist\", 8700.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'payments': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'order_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'payment_method', 'type': 'VARCHAR(50)', 'nullable': False}], 'foreign_keys': [{'column': ['order_id'], 'referenced_table': 'orders', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 5 payments using different methods ('credit card', 'paypal', 'bank transfer').",
+        "output": "{\"payments\": {\"columns\": [\"id\", \"order_id\", \"amount\", \"payment_method\"], \"values\": [[1, 1, 150.0, \"credit card\"], [2, 2, 200.0, \"paypal\"], [3, 3, 300.0, \"bank transfer\"], [4, 4, 120.0, \"credit card\"], [5, 5, 180.0, \"paypal\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'bank_transactions': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'account_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'currency', 'type': 'VARCHAR(10)', 'nullable': False}], 'foreign_keys': [{'column': ['account_id'], 'referenced_table': 'accounts', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 5 transactions in different currencies ('USD', 'EUR', 'BRL').",
+        "output": "{\"bank_transactions\": {\"columns\": [\"id\", \"account_id\", \"amount\", \"currency\"], \"values\": [[1, 101, 1000.0, \"USD\"], [2, 102, 750.5, \"EUR\"], [3, 103, 2000.0, \"BRL\"], [4, 104, 500.0, \"USD\"], [5, 105, 1300.0, \"EUR\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'hotel_reservations': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'guest_name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'room_type', 'type': 'VARCHAR(50)', 'nullable': False}, {'name': 'check_in', 'type': 'TIMESTAMP', 'nullable': False}, {'name': 'check_out', 'type': 'TIMESTAMP', 'nullable': False}]}} <USER_REQUEST> Generate 5 hotel reservations with different room types.",
+        "output": "{\"hotel_reservations\": {\"columns\": [\"id\", \"guest_name\", \"room_type\", \"check_in\", \"check_out\"], \"values\": [[1, \"Alice Johnson\", \"Single\", \"2024-06-10 14:00:00\", \"2024-06-15 12:00:00\"], [2, \"Bob Smith\", \"Double\", \"2024-07-01 15:00:00\", \"2024-07-05 11:00:00\"], [3, \"Charlie Brown\", \"Suite\", \"2024-08-05 13:00:00\", \"2024-08-10 12:00:00\"], [4, \"David Lee\", \"Penthouse\", \"2024-09-12 14:00:00\", \"2024-09-20 11:00:00\"], [5, \"Emma Wilson\", \"Double\", \"2024-10-01 15:00:00\", \"2024-10-07 12:00:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'payments': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'payment_date', 'type': 'TIMESTAMP', 'nullable': True}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 10 payments.",
+        "output": "{\"payments\": {\"columns\": [\"id\", \"client_id\", \"amount\", \"payment_date\"], \"values\": [[1, 1, 120.0, \"2024-01-01 10:30:00\"], [2, 2, 250.75, \"2024-01-05 14:00:00\"], [3, 3, 90.5, \"2024-01-10 12:15:00\"], [4, 4, 180.0, \"2024-01-15 16:45:00\"], [5, 5, 60.0, \"2024-01-20 09:20:00\"], [6, 1, 300.0, \"2024-01-22 11:50:00\"], [7, 2, 99.99, \"2024-01-25 08:00:00\"], [8, 3, 500.0, \"2024-01-28 19:10:00\"], [9, 4, 75.25, \"2024-02-02 13:40:00\"], [10, 5, 220.3, \"2024-02-06 17:30:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'stock': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'product_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'quantity', 'type': 'INTEGER', 'nullable': False}, {'name': 'last_updated', 'type': 'TIMESTAMP', 'nullable': True}], 'foreign_keys': [{'column': ['product_id'], 'referenced_table': 'products', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 8 stock records.",
+        "output": "{\"stock\": {\"columns\": [\"id\", \"product_id\", \"quantity\", \"last_updated\"], \"values\": [[1, 1, 50, \"2024-01-10 08:00:00\"], [2, 2, 30, \"2024-01-12 10:20:00\"], [3, 3, 15, \"2024-01-15 14:35:00\"], [4, 4, 100, \"2024-01-18 16:45:00\"], [5, 5, 75, \"2024-01-20 18:00:00\"], [6, 1, 40, \"2024-01-22 11:50:00\"], [7, 2, 20, \"2024-01-25 08:30:00\"], [8, 3, 60, \"2024-01-28 20:10:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'role', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'salary', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'hired_at', 'type': 'TIMESTAMP', 'nullable': True}]}} <USER_REQUEST> Generate 6 employees.",
+        "output": "{\"employees\": {\"columns\": [\"id\", \"name\", \"role\", \"salary\", \"hired_at\"], \"values\": [[1, \"Laura Mitchell\", \"Software Engineer\", 7500.0, \"2023-06-15 09:00:00\"], [2, \"Michael Carter\", \"Project Manager\", 9000.0, \"2022-11-10 09:00:00\"], [3, \"Sophia Miller\", \"HR Specialist\", 6000.0, \"2023-03-20 09:00:00\"], [4, \"James Anderson\", \"Data Scientist\", 8500.0, \"2024-01-05 09:00:00\"], [5, \"Emma Thompson\", \"UX Designer\", 7000.0, \"2022-08-10 09:00:00\"], [6, \"Robert Wilson\", \"DevOps Engineer\", 9500.0, \"2021-12-01 09:00:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'reservations': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'guest_name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'room_number', 'type': 'INTEGER', 'nullable': False}, {'name': 'check_in', 'type': 'TIMESTAMP', 'nullable': False}, {'name': 'check_out', 'type': 'TIMESTAMP', 'nullable': False}]}} <USER_REQUEST> Generate 5 hotel reservations.",
+        "output": "{\"reservations\": {\"columns\": [\"id\", \"guest_name\", \"room_number\", \"check_in\", \"check_out\"], \"values\": [[1, \"Alice Johnson\", 101, \"2024-02-01 14:00:00\", \"2024-02-05 11:00:00\"], [2, \"Bob Smith\", 202, \"2024-02-10 14:00:00\", \"2024-02-15 11:00:00\"], [3, \"Charlie Brown\", 303, \"2024-03-05 14:00:00\", \"2024-03-10 11:00:00\"], [4, \"David Lee\", 404, \"2024-03-15 14:00:00\", \"2024-03-20 11:00:00\"], [5, \"Emma Wilson\", 505, \"2024-04-01 14:00:00\", \"2024-04-05 11:00:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'purchase_orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'supplier_name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'order_date', 'type': 'TIMESTAMP', 'nullable': False}, {'name': 'total_amount', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate 5 purchase orders.",
+        "output": "{\"purchase_orders\": {\"columns\": [\"id\", \"supplier_name\", \"order_date\", \"total_amount\"], \"values\": [[1, \"ABC Electronics\", \"2024-01-15 10:00:00\", 5000.0], [2, \"XYZ Wholesale\", \"2024-01-20 12:30:00\", 7200.5], [3, \"Fast Supplies\", \"2024-02-01 15:45:00\", 3100.25], [4, \"Global Traders\", \"2024-02-10 11:20:00\", 8900.0], [5, \"Superior Goods\", \"2024-02-15 09:00:00\", 12000.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'email', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate 10 clients.",
+        "output": "{\"clients\": {\"columns\": [\"id\", \"name\", \"email\"], \"values\": [[1, \"Alice Johnson\", \"alice.johnson@example.com\"], [2, \"Bob Smith\", \"bob.smith@example.com\"], [3, \"Charlie Brown\", \"charlie.brown@example.com\"], [4, \"David Lee\", \"david.lee@example.com\"], [5, \"Emma Wilson\", \"emma.wilson@example.com\"], [6, \"Frank White\", \"frank.white@example.com\"], [7, \"Grace Adams\", \"grace.adams@example.com\"], [8, \"Henry Clark\", \"henry.clark@example.com\"], [9, \"Isabella Young\", \"isabella.young@example.com\"], [10, \"Jack Turner\", \"jack.turner@example.com\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Generate 10 records for 'customers'.",
+        "output": "{\"error\": \"Table 'customers' not found in database structure.\"}"
+    },
+    {
+        "input": "Olá, Hello, gostaria de alguma ajuda com algo aleatório dados, geração de dados.",
+        "output": "{\"error\": \"Invalid input format. Ensure proper JSON structure.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Just generate some random data.",
+        "output": "{\"error\": \"Invalid request. Please specify a valid table and data constraints.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Generate 1,000,000 records.",
+        "output": "{\"error\": \"Requested data volume exceeds the allowed limit (Max: 100).\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate an 'address' column for clients.",
+        "output": "{\"error\": \"Column 'address' not found in table 'clients'.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate orders for a non-existing client ID.",
+        "output": "{\"error\": \"Foreign key constraint violation: 'client_id' does not match existing 'clients' table.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Delete duplicate records.",
+        "output": "{\"error\": \"Invalid operation: This model only supports data generation.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate a product with a negative price.",
+        "output": "{\"error\": \"Invalid value: 'price' must be positive.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(100)', 'nullable': False}]}} <USER_REQUEST> Generate a product name with 300 characters.",
+        "output": "{\"error\": \"Value too long for column 'name' (Max: 100 chars).\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False, 'auto_increment': True}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate IDs starting from 1000.",
+        "output": "{\"error\": \"ID column 'id' is auto_increment. Do not provide manual values.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}, 'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 5 clients and their orders.",
+        "output": "{\"clients\": {\"columns\": [\"id\", \"name\"], \"values\": [[1, \"Alice Johnson\"], [2, \"Bob Smith\"], [3, \"Charlie Brown\"], [4, \"David Lee\"], [5, \"Emma Wilson\"]]}, \"orders\": {\"columns\": [\"id\", \"client_id\"], \"values\": [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'role', 'type': 'VARCHAR(255)', 'nullable': False}]}, 'departments': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Populate all tables with 100 records each.",
+        "output": "{\"employees\": {\"columns\": [\"id\", \"name\", \"role\"], \"values\": [[1, \"Employee 1\", \"Engineer\"], [2, \"Employee 2\", \"Engineer\"], [3, \"Employee 3\", \"Engineer\"], [4, \"Employee 4\", \"Engineer\"], [5, \"Employee 5\", \"Engineer\"], [6, \"Employee 6\", \"Engineer\"], [7, \"Employee 7\", \"Engineer\"], [8, \"Employee 8\", \"Engineer\"], [9, \"Employee 9\", \"Engineer\"], [10, \"Employee 10\", \"Engineer\"], [11, \"Employee 11\", \"Engineer\"], [12, \"Employee 12\", \"Engineer\"], [13, \"Employee 13\", \"Engineer\"], [14, \"Employee 14\", \"Engineer\"], [15, \"Employee 15\", \"Engineer\"], [16, \"Employee 16\", \"Engineer\"], [17, \"Employee 17\", \"Engineer\"], [18, \"Employee 18\", \"Engineer\"], [19, \"Employee 19\", \"Engineer\"], [20, \"Employee 20\", \"Engineer\"], [21, \"Employee 21\", \"Engineer\"], [22, \"Employee 22\", \"Engineer\"], [23, \"Employee 23\", \"Engineer\"], [24, \"Employee 24\", \"Engineer\"], [25, \"Employee 25\", \"Engineer\"], [26, \"Employee 26\", \"Engineer\"], [27, \"Employee 27\", \"Engineer\"], [28, \"Employee 28\", \"Engineer\"], [29, \"Employee 29\", \"Engineer\"], [30, \"Employee 30\", \"Engineer\"], [31, \"Employee 31\", \"Engineer\"], [32, \"Employee 32\", \"Engineer\"], [33, \"Employee 33\", \"Engineer\"], [34, \"Employee 34\", \"Engineer\"], [35, \"Employee 35\", \"Engineer\"], [36, \"Employee 36\", \"Engineer\"], [37, \"Employee 37\", \"Engineer\"], [38, \"Employee 38\", \"Engineer\"], [39, \"Employee 39\", \"Engineer\"], [40, \"Employee 40\", \"Engineer\"], [41, \"Employee 41\", \"Engineer\"], [42, \"Employee 42\", \"Engineer\"], [43, \"Employee 43\", \"Engineer\"], [44, \"Employee 44\", \"Engineer\"], [45, \"Employee 45\", \"Engineer\"], [46, \"Employee 46\", \"Engineer\"], [47, \"Employee 47\", \"Engineer\"], [48, \"Employee 48\", \"Engineer\"], [49, \"Employee 49\", \"Engineer\"], [50, \"Employee 50\", \"Engineer\"], [51, \"Employee 51\", \"Engineer\"], [52, \"Employee 52\", \"Engineer\"], [53, \"Employee 53\", \"Engineer\"], [54, \"Employee 54\", \"Engineer\"], [55, \"Employee 55\", \"Engineer\"], [56, \"Employee 56\", \"Engineer\"], [57, \"Employee 57\", \"Engineer\"], [58, \"Employee 58\", \"Engineer\"], [59, \"Employee 59\", \"Engineer\"], [60, \"Employee 60\", \"Engineer\"], [61, \"Employee 61\", \"Engineer\"], [62, \"Employee 62\", \"Engineer\"], [63, \"Employee 63\", \"Engineer\"], [64, \"Employee 64\", \"Engineer\"], [65, \"Employee 65\", \"Engineer\"], [66, \"Employee 66\", \"Engineer\"], [67, \"Employee 67\", \"Engineer\"], [68, \"Employee 68\", \"Engineer\"], [69, \"Employee 69\", \"Engineer\"], [70, \"Employee 70\", \"Engineer\"], [71, \"Employee 71\", \"Engineer\"], [72, \"Employee 72\", \"Engineer\"], [73, \"Employee 73\", \"Engineer\"], [74, \"Employee 74\", \"Engineer\"], [75, \"Employee 75\", \"Engineer\"], [76, \"Employee 76\", \"Engineer\"], [77, \"Employee 77\", \"Engineer\"], [78, \"Employee 78\", \"Engineer\"], [79, \"Employee 79\", \"Engineer\"], [80, \"Employee 80\", \"Engineer\"], [81, \"Employee 81\", \"Engineer\"], [82, \"Employee 82\", \"Engineer\"], [83, \"Employee 83\", \"Engineer\"], [84, \"Employee 84\", \"Engineer\"], [85, \"Employee 85\", \"Engineer\"], [86, \"Employee 86\", \"Engineer\"], [87, \"Employee 87\", \"Engineer\"], [88, \"Employee 88\", \"Engineer\"], [89, \"Employee 89\", \"Engineer\"], [90, \"Employee 90\", \"Engineer\"], [91, \"Employee 91\", \"Engineer\"], [92, \"Employee 92\", \"Engineer\"], [93, \"Employee 93\", \"Engineer\"], [94, \"Employee 94\", \"Engineer\"], [95, \"Employee 95\", \"Engineer\"], [96, \"Employee 96\", \"Engineer\"], [97, \"Employee 97\", \"Engineer\"], [98, \"Employee 98\", \"Engineer\"], [99, \"Employee 99\", \"Engineer\"], [100, \"Employee 100\", \"Engineer\"]]}, \"departments\": {\"columns\": [\"id\", \"name\"], \"values\": [[1, \"Department 1\"], [2, \"Department 2\"], [3, \"Department 3\"], [4, \"Department 4\"], [5, \"Department 5\"], [6, \"Department 6\"], [7, \"Department 7\"], [8, \"Department 8\"], [9, \"Department 9\"], [10, \"Department 10\"], [11, \"Department 11\"], [12, \"Department 12\"], [13, \"Department 13\"], [14, \"Department 14\"], [15, \"Department 15\"], [16, \"Department 16\"], [17, \"Department 17\"], [18, \"Department 18\"], [19, \"Department 19\"], [20, \"Department 20\"], [21, \"Department 21\"], [22, \"Department 22\"], [23, \"Department 23\"], [24, \"Department 24\"], [25, \"Department 25\"], [26, \"Department 26\"], [27, \"Department 27\"], [28, \"Department 28\"], [29, \"Department 29\"], [30, \"Department 30\"], [31, \"Department 31\"], [32, \"Department 32\"], [33, \"Department 33\"], [34, \"Department 34\"], [35, \"Department 35\"], [36, \"Department 36\"], [37, \"Department 37\"], [38, \"Department 38\"], [39, \"Department 39\"], [40, \"Department 40\"], [41, \"Department 41\"], [42, \"Department 42\"], [43, \"Department 43\"], [44, \"Department 44\"], [45, \"Department 45\"], [46, \"Department 46\"], [47, \"Department 47\"], [48, \"Department 48\"], [49, \"Department 49\"], [50, \"Department 50\"], [51, \"Department 51\"], [52, \"Department 52\"], [53, \"Department 53\"], [54, \"Department 54\"], [55, \"Department 55\"], [56, \"Department 56\"], [57, \"Department 57\"], [58, \"Department 58\"], [59, \"Department 59\"], [60, \"Department 60\"], [61, \"Department 61\"], [62, \"Department 62\"], [63, \"Department 63\"], [64, \"Department 64\"], [65, \"Department 65\"], [66, \"Department 66\"], [67, \"Department 67\"], [68, \"Department 68\"], [69, \"Department 69\"], [70, \"Department 70\"], [71, \"Department 71\"], [72, \"Department 72\"], [73, \"Department 73\"], [74, \"Department 74\"], [75, \"Department 75\"], [76, \"Department 76\"], [77, \"Department 77\"], [78, \"Department 78\"], [79, \"Department 79\"], [80, \"Department 80\"], [81, \"Department 81\"], [82, \"Department 82\"], [83, \"Department 83\"], [84, \"Department 84\"], [85, \"Department 85\"], [86, \"Department 86\"], [87, \"Department 87\"], [88, \"Department 88\"], [89, \"Department 89\"], [90, \"Department 90\"], [91, \"Department 91\"], [92, \"Department 92\"], [93, \"Department 93\"], [94, \"Department 94\"], [95, \"Department 95\"], [96, \"Department 96\"], [97, \"Department 97\"], [98, \"Department 98\"], [99, \"Department 99\"], [100, \"Department 100\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate exactly 5 products.",
+        "output": "{\"products\": {\"columns\": [\"id\", \"name\", \"price\"], \"values\": [[1, \"Laptop\", 1200.0], [2, \"Smartphone\", 800.0], [3, \"Tablet\", 500.0], [4, \"Smartwatch\", 300.0], [5, \"Headphones\", 150.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'category', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate products in the 'electronics' category with prices between 500 and 2000.",
+        "output": "{\"products\": {\"columns\": [\"id\", \"name\", \"category\", \"price\"], \"values\": [[1, \"Laptop\", \"electronics\", 1200.0], [2, \"Smartphone\", \"electronics\", 800.0], [3, \"Tablet\", \"electronics\", 600.0], [4, \"Gaming Console\", \"electronics\", 1500.0], [5, \"Monitor\", \"electronics\", 700.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}, 'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate orders only for existing clients.",
+        "output": "{\"orders\": {\"columns\": [\"id\", \"client_id\"], \"values\": [[1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'transactions': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'transaction_date', 'type': 'TIMESTAMP', 'nullable': True}]}} <USER_REQUEST> Generate financial transactions from the last 6 months.",
+        "output": "{\"transactions\": {\"columns\": [\"id\", \"amount\", \"transaction_date\"], \"values\": [[1, 150.75, \"2023-08-15 14:30:00\"], [2, 200.5, \"2023-09-10 10:45:00\"], [3, 320.0, \"2023-10-05 16:20:00\"], [4, 540.9, \"2023-11-22 11:10:00\"], [5, 125.0, \"2023-12-01 09:05:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'category', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate 5 products, each from a different category.",
+        "output": "{\"products\": {\"columns\": [\"id\", \"name\", \"category\", \"price\"], \"values\": [[1, \"Smartphone\", \"Electronics\", 1200.0], [2, \"Jeans\", \"Clothing\", 50.0], [3, \"Sofa\", \"Furniture\", 500.0], [4, \"Basketball\", \"Sports\", 30.0], [5, \"Laptop\", \"Computers\", 1500.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'status', 'type': 'VARCHAR(50)', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 10 orders with different statuses ('pending', 'shipped', 'delivered').",
+        "output": "{\"orders\": {\"columns\": [\"id\", \"client_id\", \"status\"], \"values\": [[1, 1, \"pending\"], [2, 2, \"shipped\"], [3, 3, \"delivered\"], [4, 4, \"pending\"], [5, 5, \"shipped\"], [6, 6, \"delivered\"], [7, 7, \"pending\"], [8, 8, \"shipped\"], [9, 9, \"delivered\"], [10, 10, \"pending\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'role', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'salary', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate 5 employees with different roles.",
+        "output": "{\"employees\": {\"columns\": [\"id\", \"name\", \"role\", \"salary\"], \"values\": [[1, \"Alice Johnson\", \"Software Engineer\", 8000.0], [2, \"Bob Smith\", \"Project Manager\", 9500.0], [3, \"Charlie Brown\", \"HR Specialist\", 6000.0], [4, \"David Lee\", \"Marketing Manager\", 7200.0], [5, \"Emma Wilson\", \"Data Scientist\", 8700.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'payments': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'order_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'payment_method', 'type': 'VARCHAR(50)', 'nullable': False}], 'foreign_keys': [{'column': ['order_id'], 'referenced_table': 'orders', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 5 payments using different methods ('credit card', 'paypal', 'bank transfer').",
+        "output": "{\"payments\": {\"columns\": [\"id\", \"order_id\", \"amount\", \"payment_method\"], \"values\": [[1, 1, 150.0, \"credit card\"], [2, 2, 200.0, \"paypal\"], [3, 3, 300.0, \"bank transfer\"], [4, 4, 120.0, \"credit card\"], [5, 5, 180.0, \"paypal\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'bank_transactions': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'account_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'currency', 'type': 'VARCHAR(10)', 'nullable': False}], 'foreign_keys': [{'column': ['account_id'], 'referenced_table': 'accounts', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 5 transactions in different currencies ('USD', 'EUR', 'BRL').",
+        "output": "{\"bank_transactions\": {\"columns\": [\"id\", \"account_id\", \"amount\", \"currency\"], \"values\": [[1, 101, 1000.0, \"USD\"], [2, 102, 750.5, \"EUR\"], [3, 103, 2000.0, \"BRL\"], [4, 104, 500.0, \"USD\"], [5, 105, 1300.0, \"EUR\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'hotel_reservations': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'guest_name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'room_type', 'type': 'VARCHAR(50)', 'nullable': False}, {'name': 'check_in', 'type': 'TIMESTAMP', 'nullable': False}, {'name': 'check_out', 'type': 'TIMESTAMP', 'nullable': False}]}} <USER_REQUEST> Generate 5 hotel reservations with different room types.",
+        "output": "{\"hotel_reservations\": {\"columns\": [\"id\", \"guest_name\", \"room_type\", \"check_in\", \"check_out\"], \"values\": [[1, \"Alice Johnson\", \"Single\", \"2024-06-10 14:00:00\", \"2024-06-15 12:00:00\"], [2, \"Bob Smith\", \"Double\", \"2024-07-01 15:00:00\", \"2024-07-05 11:00:00\"], [3, \"Charlie Brown\", \"Suite\", \"2024-08-05 13:00:00\", \"2024-08-10 12:00:00\"], [4, \"David Lee\", \"Penthouse\", \"2024-09-12 14:00:00\", \"2024-09-20 11:00:00\"], [5, \"Emma Wilson\", \"Double\", \"2024-10-01 15:00:00\", \"2024-10-07 12:00:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'payments': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'payment_date', 'type': 'TIMESTAMP', 'nullable': True}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 10 payments.",
+        "output": "{\"payments\": {\"columns\": [\"id\", \"client_id\", \"amount\", \"payment_date\"], \"values\": [[1, 1, 120.0, \"2024-01-01 10:30:00\"], [2, 2, 250.75, \"2024-01-05 14:00:00\"], [3, 3, 90.5, \"2024-01-10 12:15:00\"], [4, 4, 180.0, \"2024-01-15 16:45:00\"], [5, 5, 60.0, \"2024-01-20 09:20:00\"], [6, 1, 300.0, \"2024-01-22 11:50:00\"], [7, 2, 99.99, \"2024-01-25 08:00:00\"], [8, 3, 500.0, \"2024-01-28 19:10:00\"], [9, 4, 75.25, \"2024-02-02 13:40:00\"], [10, 5, 220.3, \"2024-02-06 17:30:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'stock': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'product_id', 'type': 'INTEGER', 'nullable': False}, {'name': 'quantity', 'type': 'INTEGER', 'nullable': False}, {'name': 'last_updated', 'type': 'TIMESTAMP', 'nullable': True}], 'foreign_keys': [{'column': ['product_id'], 'referenced_table': 'products', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate 8 stock records.",
+        "output": "{\"stock\": {\"columns\": [\"id\", \"product_id\", \"quantity\", \"last_updated\"], \"values\": [[1, 1, 50, \"2024-01-10 08:00:00\"], [2, 2, 30, \"2024-01-12 10:20:00\"], [3, 3, 15, \"2024-01-15 14:35:00\"], [4, 4, 100, \"2024-01-18 16:45:00\"], [5, 5, 75, \"2024-01-20 18:00:00\"], [6, 1, 40, \"2024-01-22 11:50:00\"], [7, 2, 20, \"2024-01-25 08:30:00\"], [8, 3, 60, \"2024-01-28 20:10:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'role', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'salary', 'type': 'DECIMAL(10,2)', 'nullable': False}, {'name': 'hired_at', 'type': 'TIMESTAMP', 'nullable': True}]}} <USER_REQUEST> Generate 6 employees.",
+        "output": "{\"employees\": {\"columns\": [\"id\", \"name\", \"role\", \"salary\", \"hired_at\"], \"values\": [[1, \"Laura Mitchell\", \"Software Engineer\", 7500.0, \"2023-06-15 09:00:00\"], [2, \"Michael Carter\", \"Project Manager\", 9000.0, \"2022-11-10 09:00:00\"], [3, \"Sophia Miller\", \"HR Specialist\", 6000.0, \"2023-03-20 09:00:00\"], [4, \"James Anderson\", \"Data Scientist\", 8500.0, \"2024-01-05 09:00:00\"], [5, \"Emma Thompson\", \"UX Designer\", 7000.0, \"2022-08-10 09:00:00\"], [6, \"Robert Wilson\", \"DevOps Engineer\", 9500.0, \"2021-12-01 09:00:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'reservations': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'guest_name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'room_number', 'type': 'INTEGER', 'nullable': False}, {'name': 'check_in', 'type': 'TIMESTAMP', 'nullable': False}, {'name': 'check_out', 'type': 'TIMESTAMP', 'nullable': False}]}} <USER_REQUEST> Generate 5 hotel reservations.",
+        "output": "{\"reservations\": {\"columns\": [\"id\", \"guest_name\", \"room_number\", \"check_in\", \"check_out\"], \"values\": [[1, \"Alice Johnson\", 101, \"2024-02-01 14:00:00\", \"2024-02-05 11:00:00\"], [2, \"Bob Smith\", 202, \"2024-02-10 14:00:00\", \"2024-02-15 11:00:00\"], [3, \"Charlie Brown\", 303, \"2024-03-05 14:00:00\", \"2024-03-10 11:00:00\"], [4, \"David Lee\", 404, \"2024-03-15 14:00:00\", \"2024-03-20 11:00:00\"], [5, \"Emma Wilson\", 505, \"2024-04-01 14:00:00\", \"2024-04-05 11:00:00\"]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'purchase_orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'supplier_name', 'type': 'VARCHAR(255)', 'nullable': False}, {'name': 'order_date', 'type': 'TIMESTAMP', 'nullable': False}, {'name': 'total_amount', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate 5 purchase orders.",
+        "output": "{\"purchase_orders\": {\"columns\": [\"id\", \"supplier_name\", \"order_date\", \"total_amount\"], \"values\": [[1, \"ABC Electronics\", \"2024-01-15 10:00:00\", 5000.0], [2, \"XYZ Wholesale\", \"2024-01-20 12:30:00\", 7200.5], [3, \"Fast Supplies\", \"2024-02-01 15:45:00\", 3100.25], [4, \"Global Traders\", \"2024-02-10 11:20:00\", 8900.0], [5, \"Superior Goods\", \"2024-02-15 09:00:00\", 12000.0]]}}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'empty_table': {}} <USER_REQUEST> Generate 10 records for 'empty_table'.",
+        "output": "{\"error\": \"Table 'empty_table' has no defined columns.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Just generate something useful.",
+        "output": "{\"error\": \"Invalid request. Please specify a valid table and data constraints.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate 10 clients including 'phone_number'.",
+        "output": "{\"error\": \"Column 'phone_number' not found in table 'clients'.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'users': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'email', 'type': 'VARCHAR(255)', 'nullable': False, 'unique': True}]}} <USER_REQUEST> Generate users with duplicate emails.",
+        "output": "{\"error\": \"Constraint violation: 'email' must be unique in table 'users'.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'description', 'type': 'VARCHAR(50)', 'nullable': False}]}} <USER_REQUEST> Generate a product with a description of 200 characters.",
+        "output": "{\"error\": \"Value too long for column 'description' (Max: 50 chars).\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'employees': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'name', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate 5 employees but leave the name empty.",
+        "output": "{\"error\": \"Column 'name' cannot be NULL in table 'employees'.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False, 'auto_increment': True}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}]}} <USER_REQUEST> Generate orders starting from ID 1000.",
+        "output": "{\"error\": \"ID column 'id' is auto_increment. Do not provide manual values.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'orders': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'client_id', 'type': 'INTEGER', 'nullable': False}], 'foreign_keys': [{'column': ['client_id'], 'referenced_table': 'clients', 'referenced_column': ['id']}]} } <USER_REQUEST> Generate orders for non-existent clients.",
+        "output": "{\"error\": \"Foreign key constraint violation: 'client_id' does not match existing 'clients' table.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'email', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Update email addresses for all clients.",
+        "output": "{\"error\": \"Invalid operation: This model only supports data generation.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'products': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'price', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate a product with a negative price.",
+        "output": "{\"error\": \"Invalid value: 'price' must be positive.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'clients': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'email', 'type': 'VARCHAR(255)', 'nullable': False}]}} <USER_REQUEST> Generate clients with duplicate emails.",
+        "output": "{\"error\": \"Constraint violation: 'email' should be unique in table 'clients'.\"}"
+    },
+    {
+        "input": "<DATABASE_STRUCTURE> {'transactions': {'columns': [{'name': 'id', 'type': 'INTEGER', 'nullable': False}, {'name': 'amount', 'type': 'DECIMAL(10,2)', 'nullable': False}]}} <USER_REQUEST> Generate 500,000 transactions.",
+        "output": "{\"error\": \"Requested data volume exceeds the allowed limit (Max: 100).\"}"
+    }
+]
