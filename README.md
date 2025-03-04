@@ -64,9 +64,46 @@ Conecte-se à LLM para gerar dados sintéticos com base em prompts:
 from datalchemy import Generators
 
 generator = Generators(manager, OPENAI_API_KEY="sua_chave_aqui")
-prompt = "Gere 10 registros para a tabela clientes."
+prompt = "Gere 10 produtos para 3 departamentos diferentes, relacionados ao setor de tecnologia."
 response = generator.generate_data("main_db", prompt)
 print(response)
+```
+
+```python
+# Saída de exemplo
+{
+  "departamento": {
+    "atributos": ["nome"],
+    "valores": [
+      ["Hardware"],
+      ["Software"],
+      ["Periféricos"]
+    ]
+  },
+  "produto": {
+    "atributos": ["nome", "preco", "departamento_id"],
+    "valores": [
+      ["Teclado mecânico", 199.90, 1],
+      ["Mouse gamer", 149.90, 1],
+      ["Monitor 24 polegadas", 899.90, 1],
+      ["Notebook i5", 2999.90, 1],
+      ["HD externo 1TB", 299.90, 1],
+      ["Licença do Windows 10", 499.90, 2],
+      ["Antivírus McAfee", 89.90, 2],
+      ["Pacote Office 365", 399.90, 2],
+      ["Placa de vídeo", 1999.90, 2],
+      ["Roteador Wi-Fi", 129.90, 3]
+    ]
+  }
+}
+```
+### **Inserindo os dados no banco**
+Após a geração dos dados é possível inseri-los automaticamente no banco de dados utilizando o DataHandler
+
+```python
+from datalchemy import DataHandler
+handler = DataHandler(manager.get_engine())
+handler.insert(response)
 ```
 
 ### **Geração de Modelos**
@@ -94,12 +131,13 @@ Exporte os modelos SQLAlchemy para entender e documentar a estrutura do banco:
 generator.generate_models("main_db", save_to_file=True)
 ```
 
-## 🔮 **Funcionalidades Futuras**
-- **Geração em Larga Escala:** Suporte para geração de grandes volumes de dados, otimizando o uso de tokens e recursos.
-- **Validação Avançada:** Regras configuráveis para validar os dados antes de inseri-los no banco.
-- **Suporte Expandido:** Integração com bancos de dados NoSQL.
-
 ## 📢 **Dicas para Maximizar o Uso**
 - Use prompts claros e objetivos para obter dados relevantes e consistentes.
 - Combine os dados gerados com ferramentas de visualização para entender melhor os cenários simulados.
 - Explore a geração de modelos para documentar seu banco e facilitar futuras integrações.
+
+## 🔮 **Funcionalidades Futuras**
+- **Geração em Larga Escala:** Suporte para geração de grandes volumes de dados, otimizando o uso de tokens e recursos.
+- **Validação Avançada:** Regras configuráveis para validar os dados antes de inseri-los no banco.
+- **Suporte Expandido:** Integração com bancos de dados NoSQL.
+- **Uso de LLM's locais:** Possibilitar a utilização de LLM's Open Source e personalizavéis.
