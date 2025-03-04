@@ -3,6 +3,7 @@
 [![CI](https://github.com/Bruno-Gomes-QA/datalchemy/actions/workflows/pipeline.yaml/badge.svg)](https://github.com/Bruno-Gomes-QA/datalchemy/actions/workflows/pipeline.yaml)
 [![Documentation Status](https://readthedocs.org/projects/datalchemy/badge/?version=latest)](https://datalchemy.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/Bruno-Gomes-QA/datalchemy/graph/badge.svg?token=sYf3a0mhbR)](https://codecov.io/gh/Bruno-Gomes-QA/datalchemy)
+[![PyPI - Version](https://img.shields.io/pypi/v/datalchemy.svg?logo=pypi&label=PyPI&logoColor=gold)](https://pypi.org/project/datalchemy/)
 
 📌 **Datalchemy** é uma biblioteca intuitiva projetada para facilitar a geração de dados sintéticos com base na estrutura do banco de dados do usuário. Atualmente, a ferramenta é ideal para **prototipagem de aplicações** e para **estudantes** que desejam realizar testes com dados consistentes e realistas, mas em menor escala.
 
