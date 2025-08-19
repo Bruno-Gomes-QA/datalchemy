@@ -1,55 +1,49 @@
-![Datalchemy](assets/DATALCHEMY_.png){width="300"}
+# Datalchemy
 
-# **Datalchemy**
+![Datalchemy](assets/DATALCHEMY_.png){width="300", class="center"}
 
-
-### **Simplificando a Geração de Dados Sintéticos Orientados por Semântica**
-
----
-
-## 📌 **O que é?**
-
-Datalchemy é uma biblioteca poderosa e intuitiva para facilitar a geração de dados sintéticos com base na estrutura do banco de dados do usuário. Ideal para desenvolvedores, cientistas de dados e equipes de QA que precisam criar dados consistentes, seguros e prontos para uso em testes ou protótipos.
+## Simplificando a Geração de Dados Sintéticos Orientados por Semântica
 
 ---
 
-## ✨ **Principais Funcionalidades**
+## Introdução
 
-### 📊 **Integração com Múltiplos Bancos de Dados**
-Gerencie conexões com bancos SQL como MySQL, PostgreSQL, SQLite, entre outros, em poucos passos.
-
-### 🛠️ **Geração de Modelos Automática**
-Use o sqlacodegen para traduzir a estrutura do banco em modelos Python prontos para uso com SQLAlchemy.
-
-### 🤖 **Assistente Semântico Alimentado por LLMs**
-Solicite dados sintéticos diretamente por prompts em linguagem natural, garantindo consistência com as relações e constraints do banco.
-
-### ⚙️ **Configuração e Uso Simplificados**
-Configure múltiplas conexões e gere dados rapidamente por meio de uma interface intuitiva.
-
-### 🔒 **Dados Seguros e Anonimizados**
-Gera dados que seguem as melhores práticas de segurança e anonimização, atendendo a normas como LGPD e GDPR.
+Datalchemy é uma biblioteca para a geração de dados sintéticos com base na estrutura do banco de dados do usuário. É ideal para desenvolvedores, cientistas de dados e equipes de QA que precisam criar dados consistentes e seguros para uso em testes ou protótipos.
 
 ---
 
-## 🚀 **Como Datalchemy Pode Te Ajudar?**
+## Principais Funcionalidades
+
+- **Integração com Múltiplos Bancos de Dados:** Gerenciamento de conexões com bancos SQL como MySQL, PostgreSQL, SQLite, entre outros.
+
+- **Geração de Modelos Automática:** Utiliza o sqlacodegen para traduzir a estrutura do banco em modelos Python para uso com SQLAlchemy.
+
+- **Assistente Semântico com LLMs:** Geração de dados sintéticos através de prompts em linguagem natural, garantindo consistência com as relações e constraints do banco.
+
+- **Configuração e Uso Simplificados:** Interface intuitiva para configurar conexões e gerar dados.
+
+- **Dados Seguros e Anonimizados:** Geração de dados que seguem as melhores práticas de segurança e anonimização, atendendo a normas como LGPD e GDPR.
+
+---
+
+## Casos de Uso
 
 - **Testes Automatizados:** Gere cenários realistas com dados consistentes para validar aplicações sem acessar dados reais.
-- **Desenvolvimento de Prototótipos:** Popule rapidamente bancos de dados de desenvolvimento ou sandbox.
-- **Treinamento de Modelos de IA:** Crie dados sintéticos com características específicas para treinar seus modelos.
+- **Desenvolvimento de Prototipos:** Popule rapidamente bancos de dados de desenvolvimento ou sandbox.
+- **Treinamento de Modelos de IA:** Crie dados sintéticos com características específicas para treinar modelos.
 - **Análise de Dados:** Simule cenários completos sem interferir no ambiente de produção.
 
 ---
 
-## 🛠️ **Como Começar?**
+## Como Começar
 
-### **Instalação**
+### Instalação
 
 ```bash
 pip install datalchemy
 ```
 
-### **Configuração**
+### Configuração
 
 Defina as configurações de conexão com seus bancos de dados:
 
@@ -71,9 +65,9 @@ configs = [
 manager = DatabaseConnectionManager(configs)
 ```
 
-### **Geração de Dados**
+### Geração de Dados
 
-Conecte-se à LLM para gerar dados sintéticos com base em prompts:
+Conecte-se a um LLM para gerar dados sintéticos com base em prompts:
 
 ```python
 from datalchemy import Generators
@@ -84,9 +78,9 @@ response = generator.generate_data("main_db", prompt)
 print(response)
 ```
 
-### **Geração de Modelos**
+### Geração de Modelos
 
-Gere os modelos SQLAlchemy do banco de dados automaticamente:
+Gere os modelos SQLAlchemy do banco de dados:
 
 ```python
 models_code = generator.generate_models("main_db", save_to_file=True)
@@ -95,41 +89,16 @@ print(models_code)
 
 ---
 
-## 📚 **Exemplos e Casos de Uso**
+## Roadmap
 
-### **Prototipagem Simples**
-
-Gere poucos dados para tabelas relacionadas:
-
-```python
-prompt = "Gere 5 registros para cada tabela do banco de dados."
-print(generator.generate_data("main_db", prompt))
-```
-
-### **Exploração de Estrutura**
-
-Exporte os modelos SQLAlchemy para entender e documentar a estrutura do banco:
-
-```python
-generator.generate_models("main_db", save_to_file=True)
-```
-
----
-
-## 🔮 **Funcionalidades Futuras**
-
-- **Geração em Larga Escala:** Suporte para grandes volumes de dados, otimizando o uso de tokens e recursos.
-- **Validação Avançada:** Regras configuráveis para validar os dados antes de inseri-los no banco.
+- **Geração em Larga Escala:** Suporte para grandes volumes de dados, com otimização do uso de tokens e recursos.
+- **Validação Avançada:** Regras configuráveis para validar os dados antes da inserção no banco.
 - **Suporte Expandido:** Integração com bancos de dados NoSQL.
 
 ---
 
-## 📢 **Dicas para Maximizar o Uso**
+## Dicas para Maximizar o Uso
 
-- Use prompts claros e objetivos para obter dados relevantes e consistentes.
-- Combine os dados gerados com ferramentas de visualização para entender melhor os cenários simulados.
-- Explore a geração de modelos para documentar seu banco e facilitar futuras integrações.
-
----
-
-✨ **Datalchemy: Simplifique sua jornada com dados sintéticos!**
+- Utilize prompts claros e objetivos para obter dados mais relevantes.
+- Combine os dados gerados com ferramentas de visualização para melhor compreensão dos cenários simulados.
+- Explore a geração de modelos para documentar seu banco de dados e facilitar futuras integrações.

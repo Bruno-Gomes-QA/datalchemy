@@ -1,23 +1,25 @@
+"""Operações para inserção de dados em bancos de dados."""
+
 import json
 
 from sqlalchemy import MetaData, Table
 
 
 class DataHandler:
+    """Manipula a inserção de dados em um banco de dados."""
+
     def __init__(self, engine):
-        """
-        Inicializa o orquestrador de dados automáticos.
+        """Inicializa o manipulador de dados.
 
         Args:
-            engine: Instância do SQLAlchemy engine conectada ao banco.
+            engine: Instância do SQLAlchemy Engine conectada ao banco.
         """
         self.engine = engine
         self.metadata = MetaData(bind=self.engine)
         self.metadata.reflect()  # Reflete as tabelas existentes no banco
 
     def insert(self, json_data):
-        """
-        Insere dados no banco de dados com base no JSON fornecido.
+        """Insere dados no banco de dados com base na estrutura JSON fornecida.
 
         Args:
             json_data (dict | str): Estrutura JSON contendo as tabelas, colunas e valores a serem inseridos.
