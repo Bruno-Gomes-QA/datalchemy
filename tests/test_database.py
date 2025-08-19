@@ -97,7 +97,7 @@ def test_get_session_invalid_name(db_configs):
     manager = DatabaseConnectionManager(db_configs)
 
     with pytest.raises(
-        ValueError, match="🚫 Conexão 'invalid_db' não encontrada"
+        ValueError, match="Conexão 'invalid_db' não encontrada."
     ):
         manager.get_session('invalid_db')
 

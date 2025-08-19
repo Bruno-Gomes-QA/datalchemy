@@ -1,3 +1,5 @@
+"""Funções utilitárias para geração de dados e modelos."""
+
 import json
 import os
 import subprocess
@@ -10,11 +12,12 @@ from .database import DatabaseConnectionManager
 
 
 class Generators:
+    """Fornece métodos para gerar dados sintéticos e modelos SQLAlchemy."""
+
     def __init__(
         self, manager: DatabaseConnectionManager, OPENAI_API_KEY: str
     ):
-        """
-        Inicializa os geradores de dados e define o gerenciador de conexões.
+        """Inicializa o gerador de dados.
 
         Args:
             manager (DatabaseConnectionManager): Gerenciador de conexões com bancos de dados.
@@ -34,16 +37,15 @@ class Generators:
         temp: float = 0.3,
         qtd_lines: int = 100,
     ):
-        """
-        Gera dados semânticos usando o modelo OpenAI com base em um prompt.
+        """Gera dados sintéticos usando o modelo OpenAI com base em um prompt.
 
         Args:
             db_name (str): Nome do banco de dados associado à geração de dados.
             prompt (str): Mensagem enviada ao modelo para geração de dados.
             model (str): Modelo OpenAI a ser utilizado.
-            max_tokens (int): Número máximo de tokens permitidos na resposta, recomendamos não alterar essa quantidade, pois a função realiza o cálculo automático e administra os tokens para melhor performance na resposta.
-            temp (float): Grau de criatividade da resposta (default: 0.3).
-            qtd_lines (int): Quantidade máxima de linhas de dados a serem geradas (default: 100).
+            max_tokens (int): Número máximo de tokens permitidos na resposta. É recomendável não alterar este valor, pois a função calcula automaticamente a melhor utilização de tokens.
+            temp (float): Grau de criatividade da resposta.
+            qtd_lines (int): Quantidade máxima de linhas de dados a serem geradas.
 
         Returns:
             str: Resposta em JSON com os dados gerados.
