@@ -1,0 +1,12 @@
+[package]
+name = "datalchemy-core"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+schemars.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

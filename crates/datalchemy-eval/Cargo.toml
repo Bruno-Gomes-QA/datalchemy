@@ -1,0 +1,8 @@
+[package]
+name = "datalchemy-eval"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+datalchemy-core = { path = "../datalchemy-core" }
+serde.workspace = true

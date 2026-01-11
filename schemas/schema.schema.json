@@ -1,0 +1,515 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DatabaseSchema",
+  "description": "Top-level schema snapshot for a database.",
+  "type": "object",
+  "required": [
+    "engine",
+    "enums",
+    "schema_version",
+    "schemas"
+  ],
+  "properties": {
+    "database": {
+      "description": "Database name when available.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "engine": {
+      "description": "Database engine identifier (e.g. `postgres`).",
+      "type": "string"
+    },
+    "enums": {
+      "description": "Enum types captured across schemas.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/EnumType"
+      }
+    },
+    "schema_fingerprint": {
+      "description": "Optional fingerprint of the schema for cache/validation purposes.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "schema_version": {
+      "description": "Contract version for this schema format.",
+      "type": "string"
+    },
+    "schemas": {
+      "description": "Schemas captured from the database.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Schema"
+      }
+    }
+  },
+  "definitions": {
+    "Column": {
+      "description": "Column metadata for a table-like object.",
+      "type": "object",
+      "required": [
+        "column_type",
+        "is_nullable",
+        "name",
+        "ordinal_position"
+      ],
+      "properties": {
+        "column_type": {
+          "$ref": "#/definitions/ColumnType"
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "default": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generated": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/GeneratedExpression"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "identity": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/IdentityGeneration"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "is_nullable": {
+          "type": "boolean"
+        },
+        "name": {
+          "type": "string"
+        },
+        "ordinal_position": {
+          "type": "integer",
+          "format": "int16"
+        }
+      }
+    },
+    "ColumnType": {
+      "description": "Formatted and raw Postgres type metadata for a column.",
+      "type": "object",
+      "required": [
+        "data_type",
+        "udt_name",
+        "udt_schema"
+      ],
+      "properties": {
+        "character_max_length": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int32"
+        },
+        "collation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "data_type": {
+          "description": "User-friendly formatted type (e.g. `character varying(255)`).",
+          "type": "string"
+        },
+        "numeric_precision": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int32"
+        },
+        "numeric_scale": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "int32"
+        },
+        "udt_name": {
+          "description": "Name of the underlying type.",
+          "type": "string"
+        },
+        "udt_schema": {
+          "description": "Namespace of the underlying type.",
+          "type": "string"
+        }
+      }
+    },
+    "Constraint": {
+      "description": "Table-level constraint definitions.",
+      "oneOf": [
+        {
+          "description": "Primary key definition preserving column order.",
+          "type": "object",
+          "required": [
+            "columns",
+            "kind"
+          ],
+          "properties": {
+            "columns": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "primary_key"
+              ]
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        {
+          "description": "Foreign key definition preserving column ordering.",
+          "type": "object",
+          "required": [
+            "columns",
+            "initially_deferred",
+            "is_deferrable",
+            "kind",
+            "match_type",
+            "on_delete",
+            "on_update",
+            "referenced_columns",
+            "referenced_schema",
+            "referenced_table"
+          ],
+          "properties": {
+            "columns": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "initially_deferred": {
+              "type": "boolean"
+            },
+            "is_deferrable": {
+              "type": "boolean"
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "foreign_key"
+              ]
+            },
+            "match_type": {
+              "$ref": "#/definitions/FkMatchType"
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "on_delete": {
+              "$ref": "#/definitions/FkAction"
+            },
+            "on_update": {
+              "$ref": "#/definitions/FkAction"
+            },
+            "referenced_columns": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "referenced_schema": {
+              "type": "string"
+            },
+            "referenced_table": {
+              "type": "string"
+            }
+          }
+        },
+        {
+          "description": "Unique constraint definition.",
+          "type": "object",
+          "required": [
+            "columns",
+            "initially_deferred",
+            "is_deferrable",
+            "kind"
+          ],
+          "properties": {
+            "columns": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "initially_deferred": {
+              "type": "boolean"
+            },
+            "is_deferrable": {
+              "type": "boolean"
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "unique"
+              ]
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        {
+          "description": "Check constraint definition.",
+          "type": "object",
+          "required": [
+            "expression",
+            "kind"
+          ],
+          "properties": {
+            "expression": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string",
+              "enum": [
+                "check"
+              ]
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "EnumType": {
+      "description": "Representation of Postgres enum types.",
+      "type": "object",
+      "required": [
+        "labels",
+        "name",
+        "schema"
+      ],
+      "properties": {
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    "FkAction": {
+      "description": "Foreign key action semantics.",
+      "type": "string",
+      "enum": [
+        "no_action",
+        "restrict",
+        "cascade",
+        "set_null",
+        "set_default",
+        "unknown"
+      ]
+    },
+    "FkMatchType": {
+      "description": "Foreign key match semantics.",
+      "type": "string",
+      "enum": [
+        "full",
+        "partial",
+        "simple",
+        "unknown"
+      ]
+    },
+    "GeneratedExpression": {
+      "description": "Information about generated column expressions.",
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "expression": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kind": {
+          "$ref": "#/definitions/GeneratedKind"
+        }
+      }
+    },
+    "GeneratedKind": {
+      "description": "Kind of generated column supported by Postgres.",
+      "type": "string",
+      "enum": [
+        "stored"
+      ]
+    },
+    "IdentityGeneration": {
+      "description": "Identity generation strategy for columns using `GENERATED ... AS IDENTITY`.",
+      "type": "string",
+      "enum": [
+        "always",
+        "by_default"
+      ]
+    },
+    "Index": {
+      "description": "Index definition.",
+      "type": "object",
+      "required": [
+        "definition",
+        "is_primary",
+        "is_unique",
+        "is_valid",
+        "method",
+        "name"
+      ],
+      "properties": {
+        "definition": {
+          "type": "string"
+        },
+        "is_primary": {
+          "type": "boolean"
+        },
+        "is_unique": {
+          "type": "boolean"
+        },
+        "is_valid": {
+          "type": "boolean"
+        },
+        "method": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "Schema": {
+      "description": "A Postgres namespace containing tables and related objects.",
+      "type": "object",
+      "required": [
+        "name",
+        "tables"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "tables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Table"
+          }
+        }
+      }
+    },
+    "Table": {
+      "description": "A table-like object (table, view, materialized view, foreign table, partitioned table).",
+      "type": "object",
+      "required": [
+        "columns",
+        "constraints",
+        "indexes",
+        "kind",
+        "name"
+      ],
+      "properties": {
+        "columns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Column"
+          }
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Constraint"
+          }
+        },
+        "indexes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Index"
+          }
+        },
+        "kind": {
+          "$ref": "#/definitions/TableKind"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "TableKind": {
+      "description": "Kind of table represented in the catalog.",
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": [
+            "table",
+            "partitioned_table",
+            "view",
+            "materialized_view",
+            "foreign_table"
+          ]
+        },
+        {
+          "type": "object",
+          "required": [
+            "other"
+          ],
+          "properties": {
+            "other": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}

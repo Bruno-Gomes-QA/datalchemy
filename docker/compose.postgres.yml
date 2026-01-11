@@ -1,0 +1,10 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: datalchemy-postgres
+    environment:
+      POSTGRES_USER: datalchemy
+      POSTGRES_PASSWORD: datalchemy
+      POSTGRES_DB: datalchemy_crm
+    ports:
+      - "5432:5432"
