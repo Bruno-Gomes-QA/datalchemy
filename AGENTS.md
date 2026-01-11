@@ -138,7 +138,16 @@ Qualquer mudanca no contrato `schema.json` deve:
 
 - Unit tests: redaction, grafo FK, serializacao deterministica.
 - Integration tests: Postgres via Docker, valida PK/FK/UNIQUE/CHECK.
-- Fixtures em `fixtures/sql/postgres/`.
+- Fixtures em `fixtures/sql/postgres/`:
+  - `tables/` com SQL por tabela (prefixo numerico).
+  - `data/` com cargas de dados de teste.
+  - Colunas e tabelas em portugues, sem acentos.
+  - `000_schema.sql` define o schema base e enums do CRM.
+- Script recomendado: `scripts/postgres_docker.sh` (subir Postgres e aplicar fixtures).
+  - Container padrao: `datalchemy-postgres` (porta 5432, db `datalchemy_crm`).
+- Para novos bancos, seguir o padrao:
+  - `scripts/<db>_docker.sh`
+  - `docker/compose.<db>.yml`
 
 ---
 

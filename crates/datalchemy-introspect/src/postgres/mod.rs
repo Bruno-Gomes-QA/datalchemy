@@ -1,6 +1,6 @@
 use sqlx::PgPool;
 
-use datalchemy_core::{DatabaseSchema, Result, Schema, SCHEMA_VERSION};
+use datalchemy_core::{DatabaseSchema, Result, SCHEMA_VERSION, Schema};
 
 use crate::adapter::Adapter;
 use crate::options::IntrospectOptions;
@@ -92,8 +92,7 @@ pub async fn introspect(pool: &PgPool, opts: &IntrospectOptions) -> Result<Datab
             table.constraints = constraints;
 
             if opts.include_indexes {
-                let raw_indexes =
-                    queries::list_indexes(pool, &schema_name, &table.name).await?;
+                let raw_indexes = queries::list_indexes(pool, &schema_name, &table.name).await?;
                 table.indexes = mapper::map_indexes(raw_indexes);
             }
         }
@@ -118,6 +117,6 @@ pub async fn introspect(pool: &PgPool, opts: &IntrospectOptions) -> Result<Datab
         database: Some(database),
         schemas: schema_items,
         enums,
-        fingerprint: None,
+        schema_fingerprint: None,
     })
 }

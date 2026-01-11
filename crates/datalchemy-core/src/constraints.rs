@@ -1,14 +1,15 @@
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// Primary key definition preserving column order.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct PrimaryKey {
     pub name: Option<String>,
     pub columns: Vec<String>,
 }
 
 /// Unique constraint definition.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct UniqueConstraint {
     pub name: Option<String>,
     pub columns: Vec<String>,
@@ -17,14 +18,14 @@ pub struct UniqueConstraint {
 }
 
 /// Check constraint definition.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct CheckConstraint {
     pub name: Option<String>,
     pub expression: String,
 }
 
 /// Foreign key action semantics.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum FkAction {
     NoAction,
@@ -36,7 +37,7 @@ pub enum FkAction {
 }
 
 /// Foreign key match semantics.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum FkMatchType {
     Full,
@@ -46,7 +47,7 @@ pub enum FkMatchType {
 }
 
 /// Foreign key definition preserving column ordering.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ForeignKey {
     pub name: Option<String>,
     pub columns: Vec<String>,
@@ -61,7 +62,7 @@ pub struct ForeignKey {
 }
 
 /// Index definition.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Index {
     pub name: String,
     pub is_unique: bool,
@@ -72,7 +73,7 @@ pub struct Index {
 }
 
 /// Table-level constraint definitions.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum Constraint {
     PrimaryKey(PrimaryKey),

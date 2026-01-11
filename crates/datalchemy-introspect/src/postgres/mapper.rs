@@ -169,11 +169,23 @@ pub fn sort_constraints(constraints: &mut Vec<Constraint>) {
     constraints.sort_by(|left, right| constraint_key(left).cmp(&constraint_key(right)));
 }
 
-fn constraint_key(constraint: &Constraint) -> (u8, String) {
+fn constraint_key(constraint: &Constraint) -> (u8, String, String) {
     match constraint {
-        Constraint::PrimaryKey(pk) => (0, pk.name.clone().unwrap_or_default()),
-        Constraint::Unique(unique) => (1, unique.name.clone().unwrap_or_default()),
-        Constraint::Check(check) => (2, check.name.clone().unwrap_or_default()),
-        Constraint::ForeignKey(fk) => (3, fk.name.clone().unwrap_or_default()),
+        Constraint::PrimaryKey(pk) => {
+            (0, pk.name.clone().unwrap_or_default(), pk.columns.join("|"))
+        }
+        Constraint::Unique(unique) => (
+            1,
+            unique.name.clone().unwrap_or_default(),
+            unique.columns.join("|"),
+        ),
+        Constraint::Check(check) => (
+            2,
+            check.name.clone().unwrap_or_default(),
+            check.expression.clone(),
+        ),
+        Constraint::ForeignKey(fk) => {
+            (3, fk.name.clone().unwrap_or_default(), fk.columns.join("|"))
+        }
     }
 }

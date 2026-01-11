@@ -24,9 +24,13 @@ datalchemy/
 ├─ fixtures/
 │  └─ sql/
 │     └─ postgres/            # Fixtures SQL para testes (schema + data)
+│        ├─ tables/           # SQL por tabela (ordenado por prefixo)
+│        └─ data/             # Carga de dados de teste
 ├─ docker/
-│  └─ compose.postgres.yml    # Postgres para testes de integracao
+│  └─ compose.postgres.yml    # Postgres para testes de integracao (opcional)
+├─ scripts/                   # Scripts de infraestrutura/teste (ex.: postgres_docker.sh)
 ├─ docs/                      # Documentacao adicional
+├─ schemas/                   # JSON Schema oficial do contrato
 ├─ evidence/                  # Evidencias por task/issue
 ├─ tasks/                     # Tasks (issue_task_*.md, pr_task_*.md)
 ├─ runs/                      # Artefatos gerados pelo CLI (gitignored)
@@ -99,11 +103,15 @@ datalchemy/
 ## 3) Fixtures e testes
 
 ### 3.1 Fixtures
-- `fixtures/sql/postgres/001_schema.sql`
-- `fixtures/sql/postgres/002_data.sql`
+- `fixtures/sql/postgres/tables/000_schema.sql` (schema CRM + enums)
+- `fixtures/sql/postgres/tables/table_XXX_*.sql` (tabelas CRM, ordem deterministica)
+- `fixtures/sql/postgres/data/data_XXX.sql` (cargas minimas de dados)
+- Nomes em portugues, sem acentos
 
 ### 3.2 Docker
 - `docker/compose.postgres.yml` sobe o Postgres para testes de integracao.
+- Script recomendado: `scripts/postgres_docker.sh` (sobe o container e aplica fixtures).
+- Para novos bancos: `scripts/<db>_docker.sh` + `docker/compose.<db>.yml`.
 
 ---
 

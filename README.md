@@ -24,10 +24,12 @@ datalchemy/
 │  ├─ datalchemy-eval/        # Metricas do schema
 │  ├─ datalchemy-plan/        # Stub (Plan 2+)
 │  └─ datalchemy-generate/    # Stub (Plan 2+)
-├─ fixtures/sql/postgres/     # Fixtures SQL para testes
+├─ fixtures/sql/postgres/     # Fixtures SQL para testes (tables/ + data/)
 ├─ docker/compose.postgres.yml
+├─ scripts/                   # Scripts para subir banco e aplicar fixtures
 ├─ tasks/                     # issue_task_*.md / pr_task_*.md
 ├─ evidence/                  # Evidencias por task
+├─ schemas/                   # JSON Schema oficial do contrato
 ├─ runs/                      # Artefatos gerados pelo CLI (gitignored)
 └─ datalchemy_structure.md    # Estrutura atual detalhada
 ```
@@ -57,27 +59,56 @@ cargo run -p datalchemy-introspect --example dump_json > schema.json
 
 ---
 
-## 4) Testes
+## 4) Ambiente local Postgres (docker)
 
-### 4.1 Subir Postgres local via Docker
+### 4.1 Subir container e aplicar fixtures
 ```bash
-docker compose -f docker/compose.postgres.yml up -d
-export TEST_DATABASE_URL="postgres://datalchemy:datalchemy@localhost:5432/datalchemy"
+./scripts/postgres_docker.sh
 ```
 
-### 4.2 Rodar testes
+**Container padrao**
+- Nome: `datalchemy-postgres`
+- Porta: `5432`
+- Usuario: `datalchemy`
+- Senha: `datalchemy`
+- Database: `datalchemy_crm`
+
+Para novos bancos, manter o padrao `scripts/<db>_docker.sh`.
+Para docker compose, manter `docker/compose.<db>.yml`.
+
+### 4.2 .env recomendado
+```bash
+DATABASE_URL=postgres://datalchemy:datalchemy@localhost:5432/datalchemy_crm
+TEST_DATABASE_URL=postgres://datalchemy:datalchemy@localhost:5432/datalchemy_crm
+```
+
+---
+
+## 5) Testes
+
+### 5.1 Subir Postgres local via Docker
+```bash
+docker compose -f docker/compose.postgres.yml up -d
+export TEST_DATABASE_URL="postgres://datalchemy:datalchemy@localhost:5432/datalchemy_crm"
+```
+
+### 5.2 Rodar testes
 ```bash
 cargo test
 ```
 
-### 4.3 Encerrar Docker
+Os testes de integracao fazem:
+- Validacao do `schema.json` contra `schemas/schema.schema.json`.
+- Comparacao com o golden file `crates/datalchemy-introspect/tests/golden/postgres_minimal.schema.json`.
+
+### 5.3 Encerrar Docker
 ```bash
 docker compose -f docker/compose.postgres.yml down
 ```
 
 ---
 
-## 5) Regras essenciais (resumo)
+## 6) Regras essenciais (resumo)
 
 - **Determinismo**: output ordenado e estavel.
 - **SQL centralizado** em `crates/datalchemy-introspect/src/postgres/queries.rs`.
@@ -89,14 +120,27 @@ Veja `AGENTS.md` para o guia completo.
 
 ---
 
-## 6) Fluxo de contribuicao (branches, commits e evidencia)
+## 7) Contrato do schema.json
 
-### 6.1 Tasks obrigatorias (PIT)
+- O contrato e versionado por `schema_version` (atual: `0.2`).
+- O JSON Schema oficial fica em `schemas/schema.schema.json`.
+- Documentacao detalhada: `docs/schema_json.md`.
+
+### Regenerar o JSON Schema
+```bash
+cargo run -p datalchemy-core --example emit_schema_json_schema > schemas/schema.schema.json
+```
+
+---
+
+## 8) Fluxo de contribuicao (branches, commits e evidencia)
+
+### 8.1 Tasks obrigatorias (PIT)
 - Toda mudanca deve ter um arquivo em `tasks/`:
   - `issue_task_<id>.md` ou `pr_task_<id>.md`.
 - A evidencia deve ir em `evidence/<id>.md`.
 
-### 6.2 Branches
+### 8.2 Branches
 - Use uma branch por task.
 - Nomes sugeridos:
   - `feat/<id>-descricao`
@@ -104,7 +148,7 @@ Veja `AGENTS.md` para o guia completo.
   - `docs/<id>-descricao`
   - `chore/<id>-descricao`
 
-### 6.3 Commits
+### 8.3 Commits
 - Um commit por unidade logica de mudanca.
 - Mensagens claras e curtas, citando o ID da task.
 
@@ -113,7 +157,7 @@ Veja `AGENTS.md` para o guia completo.
 feat(pr_task_instrospect-database-schema): add cli registry artifacts
 ```
 
-### 6.4 Checklist de PR
+### 8.4 Checklist de PR
 - [ ] `cargo fmt`
 - [ ] `cargo clippy --all-targets -- -D warnings`
 - [ ] `cargo test`
@@ -122,7 +166,7 @@ feat(pr_task_instrospect-database-schema): add cli registry artifacts
 
 ---
 
-## 7) Como o CLI gera uma run
+## 9) Como o CLI gera uma run
 
 1) Detecta engine pela URL.
 2) Cria `runs/<timestamp>__run_<id>/`.
@@ -132,7 +176,7 @@ feat(pr_task_instrospect-database-schema): add cli registry artifacts
 
 ---
 
-## 8) Arquivos chave
+## 10) Arquivos chave
 
 - `crates/datalchemy-core/src/schema.rs` — contrato do schema.
 - `crates/datalchemy-introspect/src/postgres/queries.rs` — SQL do Postgres.

@@ -2,7 +2,7 @@ mod logging;
 mod run;
 
 pub use logging::init_run_logging;
-pub use run::{start_run, write_metrics, write_schema, RunContext, RunOptions};
+pub use run::{RunContext, RunOptions, start_run, write_metrics, write_schema};
 
 use thiserror::Error;
 

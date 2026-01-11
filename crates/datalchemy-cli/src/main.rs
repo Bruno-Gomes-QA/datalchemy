@@ -4,10 +4,12 @@ use std::path::PathBuf;
 use std::time::{Duration, Instant};
 
 use clap::{Args, Parser, Subcommand};
-use datalchemy_core::{redact_connection_string, validate_schema, Error as CoreError, SCHEMA_VERSION};
+use datalchemy_core::{
+    Error as CoreError, SCHEMA_VERSION, redact_connection_string, validate_schema,
+};
 use datalchemy_eval::collect_schema_metrics;
-use datalchemy_introspect::{introspect_postgres_with_options, IntrospectOptions};
-use registry::{init_run_logging, start_run, write_metrics, write_schema, RunContext, RunOptions};
+use datalchemy_introspect::{IntrospectOptions, introspect_postgres_with_options};
+use registry::{RunContext, RunOptions, init_run_logging, start_run, write_metrics, write_schema};
 use sqlx::postgres::PgPoolOptions;
 use thiserror::Error;
 use uuid::Uuid;
@@ -122,12 +124,12 @@ async fn run_introspect(args: IntrospectArgs) -> Result<(), CliError> {
         (Some(_), Some(_)) => {
             return Err(CliError::InvalidConfig(
                 "use either --conn or positional connection string".to_string(),
-            ))
+            ));
         }
         (None, None) => {
             return Err(CliError::InvalidConfig(
                 "connection string is required".to_string(),
-            ))
+            ));
         }
     };
 
@@ -208,7 +210,11 @@ async fn run_introspect(args: IntrospectArgs) -> Result<(), CliError> {
     }
 
     let duration_ms = timer.elapsed().as_millis();
-    tracing::info!(event = "run_finished", status = "success", duration_ms = duration_ms);
+    tracing::info!(
+        event = "run_finished",
+        status = "success",
+        duration_ms = duration_ms
+    );
 
     Ok(())
 }

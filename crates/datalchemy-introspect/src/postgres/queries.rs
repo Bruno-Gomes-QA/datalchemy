@@ -311,7 +311,8 @@ pub async fn list_foreign_keys(
         join pg_namespace ref_nsp on ref_nsp.oid = ref_rel.relnamespace
         join unnest(con.conkey) with ordinality as s_ord(attnum, ordinality) on true
         join pg_attribute src_att on src_att.attrelid = src_rel.oid and src_att.attnum = s_ord.attnum
-        join unnest(con.confkey) with ordinality as t_ord(attnum, ordinality) on true
+        join unnest(con.confkey) with ordinality as t_ord(attnum, ordinality)
+          on s_ord.ordinality = t_ord.ordinality
         join pg_attribute ref_att on ref_att.attrelid = ref_rel.oid and ref_att.attnum = t_ord.attnum
         where src_nsp.nspname = $1
           and src_rel.relname = $2

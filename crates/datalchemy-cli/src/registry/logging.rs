@@ -3,9 +3,9 @@ use std::io::{self, Write};
 use std::path::Path;
 use std::sync::{Arc, Mutex};
 
+use tracing_subscriber::fmt::time::UtcTime;
 use tracing_subscriber::fmt::writer::BoxMakeWriter;
 use tracing_subscriber::prelude::*;
-use tracing_subscriber::fmt::time::UtcTime;
 
 use super::{RegistryError, RegistryResult};
 
@@ -36,16 +36,18 @@ struct SharedWriter {
 
 impl Write for SharedWriter {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        let mut file = self.file.lock().map_err(|_| {
-            io::Error::new(io::ErrorKind::Other, "failed to lock log file")
-        })?;
+        let mut file = self
+            .file
+            .lock()
+            .map_err(|_| io::Error::new(io::ErrorKind::Other, "failed to lock log file"))?;
         file.write(buf)
     }
 
     fn flush(&mut self) -> io::Result<()> {
-        let mut file = self.file.lock().map_err(|_| {
-            io::Error::new(io::ErrorKind::Other, "failed to lock log file")
-        })?;
+        let mut file = self
+            .file
+            .lock()
+            .map_err(|_| io::Error::new(io::ErrorKind::Other, "failed to lock log file"))?;
         file.flush()
     }
 }

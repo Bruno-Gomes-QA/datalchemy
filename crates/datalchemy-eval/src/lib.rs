@@ -3,6 +3,6 @@
 pub mod schema_metrics;
 
 pub use schema_metrics::{
-    collect_schema_metrics, ConstraintCounts, CoverageMetrics, FkGraphMetrics, SchemaCounts,
-    SchemaMetrics,
+    ConstraintCounts, CoverageMetrics, FkGraphMetrics, SchemaCounts, SchemaMetrics,
+    collect_schema_metrics,
 };

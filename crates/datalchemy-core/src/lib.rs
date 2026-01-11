@@ -16,11 +16,11 @@ pub use constraints::{
     UniqueConstraint,
 };
 pub use error::{Error, Result};
-pub use graph::{build_fk_graph_report, FkGraphReport, FkGraphSummary};
-pub use redaction::{redact_connection_string, RedactedConnection};
+pub use graph::{FkGraphReport, FkGraphSummary, build_fk_graph_report};
+pub use redaction::{RedactedConnection, redact_connection_string};
 pub use schema::{Column, DatabaseSchema, Schema, Table, TableKind};
 pub use types::{ColumnType, EnumType, GeneratedExpression, GeneratedKind, IdentityGeneration};
 pub use validation::validate_schema;
 
 /// Current schema contract version for `schema.json` artifacts.
-pub const SCHEMA_VERSION: &str = "0.1";
+pub const SCHEMA_VERSION: &str = "0.2";

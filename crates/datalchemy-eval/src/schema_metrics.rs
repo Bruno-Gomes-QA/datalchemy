@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use datalchemy_core::{build_fk_graph_report, Constraint, DatabaseSchema};
+use datalchemy_core::{Constraint, DatabaseSchema, build_fk_graph_report};
 
 /// Top-level metrics report for a schema snapshot.
 #[derive(Debug, Clone, Serialize, Deserialize)]

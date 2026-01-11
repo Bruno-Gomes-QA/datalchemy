@@ -1,10 +1,11 @@
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::constraints::{Constraint, Index};
 use crate::types::{ColumnType, EnumType, GeneratedExpression, IdentityGeneration};
 
 /// Top-level schema snapshot for a database.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct DatabaseSchema {
     /// Contract version for this schema format.
     pub schema_version: String,
@@ -17,18 +18,18 @@ pub struct DatabaseSchema {
     /// Enum types captured across schemas.
     pub enums: Vec<EnumType>,
     /// Optional fingerprint of the schema for cache/validation purposes.
-    pub fingerprint: Option<String>,
+    pub schema_fingerprint: Option<String>,
 }
 
 /// A Postgres namespace containing tables and related objects.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Schema {
     pub name: String,
     pub tables: Vec<Table>,
 }
 
 /// A table-like object (table, view, materialized view, foreign table, partitioned table).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Table {
     pub name: String,
     pub kind: TableKind,
@@ -39,7 +40,7 @@ pub struct Table {
 }
 
 /// Kind of table represented in the catalog.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum TableKind {
     Table,
@@ -51,7 +52,7 @@ pub enum TableKind {
 }
 
 /// Column metadata for a table-like object.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Column {
     pub ordinal_position: i16,
     pub name: String,

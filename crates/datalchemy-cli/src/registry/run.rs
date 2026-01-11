@@ -1,4 +1,4 @@
-use std::fs::{create_dir_all, OpenOptions};
+use std::fs::{OpenOptions, create_dir_all};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -67,9 +67,7 @@ pub struct RunPaths {
 
 pub fn start_run(ctx: &RunContext) -> RegistryResult<RunPaths> {
     let timestamp = ctx.started_at.format("%Y-%m-%dT%H-%M-%SZ").to_string();
-    let run_root = ctx
-        .run_dir
-        .join(format!("{timestamp}__run_{}", ctx.run_id));
+    let run_root = ctx.run_dir.join(format!("{timestamp}__run_{}", ctx.run_id));
 
     create_dir_all(&run_root)?;
 
@@ -150,6 +148,10 @@ pub fn collect_git_info() -> GitInfo {
 }
 
 fn write_json<T: Serialize>(path: &Path, value: &T) -> RegistryResult<()> {
-    let file = OpenOptions::new().create(true).truncate(true).write(true).open(path)?;
+    let file = OpenOptions::new()
+        .create(true)
+        .truncate(true)
+        .write(true)
+        .open(path)?;
     serde_json::to_writer_pretty(file, value).map_err(RegistryError::from)
 }

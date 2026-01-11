@@ -1,0 +1,3868 @@
+{
+  "schema_version": "0.2",
+  "engine": "postgres",
+  "database": "datalchemy_crm",
+  "schemas": [
+    {
+      "name": "crm",
+      "tables": [
+        {
+          "name": "anotacoes",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "atividade_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "conteudo",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "criado_em",
+              "column_type": {
+                "data_type": "timestamp with time zone",
+                "udt_schema": "pg_catalog",
+                "udt_name": "timestamptz",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "now()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "anotacoes_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "anotacoes_atividade_unique",
+              "columns": [
+                "atividade_id"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "foreign_key",
+              "name": "anotacoes_atividade_id_fkey",
+              "columns": [
+                "atividade_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "atividades",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "cascade",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "anotacoes_atividade_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX anotacoes_atividade_unique ON crm.anotacoes USING btree (atividade_id)"
+            },
+            {
+              "name": "anotacoes_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX anotacoes_pkey ON crm.anotacoes USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "atividades",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "usuario_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "contato_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "oportunidade_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "tipo",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 6,
+              "name": "status",
+              "column_type": {
+                "data_type": "crm.status_atividade",
+                "udt_schema": "crm",
+                "udt_name": "status_atividade",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "'pendente'::crm.status_atividade",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 7,
+              "name": "assunto",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 8,
+              "name": "descricao",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 9,
+              "name": "data_inicio",
+              "column_type": {
+                "data_type": "timestamp with time zone",
+                "udt_schema": "pg_catalog",
+                "udt_name": "timestamptz",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 10,
+              "name": "data_fim",
+              "column_type": {
+                "data_type": "timestamp with time zone",
+                "udt_schema": "pg_catalog",
+                "udt_name": "timestamptz",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "atividades_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "check",
+              "name": "atividades_periodo_chk",
+              "expression": "CHECK (data_fim IS NULL OR data_fim >= data_inicio)"
+            },
+            {
+              "kind": "check",
+              "name": "atividades_tipo_chk",
+              "expression": "CHECK (tipo = ANY (ARRAY['tarefa'::text, 'reuniao'::text, 'anotacao'::text]))"
+            },
+            {
+              "kind": "foreign_key",
+              "name": "atividades_contato_id_fkey",
+              "columns": [
+                "contato_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "contatos",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "foreign_key",
+              "name": "atividades_oportunidade_id_fkey",
+              "columns": [
+                "oportunidade_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "oportunidades",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "foreign_key",
+              "name": "atividades_usuario_id_fkey",
+              "columns": [
+                "usuario_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "usuarios",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "atividades_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX atividades_pkey ON crm.atividades USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "contatos",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "empresa_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "nome",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "sobrenome",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "email",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 6,
+              "name": "telefone",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 7,
+              "name": "cargo",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 8,
+              "name": "data_nascimento",
+              "column_type": {
+                "data_type": "date",
+                "udt_schema": "pg_catalog",
+                "udt_name": "date",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 9,
+              "name": "data_criacao",
+              "column_type": {
+                "data_type": "timestamp with time zone",
+                "udt_schema": "pg_catalog",
+                "udt_name": "timestamptz",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "now()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "contatos_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "contatos_email_unique",
+              "columns": [
+                "email"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "check",
+              "name": "contatos_email_chk",
+              "expression": "CHECK (POSITION(('@'::text) IN (email)) > 1)"
+            },
+            {
+              "kind": "check",
+              "name": "contatos_nascimento_chk",
+              "expression": "CHECK (data_nascimento IS NULL OR data_nascimento <= CURRENT_DATE)"
+            },
+            {
+              "kind": "foreign_key",
+              "name": "contatos_empresa_id_fkey",
+              "columns": [
+                "empresa_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "empresas",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "cascade",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "contatos_email_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX contatos_email_unique ON crm.contatos USING btree (email)"
+            },
+            {
+              "name": "contatos_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX contatos_pkey ON crm.contatos USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "cotacoes",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "oportunidade_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "responsavel_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "codigo",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "data_emissao",
+              "column_type": {
+                "data_type": "date",
+                "udt_schema": "pg_catalog",
+                "udt_name": "date",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "CURRENT_DATE",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 6,
+              "name": "validade",
+              "column_type": {
+                "data_type": "date",
+                "udt_schema": "pg_catalog",
+                "udt_name": "date",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "cotacoes_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "cotacoes_codigo_unique",
+              "columns": [
+                "codigo"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "check",
+              "name": "cotacoes_validade_chk",
+              "expression": "CHECK (validade >= data_emissao)"
+            },
+            {
+              "kind": "foreign_key",
+              "name": "cotacoes_oportunidade_id_fkey",
+              "columns": [
+                "oportunidade_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "oportunidades",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "cascade",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "foreign_key",
+              "name": "cotacoes_responsavel_id_fkey",
+              "columns": [
+                "responsavel_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "usuarios",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "cotacoes_codigo_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX cotacoes_codigo_unique ON crm.cotacoes USING btree (codigo)"
+            },
+            {
+              "name": "cotacoes_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX cotacoes_pkey ON crm.cotacoes USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "empresas",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "razao_social",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "nome_fantasia",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "cnpj",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "email",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 6,
+              "name": "telefone",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 7,
+              "name": "site",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 8,
+              "name": "ativo",
+              "column_type": {
+                "data_type": "boolean",
+                "udt_schema": "pg_catalog",
+                "udt_name": "bool",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "true",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 9,
+              "name": "data_criacao",
+              "column_type": {
+                "data_type": "timestamp with time zone",
+                "udt_schema": "pg_catalog",
+                "udt_name": "timestamptz",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "now()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 10,
+              "name": "data_atualizacao",
+              "column_type": {
+                "data_type": "timestamp with time zone",
+                "udt_schema": "pg_catalog",
+                "udt_name": "timestamptz",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "now()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "empresas_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "empresas_cnpj_unique",
+              "columns": [
+                "cnpj"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "check",
+              "name": "empresas_datas_chk",
+              "expression": "CHECK (data_atualizacao >= data_criacao)"
+            },
+            {
+              "kind": "check",
+              "name": "empresas_email_chk",
+              "expression": "CHECK (email IS NULL OR POSITION(('@'::text) IN (email)) > 1)"
+            }
+          ],
+          "indexes": [
+            {
+              "name": "empresas_cnpj_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX empresas_cnpj_unique ON crm.empresas USING btree (cnpj)"
+            },
+            {
+              "name": "empresas_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX empresas_pkey ON crm.empresas USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "etapas_funil",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "funil_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "nome",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "ordem",
+              "column_type": {
+                "data_type": "integer",
+                "udt_schema": "pg_catalog",
+                "udt_name": "int4",
+                "character_max_length": null,
+                "numeric_precision": 32,
+                "numeric_scale": 0,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "probabilidade",
+              "column_type": {
+                "data_type": "numeric(5,2)",
+                "udt_schema": "pg_catalog",
+                "udt_name": "numeric",
+                "character_max_length": null,
+                "numeric_precision": 5,
+                "numeric_scale": 2,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "etapas_funil_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "etapas_funil_nome_unique",
+              "columns": [
+                "funil_id",
+                "nome"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "unique",
+              "name": "etapas_funil_ordem_unique",
+              "columns": [
+                "funil_id",
+                "ordem"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "check",
+              "name": "etapas_funil_ordem_chk",
+              "expression": "CHECK (ordem > 0)"
+            },
+            {
+              "kind": "check",
+              "name": "etapas_funil_prob_chk",
+              "expression": "CHECK (probabilidade >= 0::numeric AND probabilidade <= 100::numeric)"
+            },
+            {
+              "kind": "foreign_key",
+              "name": "etapas_funil_funil_id_fkey",
+              "columns": [
+                "funil_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "funis",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "cascade",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "etapas_funil_nome_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX etapas_funil_nome_unique ON crm.etapas_funil USING btree (funil_id, nome)"
+            },
+            {
+              "name": "etapas_funil_ordem_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX etapas_funil_ordem_unique ON crm.etapas_funil USING btree (funil_id, ordem)"
+            },
+            {
+              "name": "etapas_funil_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX etapas_funil_pkey ON crm.etapas_funil USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "faturas",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "cotacao_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "responsavel_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "numero",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "data_emissao",
+              "column_type": {
+                "data_type": "date",
+                "udt_schema": "pg_catalog",
+                "udt_name": "date",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "CURRENT_DATE",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 6,
+              "name": "data_vencimento",
+              "column_type": {
+                "data_type": "date",
+                "udt_schema": "pg_catalog",
+                "udt_name": "date",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 7,
+              "name": "status",
+              "column_type": {
+                "data_type": "crm.status_fatura",
+                "udt_schema": "crm",
+                "udt_name": "status_fatura",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "'aberta'::crm.status_fatura",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 8,
+              "name": "valor_total",
+              "column_type": {
+                "data_type": "numeric(12,2)",
+                "udt_schema": "pg_catalog",
+                "udt_name": "numeric",
+                "character_max_length": null,
+                "numeric_precision": 12,
+                "numeric_scale": 2,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "faturas_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "faturas_numero_unique",
+              "columns": [
+                "numero"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "check",
+              "name": "faturas_valor_chk",
+              "expression": "CHECK (valor_total >= 0::numeric)"
+            },
+            {
+              "kind": "check",
+              "name": "faturas_vencimento_chk",
+              "expression": "CHECK (data_vencimento >= data_emissao)"
+            },
+            {
+              "kind": "foreign_key",
+              "name": "faturas_cotacao_id_fkey",
+              "columns": [
+                "cotacao_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "cotacoes",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "foreign_key",
+              "name": "faturas_responsavel_id_fkey",
+              "columns": [
+                "responsavel_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "usuarios",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "faturas_numero_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX faturas_numero_unique ON crm.faturas USING btree (numero)"
+            },
+            {
+              "name": "faturas_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX faturas_pkey ON crm.faturas USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "fontes_lead",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "nome",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "descricao",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "ativo",
+              "column_type": {
+                "data_type": "boolean",
+                "udt_schema": "pg_catalog",
+                "udt_name": "bool",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "true",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "data_criacao",
+              "column_type": {
+                "data_type": "timestamp with time zone",
+                "udt_schema": "pg_catalog",
+                "udt_name": "timestamptz",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "now()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "fontes_lead_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "fontes_lead_nome_unique",
+              "columns": [
+                "nome"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "fontes_lead_nome_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX fontes_lead_nome_unique ON crm.fontes_lead USING btree (nome)"
+            },
+            {
+              "name": "fontes_lead_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX fontes_lead_pkey ON crm.fontes_lead USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "funis",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "nome",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "descricao",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "ativo",
+              "column_type": {
+                "data_type": "boolean",
+                "udt_schema": "pg_catalog",
+                "udt_name": "bool",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "true",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "data_criacao",
+              "column_type": {
+                "data_type": "timestamp with time zone",
+                "udt_schema": "pg_catalog",
+                "udt_name": "timestamptz",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "now()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "funis_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "funis_nome_unique",
+              "columns": [
+                "nome"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "funis_nome_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX funis_nome_unique ON crm.funis USING btree (nome)"
+            },
+            {
+              "name": "funis_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX funis_pkey ON crm.funis USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "itens_cotacao",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "cotacao_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "produto_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "quantidade",
+              "column_type": {
+                "data_type": "integer",
+                "udt_schema": "pg_catalog",
+                "udt_name": "int4",
+                "character_max_length": null,
+                "numeric_precision": 32,
+                "numeric_scale": 0,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "preco_unitario",
+              "column_type": {
+                "data_type": "numeric(12,2)",
+                "udt_schema": "pg_catalog",
+                "udt_name": "numeric",
+                "character_max_length": null,
+                "numeric_precision": 12,
+                "numeric_scale": 2,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 6,
+              "name": "desconto_percentual",
+              "column_type": {
+                "data_type": "numeric(5,2)",
+                "udt_schema": "pg_catalog",
+                "udt_name": "numeric",
+                "character_max_length": null,
+                "numeric_precision": 5,
+                "numeric_scale": 2,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "0",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "itens_cotacao_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "itens_cotacao_unique",
+              "columns": [
+                "cotacao_id",
+                "produto_id"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "check",
+              "name": "itens_cotacao_desconto_chk",
+              "expression": "CHECK (desconto_percentual >= 0::numeric AND desconto_percentual <= 100::numeric)"
+            },
+            {
+              "kind": "check",
+              "name": "itens_cotacao_preco_chk",
+              "expression": "CHECK (preco_unitario >= 0::numeric)"
+            },
+            {
+              "kind": "check",
+              "name": "itens_cotacao_quantidade_chk",
+              "expression": "CHECK (quantidade > 0)"
+            },
+            {
+              "kind": "foreign_key",
+              "name": "itens_cotacao_cotacao_id_fkey",
+              "columns": [
+                "cotacao_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "cotacoes",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "cascade",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "foreign_key",
+              "name": "itens_cotacao_produto_id_fkey",
+              "columns": [
+                "produto_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "produtos",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "itens_cotacao_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX itens_cotacao_pkey ON crm.itens_cotacao USING btree (id)"
+            },
+            {
+              "name": "itens_cotacao_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX itens_cotacao_unique ON crm.itens_cotacao USING btree (cotacao_id, produto_id)"
+            }
+          ]
+        },
+        {
+          "name": "itens_fatura",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "fatura_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "produto_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "quantidade",
+              "column_type": {
+                "data_type": "integer",
+                "udt_schema": "pg_catalog",
+                "udt_name": "int4",
+                "character_max_length": null,
+                "numeric_precision": 32,
+                "numeric_scale": 0,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "preco_unitario",
+              "column_type": {
+                "data_type": "numeric(12,2)",
+                "udt_schema": "pg_catalog",
+                "udt_name": "numeric",
+                "character_max_length": null,
+                "numeric_precision": 12,
+                "numeric_scale": 2,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "itens_fatura_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "itens_fatura_unique",
+              "columns": [
+                "fatura_id",
+                "produto_id"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "check",
+              "name": "itens_fatura_preco_chk",
+              "expression": "CHECK (preco_unitario >= 0::numeric)"
+            },
+            {
+              "kind": "check",
+              "name": "itens_fatura_quantidade_chk",
+              "expression": "CHECK (quantidade > 0)"
+            },
+            {
+              "kind": "foreign_key",
+              "name": "itens_fatura_fatura_id_fkey",
+              "columns": [
+                "fatura_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "faturas",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "cascade",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "foreign_key",
+              "name": "itens_fatura_produto_id_fkey",
+              "columns": [
+                "produto_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "produtos",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "itens_fatura_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX itens_fatura_pkey ON crm.itens_fatura USING btree (id)"
+            },
+            {
+              "name": "itens_fatura_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX itens_fatura_unique ON crm.itens_fatura USING btree (fatura_id, produto_id)"
+            }
+          ]
+        },
+        {
+          "name": "itens_lista_precos",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "lista_precos_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "produto_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "preco",
+              "column_type": {
+                "data_type": "numeric(12,2)",
+                "udt_schema": "pg_catalog",
+                "udt_name": "numeric",
+                "character_max_length": null,
+                "numeric_precision": 12,
+                "numeric_scale": 2,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "itens_lista_precos_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "itens_lista_precos_unique",
+              "columns": [
+                "lista_precos_id",
+                "produto_id"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "check",
+              "name": "itens_lista_precos_preco_chk",
+              "expression": "CHECK (preco >= 0::numeric)"
+            },
+            {
+              "kind": "foreign_key",
+              "name": "itens_lista_precos_lista_precos_id_fkey",
+              "columns": [
+                "lista_precos_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "listas_precos",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "cascade",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "foreign_key",
+              "name": "itens_lista_precos_produto_id_fkey",
+              "columns": [
+                "produto_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "produtos",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "itens_lista_precos_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX itens_lista_precos_pkey ON crm.itens_lista_precos USING btree (id)"
+            },
+            {
+              "name": "itens_lista_precos_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX itens_lista_precos_unique ON crm.itens_lista_precos USING btree (lista_precos_id, produto_id)"
+            }
+          ]
+        },
+        {
+          "name": "leads",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "fonte_lead_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "contato_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "empresa_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "responsavel_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 6,
+              "name": "status",
+              "column_type": {
+                "data_type": "crm.status_lead",
+                "udt_schema": "crm",
+                "udt_name": "status_lead",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "'novo'::crm.status_lead",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 7,
+              "name": "score",
+              "column_type": {
+                "data_type": "integer",
+                "udt_schema": "pg_catalog",
+                "udt_name": "int4",
+                "character_max_length": null,
+                "numeric_precision": 32,
+                "numeric_scale": 0,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "0",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 8,
+              "name": "data_criacao",
+              "column_type": {
+                "data_type": "timestamp with time zone",
+                "udt_schema": "pg_catalog",
+                "udt_name": "timestamptz",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "now()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 9,
+              "name": "data_qualificacao",
+              "column_type": {
+                "data_type": "timestamp with time zone",
+                "udt_schema": "pg_catalog",
+                "udt_name": "timestamptz",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "leads_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "check",
+              "name": "leads_qualificacao_chk",
+              "expression": "CHECK (data_qualificacao IS NULL OR data_qualificacao >= data_criacao)"
+            },
+            {
+              "kind": "check",
+              "name": "leads_score_chk",
+              "expression": "CHECK (score >= 0 AND score <= 100)"
+            },
+            {
+              "kind": "foreign_key",
+              "name": "leads_contato_id_fkey",
+              "columns": [
+                "contato_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "contatos",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "foreign_key",
+              "name": "leads_empresa_id_fkey",
+              "columns": [
+                "empresa_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "empresas",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "foreign_key",
+              "name": "leads_fonte_lead_id_fkey",
+              "columns": [
+                "fonte_lead_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "fontes_lead",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "foreign_key",
+              "name": "leads_responsavel_id_fkey",
+              "columns": [
+                "responsavel_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "usuarios",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "leads_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX leads_pkey ON crm.leads USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "listas_precos",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "nome",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "moeda",
+              "column_type": {
+                "data_type": "character(3)",
+                "udt_schema": "pg_catalog",
+                "udt_name": "bpchar",
+                "character_max_length": 3,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "'BRL'::bpchar",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "ativo",
+              "column_type": {
+                "data_type": "boolean",
+                "udt_schema": "pg_catalog",
+                "udt_name": "bool",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "true",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "data_inicio",
+              "column_type": {
+                "data_type": "date",
+                "udt_schema": "pg_catalog",
+                "udt_name": "date",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 6,
+              "name": "data_fim",
+              "column_type": {
+                "data_type": "date",
+                "udt_schema": "pg_catalog",
+                "udt_name": "date",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "listas_precos_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "listas_precos_nome_unique",
+              "columns": [
+                "nome"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "check",
+              "name": "listas_precos_periodo_chk",
+              "expression": "CHECK (data_fim IS NULL OR data_fim >= data_inicio)"
+            }
+          ],
+          "indexes": [
+            {
+              "name": "listas_precos_nome_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX listas_precos_nome_unique ON crm.listas_precos USING btree (nome)"
+            },
+            {
+              "name": "listas_precos_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX listas_precos_pkey ON crm.listas_precos USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "oportunidades",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "empresa_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "contato_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "etapa_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "responsavel_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 6,
+              "name": "titulo",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 7,
+              "name": "valor_estimado",
+              "column_type": {
+                "data_type": "numeric(12,2)",
+                "udt_schema": "pg_catalog",
+                "udt_name": "numeric",
+                "character_max_length": null,
+                "numeric_precision": 12,
+                "numeric_scale": 2,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 8,
+              "name": "status",
+              "column_type": {
+                "data_type": "crm.status_oportunidade",
+                "udt_schema": "crm",
+                "udt_name": "status_oportunidade",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "'aberta'::crm.status_oportunidade",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 9,
+              "name": "data_abertura",
+              "column_type": {
+                "data_type": "date",
+                "udt_schema": "pg_catalog",
+                "udt_name": "date",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "CURRENT_DATE",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 10,
+              "name": "data_fechamento",
+              "column_type": {
+                "data_type": "date",
+                "udt_schema": "pg_catalog",
+                "udt_name": "date",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "oportunidades_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "check",
+              "name": "oportunidades_fechamento_chk",
+              "expression": "CHECK (data_fechamento IS NULL OR data_fechamento >= data_abertura)"
+            },
+            {
+              "kind": "check",
+              "name": "oportunidades_valor_chk",
+              "expression": "CHECK (valor_estimado >= 0::numeric)"
+            },
+            {
+              "kind": "foreign_key",
+              "name": "oportunidades_contato_id_fkey",
+              "columns": [
+                "contato_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "contatos",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "foreign_key",
+              "name": "oportunidades_empresa_id_fkey",
+              "columns": [
+                "empresa_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "empresas",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "foreign_key",
+              "name": "oportunidades_etapa_id_fkey",
+              "columns": [
+                "etapa_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "etapas_funil",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "foreign_key",
+              "name": "oportunidades_responsavel_id_fkey",
+              "columns": [
+                "responsavel_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "usuarios",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "no_action",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "oportunidades_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX oportunidades_pkey ON crm.oportunidades USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "pagamentos",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "fatura_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "valor",
+              "column_type": {
+                "data_type": "numeric(12,2)",
+                "udt_schema": "pg_catalog",
+                "udt_name": "numeric",
+                "character_max_length": null,
+                "numeric_precision": 12,
+                "numeric_scale": 2,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "data_pagamento",
+              "column_type": {
+                "data_type": "date",
+                "udt_schema": "pg_catalog",
+                "udt_name": "date",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "status",
+              "column_type": {
+                "data_type": "crm.status_pagamento",
+                "udt_schema": "crm",
+                "udt_name": "status_pagamento",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "'pendente'::crm.status_pagamento",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 6,
+              "name": "metodo",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "pagamentos_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "check",
+              "name": "pagamentos_valor_chk",
+              "expression": "CHECK (valor > 0::numeric)"
+            },
+            {
+              "kind": "foreign_key",
+              "name": "pagamentos_fatura_id_fkey",
+              "columns": [
+                "fatura_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "faturas",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "cascade",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "pagamentos_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX pagamentos_pkey ON crm.pagamentos USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "produtos",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "sku",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "nome",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "descricao",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "ativo",
+              "column_type": {
+                "data_type": "boolean",
+                "udt_schema": "pg_catalog",
+                "udt_name": "bool",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "true",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 6,
+              "name": "preco_base",
+              "column_type": {
+                "data_type": "numeric(12,2)",
+                "udt_schema": "pg_catalog",
+                "udt_name": "numeric",
+                "character_max_length": null,
+                "numeric_precision": 12,
+                "numeric_scale": 2,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 7,
+              "name": "data_criacao",
+              "column_type": {
+                "data_type": "timestamp with time zone",
+                "udt_schema": "pg_catalog",
+                "udt_name": "timestamptz",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "now()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "produtos_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "produtos_sku_unique",
+              "columns": [
+                "sku"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "check",
+              "name": "produtos_preco_chk",
+              "expression": "CHECK (preco_base >= 0::numeric)"
+            }
+          ],
+          "indexes": [
+            {
+              "name": "produtos_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX produtos_pkey ON crm.produtos USING btree (id)"
+            },
+            {
+              "name": "produtos_sku_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX produtos_sku_unique ON crm.produtos USING btree (sku)"
+            }
+          ]
+        },
+        {
+          "name": "reunioes",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "atividade_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "local",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "link_reuniao",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "duracao_minutos",
+              "column_type": {
+                "data_type": "integer",
+                "udt_schema": "pg_catalog",
+                "udt_name": "int4",
+                "character_max_length": null,
+                "numeric_precision": 32,
+                "numeric_scale": 0,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "reunioes_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "reunioes_atividade_unique",
+              "columns": [
+                "atividade_id"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "check",
+              "name": "reunioes_duracao_chk",
+              "expression": "CHECK (duracao_minutos > 0)"
+            },
+            {
+              "kind": "foreign_key",
+              "name": "reunioes_atividade_id_fkey",
+              "columns": [
+                "atividade_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "atividades",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "cascade",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "reunioes_atividade_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX reunioes_atividade_unique ON crm.reunioes USING btree (atividade_id)"
+            },
+            {
+              "name": "reunioes_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX reunioes_pkey ON crm.reunioes USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "tarefas",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "atividade_id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "status",
+              "column_type": {
+                "data_type": "crm.status_tarefa",
+                "udt_schema": "crm",
+                "udt_name": "status_tarefa",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "'aberta'::crm.status_tarefa",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "prioridade",
+              "column_type": {
+                "data_type": "integer",
+                "udt_schema": "pg_catalog",
+                "udt_name": "int4",
+                "character_max_length": null,
+                "numeric_precision": 32,
+                "numeric_scale": 0,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "data_limite",
+              "column_type": {
+                "data_type": "date",
+                "udt_schema": "pg_catalog",
+                "udt_name": "date",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "tarefas_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "tarefas_atividade_unique",
+              "columns": [
+                "atividade_id"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "check",
+              "name": "tarefas_data_limite_chk",
+              "expression": "CHECK (data_limite IS NULL OR data_limite >= CURRENT_DATE)"
+            },
+            {
+              "kind": "check",
+              "name": "tarefas_prioridade_chk",
+              "expression": "CHECK (prioridade >= 1 AND prioridade <= 5)"
+            },
+            {
+              "kind": "foreign_key",
+              "name": "tarefas_atividade_id_fkey",
+              "columns": [
+                "atividade_id"
+              ],
+              "referenced_schema": "crm",
+              "referenced_table": "atividades",
+              "referenced_columns": [
+                "id"
+              ],
+              "on_update": "no_action",
+              "on_delete": "cascade",
+              "match_type": "simple",
+              "is_deferrable": false,
+              "initially_deferred": false
+            }
+          ],
+          "indexes": [
+            {
+              "name": "tarefas_atividade_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX tarefas_atividade_unique ON crm.tarefas USING btree (atividade_id)"
+            },
+            {
+              "name": "tarefas_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX tarefas_pkey ON crm.tarefas USING btree (id)"
+            }
+          ]
+        },
+        {
+          "name": "usuarios",
+          "kind": "table",
+          "comment": null,
+          "columns": [
+            {
+              "ordinal_position": 1,
+              "name": "id",
+              "column_type": {
+                "data_type": "uuid",
+                "udt_schema": "pg_catalog",
+                "udt_name": "uuid",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "gen_random_uuid()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 2,
+              "name": "nome",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 3,
+              "name": "email",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 4,
+              "name": "telefone",
+              "column_type": {
+                "data_type": "text",
+                "udt_schema": "pg_catalog",
+                "udt_name": "text",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": true,
+              "default": null,
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 5,
+              "name": "ativo",
+              "column_type": {
+                "data_type": "boolean",
+                "udt_schema": "pg_catalog",
+                "udt_name": "bool",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "true",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 6,
+              "name": "data_criacao",
+              "column_type": {
+                "data_type": "timestamp with time zone",
+                "udt_schema": "pg_catalog",
+                "udt_name": "timestamptz",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "now()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            },
+            {
+              "ordinal_position": 7,
+              "name": "data_atualizacao",
+              "column_type": {
+                "data_type": "timestamp with time zone",
+                "udt_schema": "pg_catalog",
+                "udt_name": "timestamptz",
+                "character_max_length": null,
+                "numeric_precision": null,
+                "numeric_scale": null,
+                "collation": null
+              },
+              "is_nullable": false,
+              "default": "now()",
+              "identity": null,
+              "generated": null,
+              "comment": null
+            }
+          ],
+          "constraints": [
+            {
+              "kind": "primary_key",
+              "name": "usuarios_pkey",
+              "columns": [
+                "id"
+              ]
+            },
+            {
+              "kind": "unique",
+              "name": "usuarios_email_unique",
+              "columns": [
+                "email"
+              ],
+              "is_deferrable": false,
+              "initially_deferred": false
+            },
+            {
+              "kind": "check",
+              "name": "usuarios_datas_chk",
+              "expression": "CHECK (data_atualizacao >= data_criacao)"
+            },
+            {
+              "kind": "check",
+              "name": "usuarios_email_chk",
+              "expression": "CHECK (POSITION(('@'::text) IN (email)) > 1)"
+            }
+          ],
+          "indexes": [
+            {
+              "name": "usuarios_email_unique",
+              "is_unique": true,
+              "is_primary": false,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX usuarios_email_unique ON crm.usuarios USING btree (email)"
+            },
+            {
+              "name": "usuarios_pkey",
+              "is_unique": true,
+              "is_primary": true,
+              "is_valid": true,
+              "method": "btree",
+              "definition": "CREATE UNIQUE INDEX usuarios_pkey ON crm.usuarios USING btree (id)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "public",
+      "tables": []
+    }
+  ],
+  "enums": [
+    {
+      "schema": "crm",
+      "name": "status_atividade",
+      "labels": [
+        "pendente",
+        "concluida",
+        "cancelada"
+      ]
+    },
+    {
+      "schema": "crm",
+      "name": "status_fatura",
+      "labels": [
+        "aberta",
+        "paga",
+        "cancelada"
+      ]
+    },
+    {
+      "schema": "crm",
+      "name": "status_lead",
+      "labels": [
+        "novo",
+        "qualificado",
+        "perdido"
+      ]
+    },
+    {
+      "schema": "crm",
+      "name": "status_oportunidade",
+      "labels": [
+        "aberta",
+        "ganha",
+        "perdida"
+      ]
+    },
+    {
+      "schema": "crm",
+      "name": "status_pagamento",
+      "labels": [
+        "pendente",
+        "confirmado",
+        "estornado"
+      ]
+    },
+    {
+      "schema": "crm",
+      "name": "status_tarefa",
+      "labels": [
+        "aberta",
+        "em_andamento",
+        "concluida",
+        "cancelada"
+      ]
+    }
+  ],
+  "schema_fingerprint": null
+}

@@ -54,9 +54,9 @@ fn build_adjacency(schema: &DatabaseSchema) -> BTreeMap<String, BTreeSet<String>
                     let referenced = format!("{}.{}", fk.referenced_schema, fk.referenced_table);
                     graph.entry(referenced.clone()).or_default();
                     graph
-                        .entry(table_key.clone())
+                        .entry(referenced)
                         .or_default()
-                        .insert(referenced);
+                        .insert(table_key.clone());
                 }
             }
         }
@@ -82,7 +82,13 @@ fn toposort(graph: &BTreeMap<String, BTreeSet<String>>) -> Result<Vec<String>, V
 
     let mut ready: BTreeSet<String> = indegree
         .iter()
-        .filter_map(|(node, count)| if *count == 0 { Some(node.clone()) } else { None })
+        .filter_map(|(node, count)| {
+            if *count == 0 {
+                Some(node.clone())
+            } else {
+                None
+            }
+        })
         .collect();
 
     let mut order = Vec::with_capacity(graph.len());
@@ -159,7 +165,7 @@ mod tests {
         };
 
         let schema = DatabaseSchema {
-            schema_version: "0.1".to_string(),
+            schema_version: "0.2".to_string(),
             engine: "postgres".to_string(),
             database: Some("db".to_string()),
             schemas: vec![Schema {
@@ -174,12 +180,18 @@ mod tests {
                 }],
             }],
             enums: Vec::new(),
-            fingerprint: None,
+            schema_fingerprint: None,
         };
 
         let report = build_fk_graph_report(&schema);
         assert!(report.topo_order.is_none());
-        assert!(report.cycle.as_ref().unwrap().contains(&"public.users".to_string()));
+        assert!(
+            report
+                .cycle
+                .as_ref()
+                .unwrap()
+                .contains(&"public.users".to_string())
+        );
     }
 
     #[test]
@@ -198,7 +210,7 @@ mod tests {
         };
 
         let schema = DatabaseSchema {
-            schema_version: "0.1".to_string(),
+            schema_version: "0.2".to_string(),
             engine: "postgres".to_string(),
             database: Some("db".to_string()),
             schemas: vec![Schema {
@@ -223,13 +235,19 @@ mod tests {
                 ],
             }],
             enums: Vec::new(),
-            fingerprint: None,
+            schema_fingerprint: None,
         };
 
         let report = build_fk_graph_report(&schema);
         let order = report.topo_order.expect("expected toposort");
-        let users_idx = order.iter().position(|item| item == "public.users").unwrap();
-        let orders_idx = order.iter().position(|item| item == "public.orders").unwrap();
+        let users_idx = order
+            .iter()
+            .position(|item| item == "public.users")
+            .unwrap();
+        let orders_idx = order
+            .iter()
+            .position(|item| item == "public.orders")
+            .unwrap();
         assert!(users_idx < orders_idx);
     }
 }
