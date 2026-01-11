@@ -1,0 +1,14 @@
+[package]
+name = "datalchemy-introspect"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+datalchemy-core = { path = "../datalchemy-core" }
+async-trait.workspace = true
+sqlx.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+tokio.workspace = true
+anyhow = "1.0.100"

@@ -1,247 +1,126 @@
-# datalchemy
+# datalchemy_structure.md — Estrutura atual do Datalchemy
 
-Objetivo: biblioteca Rust para **introspecção de schema do Postgres** (e, no futuro, geração/validação de dados sintéticos orientados por semântica).  
-Preferência: **usar `examples/`** para executáveis de demonstração.
+> Fonte de verdade para a organizacao atual do repositorio (workspace).  
+> Este documento descreve as pastas, crates e responsabilidades **como estao hoje**.
 
 ---
 
-## Estrutura de diretórios
+## 1) Visao geral (workspace)
 
 ```
 datalchemy/
-├─ Cargo.toml
-├─ README.md
-├─ LICENSE
-├─ .gitignore
-├─ src/
-│  ├─ lib.rs
-│  ├─ error.rs
-│  ├─ model/
-│  │  ├─ mod.rs
-│  │  ├─ schema.rs
-│  │  ├─ constraints.rs
-│  │  └─ types.rs
-│  ├─ introspect/
-│  │  ├─ mod.rs
-│  │  └─ postgres/
-│  │     ├─ mod.rs
-│  │     ├─ queries.rs
-│  │     └─ mapper.rs
-│  └─ utils/
-│     ├─ mod.rs
-│     └─ pg.rs
-├─ examples/
-│  ├─ introspect.rs
-│  └─ dump_json.rs
-└─ tests/
-   ├─ integration_introspect.rs
-   └─ fixtures/
-      └─ sql/
-         ├─ 001_schema.sql
-         └─ 002_data.sql
+├─ Cargo.toml                 # Workspace (membros e deps fixas)
+├─ Cargo.lock                 # Lockfile do workspace
+├─ README.md                  # Guia do projeto
+├─ AGENTS.md                  # Regras unificadas (PIT + legado valido)
+├─ datalchemy_structure.md    # Estrutura atual (este arquivo)
+├─ crates/
+│  ├─ datalchemy-core/        # Contratos do schema + validacao + redaction
+│  ├─ datalchemy-introspect/  # Adapters + queries (Postgres-first)
+│  ├─ datalchemy-cli/         # CLI e registry de runs
+│  ├─ datalchemy-eval/        # Metricas do schema
+│  ├─ datalchemy-plan/        # Stub (Plan 2+)
+│  └─ datalchemy-generate/    # Stub (Plan 2+)
+├─ fixtures/
+│  └─ sql/
+│     └─ postgres/            # Fixtures SQL para testes (schema + data)
+├─ docker/
+│  └─ compose.postgres.yml    # Postgres para testes de integracao
+├─ docs/                      # Documentacao adicional
+├─ evidence/                  # Evidencias por task/issue
+├─ tasks/                     # Tasks (issue_task_*.md, pr_task_*.md)
+├─ runs/                      # Artefatos gerados pelo CLI (gitignored)
+├─ target/                    # Build artifacts (gitignored)
+└─ schema.json                # Exemplo local/artefato (gitignored)
 ```
 
 ---
 
-## Responsabilidades
+## 2) Crates e responsabilidades
 
-### `src/lib.rs` — API pública da biblioteca
-Responsável por:
-- Exportar os tipos públicos (por exemplo `DatabaseSchema`, `Table`, `Column`, etc.).
-- Expor funções públicas e estáveis, ex.:
-  - `pub async fn introspect_postgres(pool: &PgPool, opts: IntrospectOptions) -> Result<DatabaseSchema>`
+### 2.1 `crates/datalchemy-core`
+**Responsavel por:**
+- Contratos canonicos do schema: `DatabaseSchema`, `Schema`, `Table`, `Column`.
+- Constraints: PK/FK/UNIQUE/CHECK e `Index`.
+- Tipos e metadados de coluna (identity, generated, enum).
+- Validacao interna (`validate_schema`).
+- Redaction de connection string.
+- Grafo de dependencias por FK (toposort/ciclo).
 
-Deve conter:
-- `pub use` reexportando structs e funções principais.
-- Documentação (`///`) do que é estável e do que é interno.
+**Arquivos principais**
+- `crates/datalchemy-core/src/schema.rs`
+- `crates/datalchemy-core/src/constraints.rs`
+- `crates/datalchemy-core/src/types.rs`
+- `crates/datalchemy-core/src/validation.rs`
+- `crates/datalchemy-core/src/redaction.rs`
+- `crates/datalchemy-core/src/graph.rs`
 
----
+### 2.2 `crates/datalchemy-introspect`
+**Responsavel por:**
+- Adapters de banco (Postgres-first).
+- Queries SQL concentradas em `postgres/queries.rs`.
+- Mapeamento e normalizacao de tipos/constraints.
 
-### `src/error.rs` — Erros e Result
-Responsável por:
-- Centralizar erros da lib (conexão, query, parse, inconsistência).
-- Unificar retorno em algo do tipo:
-  - `pub type Result<T> = std::result::Result<T, Error>;`
-- Envelopar `sqlx::Error` e outros em `Error::Db(...)` etc.
+**Arquivos principais**
+- `crates/datalchemy-introspect/src/postgres/mod.rs`
+- `crates/datalchemy-introspect/src/postgres/queries.rs`
+- `crates/datalchemy-introspect/src/postgres/mapper.rs`
+- `crates/datalchemy-introspect/src/postgres/utils.rs`
+- `crates/datalchemy-introspect/examples/dump_json.rs`
 
----
+### 2.3 `crates/datalchemy-cli`
+**Responsavel por:**
+- CLI `datalchemy` com o comando `introspect`.
+- Registry de runs (`runs/<timestamp>__run_<id>/`).
+- Logs estruturados (`logs.ndjson`) e artefatos (`schema.json`, `config.json`, `metrics.json`).
 
-## Camada de domínio
+**Arquivos principais**
+- `crates/datalchemy-cli/src/main.rs`
+- `crates/datalchemy-cli/src/registry/run.rs`
+- `crates/datalchemy-cli/src/registry/logging.rs`
 
-### `src/model/mod.rs` — Módulo raiz do modelo
-Responsável por:
-- Reexportar submódulos do modelo.
-- Ser a “porta de entrada” para `schema.rs`, `constraints.rs`, `types.rs`.
+### 2.4 `crates/datalchemy-eval`
+**Responsavel por:**
+- Metricas do schema (contagens, cobertura, grafo de FK).
 
----
+**Arquivos principais**
+- `crates/datalchemy-eval/src/schema_metrics.rs`
 
-### `src/model/schema.rs` — Estrutura do schema
-Responsável por:
-- Definir structs que descrevem o schema.
-- Exemplos:
-  - `DatabaseSchema { schemas: BTreeMap<String, Schema> }`
-  - `Schema { tables: BTreeMap<String, Table> }`
-  - `Table { columns, primary_key, ... }`
-- Garantir consistência interna (ex.: ordem de colunas, nomes, invariantes simples).
+### 2.5 `crates/datalchemy-plan` (stub)
+**Responsavel por:**
+- Contratos e validacao de `plan.json` (Plan 2+).
 
-Decisões:
-- Preferir `BTreeMap` para output determinístico.
-- Colocar IDs/oid do Postgres como **opcional** e separado (evitar acoplar o modelo ao SGBD).
-
----
-
-### `src/model/constraints.rs` — Constraints e relacionamentos
-Responsável por:
-- Tipos de constraint:
-  - PK, FK, UNIQUE, CHECK
-- Regras que vão ser críticas no futuro para geração sintética consistente:
-  - integridade referencial
-  - ranges/expressões
-  - deferrable/deferred
-- Representar ações de FK como enums (mais seguro):
-  - `enum FkAction { NoAction, Restrict, Cascade, SetNull, SetDefault, Unknown }`
-
----
-
-### `src/model/types.rs` — Tipos e metadados de coluna
-Responsável por:
-- Tipo “amigável” e metadados úteis:
-  - `data_type` (formatado), `udt_schema`, `udt_name`
-  - nullability, default, identity, generated, collation
-- Modelar enums:
-  - `EnumType { schema, name, labels }`
-- (Futuro) mapear para um type-system próprio (ex.: `DataType::Int`, `DataType::Text`, `DataType::Enum(...)`).
+### 2.6 `crates/datalchemy-generate` (stub)
+**Responsavel por:**
+- Engines de geracao (Plan 2+).
 
 ---
 
-## Camada de introspecção (Postgres-first)
+## 3) Fixtures e testes
 
-### `src/introspect/mod.rs` — Traits e opções genéricas
-Responsável por:
-- Definir traits/interfaces:
-  - `trait Introspector { async fn introspect(&self) -> Result<DatabaseSchema>; }`
-- Definir `IntrospectOptions`:
-  - schemas a incluir/excluir
-  - incluir views? materialized views?
-  - incluir comentários?
-  - incluir índices?
-  - etc.
+### 3.1 Fixtures
+- `fixtures/sql/postgres/001_schema.sql`
+- `fixtures/sql/postgres/002_data.sql`
+
+### 3.2 Docker
+- `docker/compose.postgres.yml` sobe o Postgres para testes de integracao.
 
 ---
 
-### `src/introspect/postgres/mod.rs` — Introspector do Postgres
-Responsável por:
-- Implementar o introspector do Postgres.
-- Expor entrypoints internos:
-  - `pub async fn introspect(pool: &PgPool, opts: &IntrospectOptions) -> Result<DatabaseSchema>`
+## 4) Artefatos de execucao
+
+### 4.1 `runs/`
+Cada execucao do CLI gera:
+- `schema.json`
+- `config.json` (connection redigida)
+- `logs.ndjson`
+- `metrics.json`
 
 ---
 
-### `src/introspect/postgres/queries.rs` — SQL
-Responsável por:
-- Conter *somente* strings SQL e funções que chamam `sqlx::query!`.
-- Uma função por query, ex.:
-  - `list_schemas(...)`
-  - `list_tables_in_schema(...)`
-  - `list_columns(...)`
-  - `list_primary_key(...)`
-  - `list_foreign_keys(...)`
-  - `list_unique_constraints(...)`
-  - `list_check_constraints(...)`
-  - `list_indexes(...)`
-  - `list_enums(...)`
+## 5) Convenções importantes
 
-Boas práticas:
-- **Nunca repetir aliases** (o macro do SQLx quebra).
-- Normalizar campos `char` do catálogo:
-  - `relkind`, `confdeltype`, etc. chegam como `i8` — converter em enums/strings no Rust
-  - `attidentity` converter para texto no SQL (ALWAYS/BY DEFAULT) para simplificar.
-- Preferir `pg_catalog` para constraints/índices, e `information_schema` apenas para campos mais padronizados quando útil.
-
----
-
-### `src/introspect/postgres/mapper.rs` — Conversões e normalização
-Responsável por:
-- Converter tipos crus do `sqlx::query!` (record structs) para o modelo:
-  - char codes (`i8`) → enums/strings
-  - arrays → `Vec<String>`
-- Regras de normalização:
-  - ordenar colunas por `attnum`
-  - manter ordem do `unnest(... with ordinality)`
-  - filtrar schemas do sistema por default
-
----
-
-## Utilidades
-
-### `src/utils/mod.rs`
-- Reexports e helpers usados por mais de um módulo.
-
-### `src/utils/pg.rs`
-Responsável por:
-- Helpers específicos do Postgres:
-  - conversões de códigos para enums (FK actions, match types, relkind)
-  - funções pequenas para lidar com `i8` → `char` com segurança
-
----
-
-## `examples/` — demos e “binários” de uso
-Objetivo: permitir testar a lib sem criar `src/bin`.
-
-### `examples/introspect.rs`
-Responsável por:
-- Conectar no DB via `DATABASE_URL`
-- Chamar a API pública da lib
-- Mostrar resultado
-
-### `examples/dump_json.rs`
-Responsável por:
-- Idem, mas imprime JSON completo (para `> schema.json`)
-
-Comandos:
-```bash
-cargo run --release --example introspect
-cargo run --release --example dump_json > schema.json
-```
-
----
-
-## `tests/` — testes de integração
-Responsável por:
-- Subir Postgres via Docker e aplicar fixtures SQL.
-- Rodar introspecção e validar invariantes:
-  - PK/FK detectadas
-  - CHECKs presentes
-  - enums capturados
-  - índices retornados
-- Garantir que output é determinístico.
-
----
-
-## API pública sugerida
-
-### Tipos
-- `DatabaseSchema`, `Schema`, `Table`, `Column`, `PrimaryKey`, `ForeignKey`, `UniqueConstraint`, `CheckConstraint`, `Index`, `EnumType`
-- `IntrospectOptions` (com defaults sensatos)
-
-### Funções
-- `pub async fn introspect_postgres(pool: &sqlx::PgPool) -> Result<DatabaseSchema>`
-- `pub async fn introspect_postgres_with_options(pool: &sqlx::PgPool, opts: IntrospectOptions) -> Result<DatabaseSchema>`
-
-### Erros
-- `Error` com variantes:
-  - `Db(sqlx::Error)`
-  - `InvalidSchema(String)` (quando invariantes falham)
-  - `Unsupported(String)` (quando algo não for suportado ainda)
-  - `Other(anyhow::Error)` (opcional)
-
----
-
-## Decisões de design
-- Output determinístico (`BTreeMap`, ordenação estável).
-- Evitar acoplamento precoce ao Postgres nos types públicos (mas ok ter módulos internos Postgres).
-- Normalizar `char` codes e representar ações (FK) como enums.
-- Manter SQL isolado em `queries.rs` para facilitar manutenção.
-- `examples/` como “binários de referência” (sem `src/bin`).
-
----
+- Sem `src/bin/`. Executaveis ficam em `examples/` (introspect) e no crate CLI.
+- SQL de Postgres centralizado em `crates/datalchemy-introspect/src/postgres/queries.rs`.
+- Output deterministico: ordenacao explicita em colecoes.
+- Nada de `unwrap()`/`expect()` em caminhos de producao.

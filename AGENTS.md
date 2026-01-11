@@ -1,185 +1,150 @@
-# Regras no projeto `datalchemy`
+# AGENTS.md — Datalchemy (PIT + legado valido)
 
-Este arquivo define **regras, padrões e critérios de aceitação** para quem for implementar mudanças no repositório `datalchemy`.
-
-> O `datalchemy_structure.md` é o **roadmap/arquitetura alvo**.
-> Este `AGENTS.md` é o **playbook de execução**: como mexer no repo sem bagunçar.
-
----
-
-## 1) Objetivo do projeto
-
-- Biblioteca Rust para **introspecção de schema do Postgres** com output determinístico.
-- O resultado deve capturar, no mínimo:
-  - schemas do usuário (excluindo `pg_*` e `information_schema` por default)
-  - tabelas / views / matviews / foreign tables (configurável por opções)
-  - colunas com metadados relevantes (tipo, nullability, default, identity, generated, collation, comentários)
-  - constraints: PK, FK, UNIQUE, CHECK
-  - índices
-  - enums
-- A lib deve ser **robusta**, com **erros bem definidos** e **API pública estável**.
+> Este arquivo e a **fonte de verdade de contribuicao**.  
+> Ele mescla as regras do PIT com regras validas do legado.  
+> **Prioridade sempre do PIT**; o legado so entra quando nao conflita.
 
 ---
 
-## 2) Princípios gerais
+## 1) Visao do projeto (PIT)
 
-1. **Rust idiomático e seguro**: nada de `unsafe` a menos que seja absolutamente necessário (e documentado).
-2. **Determinismo**: output deve ser estável entre execuções (ordenar coleções e evitar `HashMap` no output).
-3. **Separação de responsabilidades**: não colocar SQL espalhado; não misturar modelo com queries.
-4. **Public API mínima**: exponha apenas o necessário; o resto fica interno.
-5. **Zero promessas que não cumprem**: se algo não está implementado, retornar `Error::Unsupported(...)` ou omitir com opção explícita.
-6. **Sem bin em `src/bin/`**: usar **`examples/`** para executáveis de demonstração.
-7. **Compatibilidade**: suportar Postgres moderno (>= 12 é um alvo razoável por causa de generated columns), mas não falhar feio em versões ligeiramente mais antigas—retornar degrade gracioso se necessário.
+O Datalchemy e uma biblioteca/ferramenta em Rust para:
+- Introspeccao de bancos relacionais (Postgres-first) -> `schema.json`.
+- Planejamento (`plan.json`) validado por contrato.
+- Geracao de dados sinteticos reprodutiveis.
+- Avaliacao e metricas.
 
----
+**Fonte de verdade do runtime**
+1. `schema.json`
+2. `plan.schema.json`
+3. `plan.json`
+4. `runs/<...>/` (logs + metrics)
 
-## 3) Regras de arquitetura (obrigatórias)
-
-### 3.1 Módulos e fronteiras
-- `src/model/*` é a **verdade** sobre como representamos schema em memória.
-- `src/introspect/postgres/*` contém **toda a lógica específica do Postgres**.
-- SQL deve ficar concentrado em `src/introspect/postgres/queries.rs`.
-- Conversões e normalizações (ex.: `i8` → enum) ficam em `mapper.rs` e/ou `utils/pg.rs`.
-
-### 3.2 Proibido
-- Proibido adicionar `main()` em `src/lib.rs`.
-- Proibido colocar executáveis fora de `examples/`
-- Proibido “engolir” erro com `unwrap()`/`expect()` em caminho de produção.
-- Proibido duplicar aliases no `SELECT` quando usar `sqlx::query!`.
+IAs sugerem, o core valida.
 
 ---
 
-## 4) Banco e introspecção (Postgres)
+## 2) Principios inegociaveis
 
-### 4.1 Fonte de verdade
-- Constraints e índices: preferir `pg_catalog` (`pg_constraint`, `pg_index`, `pg_class`, `pg_attribute` etc.).
-- Metadados padronizados: `information_schema.columns` pode complementar (ex. precision/scale/collation).
-
-### 4.2 Tipos chatos do catálogo (regra do `char`)
-Campos `char` no Postgres frequentemente chegam como **`i8`** via `sqlx::query!`.
-Deve:
-- Converter códigos (`relkind`, `confdeltype`, `confupdtype`, `confmatchtype`) para enums/strings no Rust.
-- Para `attidentity`, **normalizar para texto no SQL**:
-  - `'a'` → `ALWAYS`
-  - `'d'` → `BY DEFAULT`
-  - `''`  → `NULL`
-- Não usar casts inválidos (ex.: nunca tentar `attgenerated::pg_node_tree`).
-
-### 4.3 Ordem é crítica
-- PK/FK/UNIQUE: preservar ordem original usando `unnest(... WITH ORDINALITY)` e ordenar por `ordinality`.
-- Colunas: ordenar por `attnum`.
+1. **Determinismo**: output estavel e ordenado (sem HashMap no output).
+2. **Separacao de responsabilidades**: contratos separados de adapters/queries.
+3. **Rust seguro e idiomatico**: sem `unsafe` (a menos que documentado).
+4. **Sem promessas vazias**: o que nao e suportado deve ser `Unsupported`.
+5. **Privacidade/LGPD**: nunca logar credenciais ou dados reais.
+6. **Reprodutibilidade**: execucoes geram artefatos versionaveis.
 
 ---
 
-## 5) API pública (contrato)
+## 3) Protocolo de trabalho (IA e humano)
 
-A lib deve expor (no mínimo):
+Quando alterar algo, entregar sempre:
+1) **O que mudou** (lista curta)
+2) **Por que mudou**
+3) **Como validar** (comandos exatos)
+4) **Evidencia** (arquivo em `evidence/` com ID da task)
 
-- Tipos públicos: `DatabaseSchema`, `Schema`, `Table`, `Column`, `PrimaryKey`, `ForeignKey`,
-  `UniqueConstraint`, `CheckConstraint`, `Index`, `EnumType`
-- Opções:
-  - `IntrospectOptions` com defaults, ex.:
-    - `include_system_schemas: bool` (default false)
-    - `include_views: bool` (default true)
-    - `include_materialized_views: bool` (default true)
-    - `include_foreign_tables: bool` (default true)
-    - `include_indexes: bool` (default true)
-    - `include_comments: bool` (default true)
-    - `schemas: Option<Vec<String>>` (whitelist; default None)
-- Funções:
-  - `pub async fn introspect_postgres(pool: &sqlx::PgPool) -> Result<DatabaseSchema>`
-  - `pub async fn introspect_postgres_with_options(pool: &sqlx::PgPool, opts: IntrospectOptions) -> Result<DatabaseSchema>`
+> Sem evidencia, a mudanca e considerada incompleta.
 
-Se algo não for suportado por enquanto (ex.: domains, sequences), documentar e/ou retornar `Unsupported`.
+### 3.1 Regra de tasks (PIT)
+- **IA so atua quando existir** `tasks/issue_task_*.md` ou `tasks/pr_task_*.md`.
+- Fora disso, abrir task ou solicitar contexto.
 
 ---
 
-## 6) Erros e logging
+## 4) Estrutura e fronteiras (workspace)
 
-### 6.1 Erros
-- Deve existir `src/error.rs` com:
-  - `pub enum Error { Db(sqlx::Error), InvalidSchema(String), Unsupported(String), Other(anyhow::Error) }`
-  - `pub type Result<T> = std::result::Result<T, Error>;`
-- Converter `sqlx::Error` via `From` para `Error::Db`.
+- **`datalchemy-core`**: contratos do schema, validacao, redaction, grafo FK.
+- **`datalchemy-introspect`**: adapters e queries (Postgres-first).
+- **`datalchemy-cli`**: CLI e registry de runs.
+- **`datalchemy-eval`**: metricas do schema.
+- **`datalchemy-plan`/`datalchemy-generate`**: stubs Plan 2+.
 
-### 6.2 Logging
-- Preferir não logar por padrão na lib.
-- Se necessário, usar `tracing` como dependência opcional (feature flag), nunca `println!` em código de lib.
+SQL deve ficar concentrado em:
+- `crates/datalchemy-introspect/src/postgres/queries.rs`
 
----
-
-## 7) Qualidade do código (padrões)
-
-### 7.1 Estilo e lints
-Toda mudança deve manter:
-- `cargo fmt` limpo
-- `cargo clippy --all-targets -- -D warnings` passando (quando possível)
-
-### 7.2 Docs
-- Funções públicas e structs públicas devem ter doc comment `///` explicando:
-  - o que fazem
-  - invariantes
-  - limitações conhecidas
-  - exemplo mínimo de uso
-
-### 7.3 Sem gambiarras no SQL
-- `sqlx::query!` exige aliases consistentes com nomes válidos.
-- Evitar nomes reservados (se usar `def`, use `as "def!"` e acessar `r.def`).
-- Nunca repetir o mesmo alias no mesmo SELECT.
+Conversoes/normalizacoes em:
+- `crates/datalchemy-introspect/src/postgres/mapper.rs`
+- `crates/datalchemy-introspect/src/postgres/utils.rs`
 
 ---
 
-## 8) Exemplos (obrigatório)
+## 5) Regras Postgres (introspeccao)
 
-Deve manter **no mínimo** um exemplo funcional:
-
-- `examples/dump_json.rs`:
-  - lê `DATABASE_URL`
-  - chama `introspect_postgres(...)`
-  - imprime JSON no stdout
-
-Comando esperado:
-```bash
-cargo run --release --example dump_json > schema.json
-```
-
----
-
-## 9) Testes (quando adicionados)
-
-Quando mexer na introspecção, preferir adicionar/atualizar testes em `tests/`:
-
-- `tests/integration_introspect.rs`:
-  - cria schema de fixture
-  - roda introspecção
-  - valida: PK/FK/UNIQUE/CHECK, enums, colunas e tipos
-
-Se não houver infraestrutura de Postgres de teste ainda:
-- Pelo menos criar “unit tests” para conversores (ex.: char codes → enums).
+- Preferir `pg_catalog` para constraints/indices.
+- `information_schema.columns` pode complementar metadados.
+- Campos `char` do catalogo chegam como `i8` via `sqlx::query!`.
+  - Converter: `relkind`, `confdeltype`, `confupdtype`, `confmatchtype`.
+  - `attidentity` deve ser normalizado no SQL:
+    - `'a'` -> `ALWAYS`
+    - `'d'` -> `BY DEFAULT`
+    - `''` -> `NULL`
+- Ordem e critica:
+  - PK/FK/UNIQUE com `unnest(... WITH ORDINALITY)`.
+  - Colunas por `attnum`.
 
 ---
 
-## 10) Critérios de aceitação (Definition of Done)
+## 6) Proibicoes
 
-Uma alteração feita só é considerada pronta quando:
-
-- [ ] `cargo build` passa
-- [ ] `cargo test` passa (se houver testes)
-- [ ] `cargo fmt` aplicado
-- [ ] `cargo clippy` sem warnings relevantes (idealmente `-D warnings`)
-- [ ] `cargo run --release --example dump_json`
-- [ ] Output JSON contém, no mínimo:
-  - schemas/tables/columns
-  - PK/FK/UNIQUE/CHECK
-  - indexes
-  - enums
-- [ ] Nenhum `main()` em `lib.rs`
-- [ ] Sem `unwrap()`/`expect()` em código de lib
+- Proibido `main()` em lib.
+- Proibido `src/bin/` (use exemplos ou CLI no crate dedicado).
+- Proibido `unwrap()`/`expect()` em caminhos de producao.
+- Proibido repetir alias no mesmo `SELECT` quando usar `sqlx::query!`.
+- Proibido logs de segredos.
 
 ---
 
-## 11) Notas de contexto
-- Este projeto está começando **Postgres-first**. Não tentar suportar “todos os bancos”.
-- O arquivo `datalchemy_structure.md` é a visão/roadmap. Este arquivo é o rulebook.
-- Prioridade atual: **introspecção completa e confiável**.
+## 7) API e contratos
 
+- Tipos publicos minimos: `DatabaseSchema`, `Schema`, `Table`, `Column`,
+  `PrimaryKey`, `ForeignKey`, `UniqueConstraint`, `CheckConstraint`, `Index`, `EnumType`.
+- Opcoes de introspeccao (default seguras):
+  - `include_system_schemas`, `include_views`, `include_materialized_views`,
+    `include_foreign_tables`, `include_indexes`, `include_comments`, `schemas`.
+
+Qualquer mudanca no contrato `schema.json` deve:
+- Bump de `schema_version`.
+- Atualizar testes e evidencia.
+
+---
+
+## 8) Erros e logging
+
+- Erros com `thiserror`.
+- Logs com `tracing` (nunca `println!` em lib).
+- Redaction obrigatoria em `config.json` e `logs.ndjson`.
+
+---
+
+## 9) Qualidade
+
+- `cargo fmt` obrigatorio.
+- `cargo clippy --all-targets -- -D warnings` sem warnings.
+- Sem dependencias pesadas sem justificativa.
+- Versoes fixas no `Cargo.toml` (sem `^` ou `~`).
+
+---
+
+## 10) Exemplos obrigatorios
+
+- `crates/datalchemy-introspect/examples/dump_json.rs`
+  - le `DATABASE_URL`
+  - chama introspeccao
+  - imprime JSON
+
+---
+
+## 11) Testes
+
+- Unit tests: redaction, grafo FK, serializacao deterministica.
+- Integration tests: Postgres via Docker, valida PK/FK/UNIQUE/CHECK.
+- Fixtures em `fixtures/sql/postgres/`.
+
+---
+
+## 12) Checklist de PR
+
+- [ ] Testes atualizados
+- [ ] `cargo fmt` + `cargo clippy` ok
+- [ ] `evidence/<task_id>.md` atualizado
+- [ ] Contratos versionados quando necessario
