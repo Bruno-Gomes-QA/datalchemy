@@ -4,6 +4,7 @@
 - Implementado avaliador de datasets no `crates/datalchemy-eval` (loader CSV, validadores NOT NULL/PK/UNIQUE/FK/CHECK subset, `metrics.json` e `report.md`).
 - Adicionado exemplo `crates/datalchemy-eval/examples/evaluate_run.rs` para rodar a avaliacao em um run.
 - Atualizado `datalchemy_structure.md` com a nova responsabilidade do crate de avaliacao.
+- Criado guia end-to-end detalhado em `docs/end_to_end_postgres.md`.
 
 ## Por que mudou
 - Cumprir o Plan 5: validar dados gerados com metricas e relatorio deterministico, comparavel entre runs.
