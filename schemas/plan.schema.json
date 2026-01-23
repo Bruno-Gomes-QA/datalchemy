@@ -1,0 +1,367 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Plan",
+  "description": "Canonical plan definition for generation.",
+  "type": "object",
+  "required": [
+    "plan_version",
+    "rules",
+    "schema_ref",
+    "seed",
+    "targets"
+  ],
+  "properties": {
+    "options": {
+      "description": "Optional plan-level options.",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/PlanOptions"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "plan_version": {
+      "description": "Contract version for the plan format.",
+      "type": "string"
+    },
+    "rules": {
+      "description": "Rules that apply to tables/columns.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Rule"
+      }
+    },
+    "rules_unsupported": {
+      "description": "Unsupported rules recorded for future evolution.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/UnsupportedRule"
+      }
+    },
+    "schema_ref": {
+      "description": "Reference to the schema used when authoring the plan.",
+      "allOf": [
+        {
+          "$ref": "#/definitions/SchemaRef"
+        }
+      ]
+    },
+    "seed": {
+      "description": "Seed for reproducibility.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    },
+    "targets": {
+      "description": "Targets to generate.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/Target"
+      }
+    }
+  },
+  "definitions": {
+    "ColumnGenerator": {
+      "description": "Supported generators for MVP.",
+      "type": "string",
+      "enum": [
+        "uuid",
+        "email",
+        "name",
+        "int_range",
+        "date_range",
+        "regex"
+      ]
+    },
+    "ConstraintKind": {
+      "description": "Constraint categories that can be controlled by policy.",
+      "type": "string",
+      "enum": [
+        "check",
+        "unique",
+        "not_null",
+        "primary_key",
+        "foreign_key"
+      ]
+    },
+    "ConstraintMode": {
+      "description": "Policy for constraint handling.",
+      "type": "string",
+      "enum": [
+        "enforce",
+        "warn",
+        "ignore"
+      ]
+    },
+    "ForeignKeyMode": {
+      "description": "Foreign key strategy modes.",
+      "type": "string",
+      "enum": [
+        "respect",
+        "disable"
+      ]
+    },
+    "InsertOrder": {
+      "description": "Supported insert ordering strategies.",
+      "oneOf": [
+        {
+          "description": "Respect foreign-key topological ordering.",
+          "type": "string",
+          "enum": [
+            "fk_toposort"
+          ]
+        }
+      ]
+    },
+    "PlanOptions": {
+      "description": "Optional plan-level options (reserved for future use).",
+      "type": "object",
+      "properties": {
+        "allow_fk_disable": {
+          "description": "Allow disabling foreign-key enforcement.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        }
+      }
+    },
+    "Rule": {
+      "description": "Rule union for plan-level instructions.",
+      "oneOf": [
+        {
+          "description": "Provide a generator for a specific column.",
+          "type": "object",
+          "required": [
+            "column",
+            "generator",
+            "schema",
+            "table",
+            "type"
+          ],
+          "properties": {
+            "column": {
+              "type": "string"
+            },
+            "generator": {
+              "$ref": "#/definitions/ColumnGenerator"
+            },
+            "params": {
+              "description": "Generator parameters (shape depends on the generator)."
+            },
+            "schema": {
+              "type": "string"
+            },
+            "table": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "column_generator"
+              ]
+            }
+          }
+        },
+        {
+          "description": "Declare constraint handling policy for a table.",
+          "type": "object",
+          "required": [
+            "constraint",
+            "mode",
+            "schema",
+            "table",
+            "type"
+          ],
+          "properties": {
+            "constraint": {
+              "$ref": "#/definitions/ConstraintKind"
+            },
+            "mode": {
+              "$ref": "#/definitions/ConstraintMode"
+            },
+            "schema": {
+              "type": "string"
+            },
+            "table": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "constraint_policy"
+              ]
+            }
+          }
+        },
+        {
+          "description": "Configure how foreign keys are handled per table.",
+          "type": "object",
+          "required": [
+            "mode",
+            "schema",
+            "table",
+            "type"
+          ],
+          "properties": {
+            "mode": {
+              "$ref": "#/definitions/ForeignKeyMode"
+            },
+            "schema": {
+              "type": "string"
+            },
+            "table": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "foreign_key_strategy"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "RuleReference": {
+      "description": "Reference to schema/table/column for rules.",
+      "type": "object",
+      "required": [
+        "schema",
+        "table"
+      ],
+      "properties": {
+        "column": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "schema": {
+          "type": "string"
+        },
+        "table": {
+          "type": "string"
+        }
+      }
+    },
+    "SchemaRef": {
+      "description": "Reference to the schema used when the plan was authored.",
+      "type": "object",
+      "required": [
+        "engine",
+        "schema_version"
+      ],
+      "properties": {
+        "engine": {
+          "description": "Engine identifier (ex.: postgres).",
+          "type": "string"
+        },
+        "schema_fingerprint": {
+          "description": "Optional schema fingerprint to prevent drift.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "schema_version": {
+          "description": "Schema contract version expected by the plan.",
+          "type": "string"
+        }
+      }
+    },
+    "Target": {
+      "description": "A target table and expected row count.",
+      "type": "object",
+      "required": [
+        "rows",
+        "schema",
+        "table"
+      ],
+      "properties": {
+        "rows": {
+          "description": "Number of rows to generate.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0.0
+        },
+        "schema": {
+          "description": "Schema name (namespace) of the table.",
+          "type": "string"
+        },
+        "strategy": {
+          "description": "Optional strategy hints for generation.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/TargetStrategy"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "table": {
+          "description": "Table name within the schema.",
+          "type": "string"
+        }
+      }
+    },
+    "TargetStrategy": {
+      "description": "Optional strategy hints for a target.",
+      "type": "object",
+      "properties": {
+        "batch_size": {
+          "description": "Suggested batch size for inserts (future support).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0.0
+        },
+        "insert_order": {
+          "description": "Insert order strategy (future support).",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/InsertOrder"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "UnsupportedRule": {
+      "description": "Unsupported rule placeholder for future features.",
+      "type": "object",
+      "required": [
+        "description",
+        "reason"
+      ],
+      "properties": {
+        "description": {
+          "description": "Short description of the intent.",
+          "type": "string"
+        },
+        "reason": {
+          "description": "Reason why it is unsupported today.",
+          "type": "string"
+        },
+        "reference": {
+          "description": "Optional reference to a schema/table/column.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/RuleReference"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
