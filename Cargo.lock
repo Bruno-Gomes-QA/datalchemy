@@ -397,8 +397,15 @@ dependencies = [
 name = "datalchemy-eval"
 version = "0.1.0"
 dependencies = [
+ "chrono",
+ "csv",
  "datalchemy-core",
+ "datalchemy-generate",
+ "datalchemy-plan",
  "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "uuid",
 ]
 
 [[package]]

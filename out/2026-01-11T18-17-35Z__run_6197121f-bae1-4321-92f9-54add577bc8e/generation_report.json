@@ -1,0 +1,50 @@
+{
+  "run_id": "6197121f-bae1-4321-92f9-54add577bc8e",
+  "tables": [
+    {
+      "schema": "crm",
+      "table": "empresas",
+      "rows_requested": 200,
+      "rows_generated": 200,
+      "retries": 173
+    },
+    {
+      "schema": "crm",
+      "table": "contatos",
+      "rows_requested": 200,
+      "rows_generated": 200,
+      "retries": 0
+    },
+    {
+      "schema": "crm",
+      "table": "funis",
+      "rows_requested": 120,
+      "rows_generated": 120,
+      "retries": 0
+    },
+    {
+      "schema": "crm",
+      "table": "etapas_funil",
+      "rows_requested": 120,
+      "rows_generated": 120,
+      "retries": 0
+    },
+    {
+      "schema": "crm",
+      "table": "usuarios",
+      "rows_requested": 50,
+      "rows_generated": 50,
+      "retries": 65
+    },
+    {
+      "schema": "crm",
+      "table": "oportunidades",
+      "rows_requested": 120,
+      "rows_generated": 120,
+      "retries": 104
+    }
+  ],
+  "retries_total": 342,
+  "warnings": [],
+  "unsupported": []
+}

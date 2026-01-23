@@ -87,9 +87,13 @@ datalchemy/
 ### 2.4 `crates/datalchemy-eval`
 **Responsavel por:**
 - Metricas do schema (contagens, cobertura, grafo de FK).
+- Avaliacao de datasets (PK/FK/UNIQUE/NOT NULL/CHECK subset) + `metrics.json`/`report.md`.
 
 **Arquivos principais**
 - `crates/datalchemy-eval/src/schema_metrics.rs`
+- `crates/datalchemy-eval/src/engine.rs`
+- `crates/datalchemy-eval/src/metrics.rs`
+- `crates/datalchemy-eval/src/report.rs`
 
 ### 2.5 `crates/datalchemy-plan` (stub)
 **Responsavel por:**
