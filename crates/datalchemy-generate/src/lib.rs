@@ -1,7 +1,16 @@
-//! Generation engines (stub for PIT Plan 1).
+//! Rule-based data generation engine for Datalchemy (Plan 4).
+//!
+//! This crate consumes `schema.json` + `plan.json` to produce deterministic
+//! datasets (CSV) with constraint-aware generation.
 
-use serde::{Deserialize, Serialize};
+pub mod checks;
+pub mod engine;
+pub mod errors;
+pub mod generators;
+pub mod model;
+pub mod output;
+pub mod planner;
 
-/// Placeholder type until generators are implemented.
-#[derive(Debug, Default, Serialize, Deserialize)]
-pub struct GeneratorPlaceholder;
+pub use engine::{GenerationEngine, GenerationResult};
+pub use errors::GenerationError;
+pub use model::{GenerateOptions, GenerationReport, TableReport};

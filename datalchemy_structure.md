@@ -20,7 +20,7 @@ datalchemy/
 │  ├─ datalchemy-cli/         # CLI e registry de runs
 │  ├─ datalchemy-eval/        # Metricas do schema
 │  ├─ datalchemy-plan/        # Stub (Plan 2+)
-│  └─ datalchemy-generate/    # Stub (Plan 2+)
+│  └─ datalchemy-generate/    # Engine de geracao (Plan 4)
 ├─ fixtures/
 │  └─ sql/
 │     └─ postgres/            # Fixtures SQL para testes (schema + data)
@@ -31,6 +31,7 @@ datalchemy/
 ├─ scripts/                   # Scripts de infraestrutura/teste (ex.: postgres_docker.sh)
 ├─ docs/                      # Documentacao adicional
 ├─ schemas/                   # JSON Schema oficial do contrato
+├─ plans/                     # Exemplos de plan.json (Plan 3)
 ├─ evidence/                  # Evidencias por task/issue
 ├─ tasks/                     # Tasks (issue_task_*.md, pr_task_*.md)
 ├─ runs/                      # Artefatos gerados pelo CLI (gitignored)
@@ -92,11 +93,23 @@ datalchemy/
 
 ### 2.5 `crates/datalchemy-plan` (stub)
 **Responsavel por:**
-- Contratos e validacao de `plan.json` (Plan 2+).
+- Contrato do `plan.json`, JSON Schema e validacao schema-aware (Plan 3).
 
-### 2.6 `crates/datalchemy-generate` (stub)
+**Arquivos principais**
+- `crates/datalchemy-plan/src/model.rs`
+- `crates/datalchemy-plan/src/validate.rs`
+- `crates/datalchemy-plan/examples/emit_plan_json_schema.rs`
+- `crates/datalchemy-plan/examples/validate_plan.rs`
+
+### 2.6 `crates/datalchemy-generate`
 **Responsavel por:**
-- Engines de geracao (Plan 2+).
+- Engine de geracao deterministica (CSV) guiada por `schema.json` + `plan.json`.
+
+**Arquivos principais**
+- `crates/datalchemy-generate/src/engine.rs`
+- `crates/datalchemy-generate/src/generators/mod.rs`
+- `crates/datalchemy-generate/src/checks.rs`
+- `crates/datalchemy-generate/examples/generate_csv.rs`
 
 ---
 
@@ -112,6 +125,10 @@ datalchemy/
 - `docker/compose.postgres.yml` sobe o Postgres para testes de integracao.
 - Script recomendado: `scripts/postgres_docker.sh` (sobe o container e aplica fixtures).
 - Para novos bancos: `scripts/<db>_docker.sh` + `docker/compose.<db>.yml`.
+
+### 3.3 Plan (Plan 3)
+- `schemas/plan.schema.json` (JSON Schema oficial do plan).
+- `plans/examples/minimal.plan.json` (exemplo minimo valido).
 
 ---
 
