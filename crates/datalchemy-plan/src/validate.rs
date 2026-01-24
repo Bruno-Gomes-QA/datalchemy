@@ -6,8 +6,8 @@ use serde_json::Value;
 
 use crate::errors::{IssueSeverity, PlanError, ValidationIssue, ValidationReport};
 use crate::model::{
-    ColumnGenerator, ConstraintKind, ConstraintMode, ConstraintPolicyRule, ForeignKeyMode,
-    ForeignKeyStrategyRule, Plan, Rule, Target, UnsupportedRule,
+    ConstraintKind, ConstraintMode, ConstraintPolicyRule, ForeignKeyMode, ForeignKeyStrategyRule,
+    Plan, Rule, Target, UnsupportedRule,
 };
 
 /// Validated plan with accumulated warnings.
@@ -244,7 +244,7 @@ fn validate_targets(targets: &[Target], schema_index: &SchemaIndex, report: &mut
 }
 
 fn validate_rules(plan: &Plan, schema_index: &SchemaIndex, report: &mut ValidationReport) {
-    let mut column_generators: HashMap<String, ColumnGenerator> = HashMap::new();
+    let mut column_generators: HashMap<String, String> = HashMap::new();
     let mut constraint_policies: HashMap<String, ConstraintMode> = HashMap::new();
     let mut fk_policies: HashMap<String, ForeignKeyMode> = HashMap::new();
 
@@ -350,7 +350,7 @@ fn validate_column_generator_rule(
     rule: &crate::model::ColumnGeneratorRule,
     base_path: &str,
     schema_index: &SchemaIndex,
-    column_generators: &mut HashMap<String, ColumnGenerator>,
+    column_generators: &mut HashMap<String, String>,
     report: &mut ValidationReport,
 ) {
     let schema_name = rule.schema.as_str();
@@ -411,17 +411,56 @@ fn validate_column_generator_rule(
         column_generators.insert(key, rule.generator.clone());
     }
 
-    if !generator_compatible(&rule.generator, &column.column_type) {
-        report.push_error(ValidationIssue::new(
-            IssueSeverity::Error,
-            "incompatible_generator",
-            base_path.to_string(),
-            format!(
-                "generator '{:?}' is not compatible with column type '{}'",
-                rule.generator, column.column_type.data_type
-            ),
-            None,
-        ));
+    match generator_compatible(&rule.generator, &column.column_type) {
+        Some(true) => {}
+        Some(false) => {
+            report.push_error(ValidationIssue::new(
+                IssueSeverity::Error,
+                "incompatible_generator",
+                base_path.to_string(),
+                format!(
+                    "generator '{}' is not compatible with column type '{}'",
+                    rule.generator, column.column_type.data_type
+                ),
+                None,
+            ));
+        }
+        None => {
+            report.push_warning(ValidationIssue::new(
+                IssueSeverity::Warning,
+                "unknown_generator_id",
+                base_path.to_string(),
+                format!(
+                    "generator '{}' is not recognized by the validator",
+                    rule.generator
+                ),
+                Some("ensure the generator exists in datalchemy-generate".to_string()),
+            ));
+        }
+    }
+
+    let mut seen_transforms = HashSet::new();
+    for (idx, transform) in rule.transforms.iter().enumerate() {
+        let transform_id = transform.transform.as_str();
+        if transform_id.trim().is_empty() {
+            report.push_error(ValidationIssue::new(
+                IssueSeverity::Error,
+                "transform_empty_id",
+                format!("{base_path}/transforms/{idx}/transform"),
+                "transform id must be a non-empty string".to_string(),
+                None,
+            ));
+            continue;
+        }
+        if !seen_transforms.insert(transform_id) {
+            report.push_warning(ValidationIssue::new(
+                IssueSeverity::Warning,
+                "duplicate_transform",
+                format!("{base_path}/transforms/{idx}/transform"),
+                format!("duplicate transform '{}' for the same column", transform_id),
+                None,
+            ));
+        }
     }
 }
 
@@ -563,29 +602,48 @@ fn validate_foreign_key_strategy_rule(
     }
 }
 
-fn generator_compatible(generator: &ColumnGenerator, column_type: &ColumnType) -> bool {
+fn generator_compatible(generator: &str, column_type: &ColumnType) -> Option<bool> {
     let normalized = normalize_type(&column_type.data_type);
     let data_type = normalized.as_str();
-    match generator {
-        ColumnGenerator::Uuid => data_type == "uuid",
-        ColumnGenerator::Email | ColumnGenerator::Name | ColumnGenerator::Regex => {
-            matches!(
-                data_type,
-                "text" | "character varying" | "character" | "bpchar"
-            )
+    let is_text = matches!(
+        data_type,
+        "text" | "character varying" | "character" | "bpchar"
+    );
+    let is_numeric = matches!(data_type, "smallint" | "integer" | "bigint" | "numeric");
+    let is_float = matches!(data_type, "numeric" | "real" | "double precision");
+    let is_date = data_type == "date";
+    let is_time = matches!(data_type, "time without time zone" | "time with time zone");
+    let is_timestamp = matches!(
+        data_type,
+        "timestamp without time zone" | "timestamp with time zone"
+    );
+
+    let compatibility = match generator {
+        "primitive.uuid.v4" => data_type == "uuid",
+        "primitive.bool" => data_type == "boolean",
+        "primitive.int.range" | "primitive.int.sequence_hint" => is_numeric,
+        "primitive.float.range" | "primitive.decimal.numeric" | "semantic.br.money.brl" => {
+            is_numeric || is_float
         }
-        ColumnGenerator::IntRange => {
-            matches!(data_type, "smallint" | "integer" | "bigint" | "numeric")
-        }
-        ColumnGenerator::DateRange => matches!(
-            data_type,
-            "date"
-                | "timestamp without time zone"
-                | "timestamp with time zone"
-                | "time without time zone"
-                | "time with time zone"
-        ),
-    }
+        "primitive.text.pattern" | "primitive.text.lorem" => is_text,
+        "primitive.date.range" => is_date || is_timestamp,
+        "primitive.time.range" => is_time,
+        "primitive.timestamp.range" => is_timestamp || is_date,
+        "semantic.br.name"
+        | "semantic.br.email.safe"
+        | "semantic.br.phone"
+        | "semantic.br.cpf"
+        | "semantic.br.cnpj"
+        | "semantic.br.rg"
+        | "semantic.br.cep"
+        | "semantic.br.uf"
+        | "semantic.br.city"
+        | "semantic.br.address"
+        | "semantic.br.ip"
+        | "semantic.br.url" => is_text,
+        _ => return None,
+    };
+    Some(compatibility)
 }
 
 fn normalize_type(data_type: &str) -> String {

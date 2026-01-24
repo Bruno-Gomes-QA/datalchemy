@@ -15,3 +15,7 @@ serde_json.workspace = true
 thiserror.workspace = true
 uuid.workspace = true
 chrono.workspace = true
+hex = "0.4.3"
+rand_regex = "0.17.0"
+sha2 = "0.10.8"
+tracing.workspace = true

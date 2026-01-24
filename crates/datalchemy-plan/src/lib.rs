@@ -10,9 +10,9 @@ pub mod validate;
 
 pub use errors::{IssueSeverity, PlanError, ValidationIssue, ValidationReport};
 pub use model::{
-    ColumnGenerator, ColumnGeneratorRule, ConstraintKind, ConstraintMode, ConstraintPolicyRule,
-    ForeignKeyMode, ForeignKeyStrategyRule, InsertOrder, Plan, PlanOptions, Rule, RuleReference,
-    SchemaRef, Target, TargetStrategy, UnsupportedRule,
+    ColumnGeneratorRule, ConstraintKind, ConstraintMode, ConstraintPolicyRule, ForeignKeyMode,
+    ForeignKeyStrategyRule, InsertOrder, Plan, PlanOptions, Rule, RuleReference, SchemaRef, Target,
+    TargetStrategy, TransformRule, UnsupportedRule,
 };
 pub use schema::plan_json_schema;
 pub use validate::{

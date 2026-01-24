@@ -19,7 +19,7 @@ datalchemy/
 │  ├─ datalchemy-introspect/  # Adapters + queries (Postgres-first)
 │  ├─ datalchemy-cli/         # CLI e registry de runs
 │  ├─ datalchemy-eval/        # Metricas do schema
-│  ├─ datalchemy-plan/        # Stub (Plan 2+)
+│  ├─ datalchemy-plan/        # Contrato do plan + JSON Schema
 │  └─ datalchemy-generate/    # Engine de geracao (Plan 4)
 ├─ fixtures/
 │  └─ sql/
@@ -95,7 +95,7 @@ datalchemy/
 - `crates/datalchemy-eval/src/metrics.rs`
 - `crates/datalchemy-eval/src/report.rs`
 
-### 2.5 `crates/datalchemy-plan` (stub)
+### 2.5 `crates/datalchemy-plan`
 **Responsavel por:**
 - Contrato do `plan.json`, JSON Schema e validacao schema-aware (Plan 3).
 
@@ -108,12 +108,19 @@ datalchemy/
 ### 2.6 `crates/datalchemy-generate`
 **Responsavel por:**
 - Engine de geracao deterministica (CSV) guiada por `schema.json` + `plan.json`.
+- Registry de generators/transforms por ID (primitives, transforms, semantic).
+- Assets estaticos para pt-BR (nomes, cidades, ruas).
 
 **Arquivos principais**
 - `crates/datalchemy-generate/src/engine.rs`
 - `crates/datalchemy-generate/src/generators/mod.rs`
+- `crates/datalchemy-generate/src/generators/primitives/mod.rs`
+- `crates/datalchemy-generate/src/generators/transforms/mod.rs`
+- `crates/datalchemy-generate/src/generators/semantic/mod.rs`
+- `crates/datalchemy-generate/src/assets.rs`
 - `crates/datalchemy-generate/src/checks.rs`
 - `crates/datalchemy-generate/examples/generate_csv.rs`
+- `crates/datalchemy-generate/assets/pt_BR/`
 
 ---
 
@@ -133,6 +140,8 @@ datalchemy/
 ### 3.3 Plan (Plan 3)
 - `schemas/plan.schema.json` (JSON Schema oficial do plan).
 - `plans/examples/minimal.plan.json` (exemplo minimo valido).
+- `plans/examples/m2_primitives.plan.json` (primitives + transforms).
+- `plans/examples/m3_ptbr.plan.json` (pt-BR + masks).
 
 ---
 

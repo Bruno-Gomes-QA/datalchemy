@@ -1,0 +1,224 @@
+{
+  "plan_version": "0.1",
+  "seed": 13,
+  "schema_ref": {
+    "schema_version": "0.2",
+    "engine": "postgres"
+  },
+  "targets": [
+    {
+      "schema": "crm",
+      "table": "usuarios",
+      "rows": 20
+    },
+    {
+      "schema": "crm",
+      "table": "empresas",
+      "rows": 10
+    },
+    {
+      "schema": "crm",
+      "table": "contatos",
+      "rows": 30
+    },
+    {
+      "schema": "crm",
+      "table": "reunioes",
+      "rows": 10
+    },
+    {
+      "schema": "crm",
+      "table": "oportunidades",
+      "rows": 15
+    },
+    {
+      "schema": "crm",
+      "table": "atividades",
+      "rows": 12
+    }
+  ],
+  "rules": [
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "nome",
+      "generator": "semantic.br.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "email",
+      "generator": "semantic.br.email.safe",
+      "transforms": [
+        {
+          "transform": "transform.mask",
+          "params": {
+            "mode": "format_preserving"
+          }
+        }
+      ]
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "telefone",
+      "generator": "semantic.br.phone",
+      "transforms": [
+        {
+          "transform": "transform.mask",
+          "params": {
+            "mode": "redact"
+          }
+        }
+      ]
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "cnpj",
+      "generator": "semantic.br.cnpj",
+      "transforms": [
+        {
+          "transform": "transform.mask",
+          "params": {
+            "mode": "format_preserving"
+          }
+        }
+      ]
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "nome_fantasia",
+      "generator": "semantic.br.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "email",
+      "generator": "semantic.br.email.safe",
+      "transforms": [
+        {
+          "transform": "transform.mask",
+          "params": {
+            "mode": "format_preserving"
+          }
+        }
+      ]
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "telefone",
+      "generator": "semantic.br.phone",
+      "transforms": [
+        {
+          "transform": "transform.mask",
+          "params": {
+            "mode": "redact"
+          }
+        }
+      ]
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "site",
+      "generator": "semantic.br.url"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "nome",
+      "generator": "semantic.br.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "email",
+      "generator": "semantic.br.email.safe",
+      "transforms": [
+        {
+          "transform": "transform.mask",
+          "params": {
+            "mode": "format_preserving"
+          }
+        }
+      ]
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "telefone",
+      "generator": "semantic.br.phone",
+      "transforms": [
+        {
+          "transform": "transform.mask",
+          "params": {
+            "mode": "redact"
+          }
+        }
+      ]
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "reunioes",
+      "column": "local",
+      "generator": "semantic.br.address"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "reunioes",
+      "column": "link_reuniao",
+      "generator": "semantic.br.url"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "oportunidades",
+      "column": "valor_estimado",
+      "generator": "semantic.br.money.brl",
+      "params": {
+        "min": 1000.0,
+        "max": 75000.0
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "assunto",
+      "generator": "semantic.br.city"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "descricao",
+      "generator": "semantic.br.cep"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "tipo",
+      "generator": "semantic.br.uf"
+    }
+  ],
+  "options": {
+    "strict": false
+  }
+}

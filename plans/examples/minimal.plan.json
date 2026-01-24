@@ -28,28 +28,28 @@
       "schema": "crm",
       "table": "usuarios",
       "column": "id",
-      "generator": "uuid"
+      "generator": "primitive.uuid.v4"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "usuarios",
       "column": "email",
-      "generator": "email"
+      "generator": "semantic.br.email.safe"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "contatos",
       "column": "email",
-      "generator": "email"
+      "generator": "semantic.br.email.safe"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "contatos",
       "column": "data_nascimento",
-      "generator": "date_range",
+      "generator": "primitive.date.range",
       "params": {
         "min": "1970-01-01",
         "max": "2005-12-31"
@@ -60,7 +60,7 @@
       "schema": "crm",
       "table": "oportunidades",
       "column": "valor_estimado",
-      "generator": "int_range",
+      "generator": "primitive.int.range",
       "params": {
         "min": 100,
         "max": 250000
@@ -90,5 +90,8 @@
         "column": "telefone"
       }
     }
-  ]
+  ],
+  "options": {
+    "strict": false
+  }
 }

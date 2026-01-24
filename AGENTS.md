@@ -46,7 +46,9 @@ Quando alterar algo, entregar sempre:
 > Sem evidencia, a mudanca e considerada incompleta.
 
 ### 3.1 Regra de tasks (PIT)
-- **IA so atua quando existir** `tasks/issue_task_*.md` ou `tasks/pr_task_*.md`.
+- **IA so atua quando existir** `tasks/**/pr_task_*.md` (padrao).
+- Use `tasks/**/issue_task_*.md` **apenas** quando a IA encontrar bugs ou problemas.
+- Podem ser organizadas em subpastas por feature (ex: `tasks/feature_x/pr_task_*.md`).
 - Fora disso, abrir task ou solicitar contexto.
 
 ---

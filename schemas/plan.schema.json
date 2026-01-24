@@ -63,18 +63,6 @@
     }
   },
   "definitions": {
-    "ColumnGenerator": {
-      "description": "Supported generators for MVP.",
-      "type": "string",
-      "enum": [
-        "uuid",
-        "email",
-        "name",
-        "int_range",
-        "date_range",
-        "regex"
-      ]
-    },
     "ConstraintKind": {
       "description": "Constraint categories that can be controlled by policy.",
       "type": "string",
@@ -125,6 +113,13 @@
             "boolean",
             "null"
           ]
+        },
+        "strict": {
+          "description": "Enable strict generation mode (fallbacks become errors).",
+          "type": [
+            "boolean",
+            "null"
+          ]
         }
       }
     },
@@ -146,7 +141,7 @@
               "type": "string"
             },
             "generator": {
-              "$ref": "#/definitions/ColumnGenerator"
+              "type": "string"
             },
             "params": {
               "description": "Generator parameters (shape depends on the generator)."
@@ -156,6 +151,13 @@
             },
             "table": {
               "type": "string"
+            },
+            "transforms": {
+              "description": "Optional transforms applied after generation.",
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/TransformRule"
+              }
             },
             "type": {
               "type": "string",
@@ -331,6 +333,21 @@
               "type": "null"
             }
           ]
+        }
+      }
+    },
+    "TransformRule": {
+      "description": "Transform rule applied to generated values.",
+      "type": "object",
+      "required": [
+        "transform"
+      ],
+      "properties": {
+        "params": {
+          "description": "Transform parameters (shape depends on the transform)."
+        },
+        "transform": {
+          "type": "string"
         }
       }
     },

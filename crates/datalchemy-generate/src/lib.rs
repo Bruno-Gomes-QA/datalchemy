@@ -3,6 +3,7 @@
 //! This crate consumes `schema.json` + `plan.json` to produce deterministic
 //! datasets (CSV) with constraint-aware generation.
 
+pub mod assets;
 pub mod checks;
 pub mod engine;
 pub mod errors;

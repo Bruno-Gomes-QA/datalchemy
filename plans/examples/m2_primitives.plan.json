@@ -1,0 +1,240 @@
+{
+  "plan_version": "0.1",
+  "seed": 7,
+  "schema_ref": {
+    "schema_version": "0.2",
+    "engine": "postgres"
+  },
+  "targets": [
+    {
+      "schema": "crm",
+      "table": "usuarios",
+      "rows": 20
+    },
+    {
+      "schema": "crm",
+      "table": "contatos",
+      "rows": 40
+    },
+    {
+      "schema": "crm",
+      "table": "produtos",
+      "rows": 15
+    },
+    {
+      "schema": "crm",
+      "table": "itens_cotacao",
+      "rows": 25
+    },
+    {
+      "schema": "crm",
+      "table": "atividades",
+      "rows": 10
+    }
+  ],
+  "rules": [
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "nome",
+      "generator": "primitive.text.pattern",
+      "params": {
+        "pattern": "[A-Z][a-z]{4,8}"
+      },
+      "transforms": [
+        {
+          "transform": "transform.casing",
+          "params": {
+            "mode": "title"
+          }
+        }
+      ]
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "email",
+      "generator": "primitive.text.pattern",
+      "params": {
+        "pattern": "[a-z]{5,8}\\d{2}"
+      },
+      "transforms": [
+        {
+          "transform": "transform.format",
+          "params": {
+            "template": "{value}@example.com"
+          }
+        }
+      ]
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "telefone",
+      "generator": "primitive.text.pattern",
+      "params": {
+        "pattern": "\\d{11}"
+      },
+      "transforms": [
+        {
+          "transform": "transform.format",
+          "params": {
+            "template": "+55{value}"
+          }
+        },
+        {
+          "transform": "transform.null_rate",
+          "params": {
+            "rate": 0.2
+          }
+        }
+      ]
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "ativo",
+      "generator": "primitive.bool"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "data_criacao",
+      "generator": "primitive.timestamp.range",
+      "params": {
+        "min": "2023-01-01T00:00:00",
+        "max": "2024-12-31T23:59:59"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "data_nascimento",
+      "generator": "primitive.date.range",
+      "params": {
+        "min": "1970-01-01",
+        "max": "2005-12-31"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "descricao",
+      "generator": "primitive.text.lorem",
+      "params": {
+        "min_words": 6,
+        "max_words": 12
+      },
+      "transforms": [
+        {
+          "transform": "transform.truncate",
+          "params": {
+            "max_len": 40
+          }
+        }
+      ]
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "sku",
+      "generator": "primitive.text.pattern",
+      "params": {
+        "pattern": "[A-Z]{3}\\d{4}"
+      },
+      "transforms": [
+        {
+          "transform": "transform.prefix_suffix",
+          "params": {
+            "prefix": "SKU-"
+          }
+        }
+      ]
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "nome",
+      "generator": "primitive.text.lorem",
+      "params": {
+        "words": 2
+      },
+      "transforms": [
+        {
+          "transform": "transform.casing",
+          "params": {
+            "mode": "title"
+          }
+        }
+      ]
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "itens_cotacao",
+      "column": "quantidade",
+      "generator": "primitive.int.sequence_hint",
+      "params": {
+        "start": 1,
+        "step": 1
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "itens_cotacao",
+      "column": "preco_unitario",
+      "generator": "primitive.decimal.numeric",
+      "params": {
+        "min": 10.0,
+        "max": 5000.0,
+        "scale": 2
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "itens_cotacao",
+      "column": "desconto_percentual",
+      "generator": "primitive.float.range",
+      "params": {
+        "min": 0.0,
+        "max": 35.0
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "tipo",
+      "generator": "primitive.text.lorem",
+      "params": {
+        "words": 1
+      },
+      "transforms": [
+        {
+          "transform": "transform.weighted_choice",
+          "params": {
+            "choices": [
+              { "value": "ligacao", "weight": 0.4 },
+              { "value": "reuniao", "weight": 0.4 },
+              { "value": "email", "weight": 0.2 }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "options": {
+    "strict": false
+  }
+}
