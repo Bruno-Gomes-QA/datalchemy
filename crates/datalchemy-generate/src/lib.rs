@@ -7,6 +7,7 @@ pub mod assets;
 pub mod checks;
 pub mod engine;
 pub mod errors;
+pub mod foreign;
 pub mod generators;
 pub mod model;
 pub mod output;

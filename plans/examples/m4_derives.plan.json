@@ -1,0 +1,81 @@
+{
+  "plan_version": "0.1",
+  "seed": 21,
+  "schema_ref": {
+    "schema_version": "0.2",
+    "engine": "postgres"
+  },
+  "targets": [
+    {
+      "schema": "crm",
+      "table": "usuarios",
+      "rows": 20
+    },
+    {
+      "schema": "crm",
+      "table": "oportunidades",
+      "rows": 15
+    },
+    {
+      "schema": "crm",
+      "table": "atividades",
+      "rows": 12
+    }
+  ],
+  "rules": [
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "nome",
+      "generator": "semantic.br.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "email",
+      "generator": "derive.email_from_name",
+      "params": {
+        "input_columns": ["nome"],
+        "domain": "example.com"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "data_atualizacao",
+      "generator": "derive.updated_after_created",
+      "params": {
+        "input_columns": ["data_criacao"],
+        "max_seconds": 172800
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "oportunidades",
+      "column": "data_fechamento",
+      "generator": "derive.end_after_start",
+      "params": {
+        "input_columns": ["data_abertura"],
+        "max_days": 120
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "data_fim",
+      "generator": "derive.end_after_start",
+      "params": {
+        "input_columns": ["data_inicio"],
+        "max_seconds": 10800
+      }
+    }
+  ],
+  "options": {
+    "strict": false
+  }
+}

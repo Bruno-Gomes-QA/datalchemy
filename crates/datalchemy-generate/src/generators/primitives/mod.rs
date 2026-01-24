@@ -30,7 +30,7 @@ impl Generator for BoolGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -47,7 +47,7 @@ impl Generator for IntRangeGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -71,7 +71,7 @@ impl Generator for IntSequenceHintGenerator {
 
     fn generate(
         &self,
-        ctx: &GeneratorContext<'_>,
+        ctx: &mut GeneratorContext<'_>,
         params: Option<&Value>,
         _rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -101,7 +101,7 @@ impl Generator for FloatRangeGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -125,7 +125,7 @@ impl Generator for DecimalNumericGenerator {
 
     fn generate(
         &self,
-        ctx: &GeneratorContext<'_>,
+        ctx: &mut GeneratorContext<'_>,
         params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -157,7 +157,7 @@ impl Generator for TextPatternGenerator {
 
     fn generate(
         &self,
-        ctx: &GeneratorContext<'_>,
+        ctx: &mut GeneratorContext<'_>,
         params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -193,7 +193,7 @@ impl Generator for TextLoremGenerator {
 
     fn generate(
         &self,
-        ctx: &GeneratorContext<'_>,
+        ctx: &mut GeneratorContext<'_>,
         params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -234,7 +234,7 @@ impl Generator for UuidV4Generator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -257,7 +257,7 @@ impl Generator for DateRangeGenerator {
 
     fn generate(
         &self,
-        ctx: &GeneratorContext<'_>,
+        ctx: &mut GeneratorContext<'_>,
         params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -279,7 +279,7 @@ impl Generator for TimeRangeGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -318,7 +318,7 @@ impl Generator for TimestampRangeGenerator {
 
     fn generate(
         &self,
-        ctx: &GeneratorContext<'_>,
+        ctx: &mut GeneratorContext<'_>,
         params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -354,7 +354,7 @@ impl Generator for EnumGenerator {
 
     fn generate(
         &self,
-        ctx: &GeneratorContext<'_>,
+        ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {

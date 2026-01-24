@@ -1,16 +1,21 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use rand::RngCore;
 use serde_json::Value;
 
-use datalchemy_core::Column;
+use datalchemy_core::{Column, ForeignKey};
 
 use crate::errors::GenerationError;
+use crate::foreign::ForeignContext;
 
+pub mod derive;
+pub mod domain;
 pub mod primitives;
 pub mod semantic;
 pub mod transforms;
+
+pub type RowContext = HashMap<String, GeneratedValue>;
 
 /// Generated value for a column.
 #[derive(Debug, Clone, PartialEq)]
@@ -87,9 +92,12 @@ pub struct GeneratorContext<'a> {
     pub schema: &'a str,
     pub table: &'a str,
     pub column: &'a Column,
+    pub foreign_keys: &'a [ForeignKey],
     pub base_date: NaiveDate,
     pub row_index: u64,
     pub enum_values: Option<&'a [String]>,
+    pub row: &'a RowContext,
+    pub foreign: Option<&'a mut dyn ForeignContext>,
 }
 
 /// Context for transforms.
@@ -107,7 +115,7 @@ pub trait Generator: Send + Sync {
     fn id(&self) -> &'static str;
     fn generate(
         &self,
-        ctx: &GeneratorContext<'_>,
+        ctx: &mut GeneratorContext<'_>,
         params: Option<&Value>,
         rng: &mut dyn RngCore,
     ) -> Result<GeneratedValue, GenerationError>;
@@ -141,6 +149,8 @@ impl GeneratorRegistry {
         primitives::register(&mut registry);
         transforms::register(&mut registry);
         semantic::register(&mut registry);
+        derive::register(&mut registry);
+        domain::register(&mut registry);
         registry
     }
 

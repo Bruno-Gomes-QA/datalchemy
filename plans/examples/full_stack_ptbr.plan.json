@@ -1,0 +1,277 @@
+{
+  "plan_version": "0.1",
+  "seed": 101,
+  "schema_ref": {
+    "schema_version": "0.2",
+    "engine": "postgres"
+  },
+  "targets": [
+    {
+      "schema": "crm",
+      "table": "usuarios",
+      "rows": 10000
+    },
+    {
+      "schema": "crm",
+      "table": "empresas",
+      "rows": 10000
+    },
+    {
+      "schema": "crm",
+      "table": "contatos",
+      "rows": 10000
+    },
+    {
+      "schema": "crm",
+      "table": "leads",
+      "rows": 10000
+    },
+    {
+      "schema": "crm",
+      "table": "oportunidades",
+      "rows": 10000
+    },
+    {
+      "schema": "crm",
+      "table": "atividades",
+      "rows": 10000
+    },
+    {
+      "schema": "crm",
+      "table": "produtos",
+      "rows": 5000
+    },
+    {
+      "schema": "crm",
+      "table": "faturas",
+      "rows": 5000
+    },
+    {
+      "schema": "crm",
+      "table": "pagamentos",
+      "rows": 5000
+    },
+    {
+      "schema": "crm",
+      "table": "funis",
+      "rows": 8
+    },
+    {
+      "schema": "crm",
+      "table": "etapas_funil",
+      "rows": 24
+    },
+    {
+      "schema": "crm",
+      "table": "fontes_lead",
+      "rows": 20
+    }
+  ],
+  "rules": [
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "nome",
+      "generator": "semantic.br.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "email",
+      "generator": "semantic.br.email.safe"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "telefone",
+      "generator": "semantic.br.phone"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "data_atualizacao",
+      "generator": "derive.updated_after_created",
+      "params": {
+        "input_columns": ["data_criacao"],
+        "max_seconds": 172800
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "cnpj",
+      "generator": "semantic.br.cnpj"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "email",
+      "generator": "semantic.br.email.safe"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "telefone",
+      "generator": "semantic.br.phone"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "site",
+      "generator": "semantic.br.url"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "razao_social",
+      "generator": "domain.logistics.carrier"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "nome",
+      "generator": "semantic.br.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "email",
+      "generator": "semantic.br.email.safe"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "telefone",
+      "generator": "semantic.br.phone"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "status",
+      "generator": "domain.crm.lead_stage"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "score",
+      "generator": "domain.finance.installments",
+      "params": {
+        "min": 1,
+        "max": 12
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "oportunidades",
+      "column": "titulo",
+      "generator": "domain.finance.transaction_type"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "oportunidades",
+      "column": "valor_estimado",
+      "generator": "domain.crm.deal_value",
+      "params": {
+        "min": 1000.0,
+        "max": 90000.0
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "oportunidades",
+      "column": "data_fechamento",
+      "generator": "derive.end_after_start",
+      "params": {
+        "input_columns": ["data_abertura"],
+        "max_days": 180
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "tipo",
+      "generator": "domain.crm.activity_type"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "assunto",
+      "generator": "semantic.br.city"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "data_fim",
+      "generator": "derive.end_after_start",
+      "params": {
+        "input_columns": ["data_inicio"],
+        "max_seconds": 14400
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "sku",
+      "generator": "domain.logistics.tracking_code"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "descricao",
+      "generator": "domain.logistics.dimensions_cm"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "faturas",
+      "column": "status",
+      "generator": "domain.finance.invoice_status"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "pagamentos",
+      "column": "metodo",
+      "generator": "domain.finance.payment_method"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "funis",
+      "column": "nome",
+      "generator": "domain.crm.pipeline_name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "fontes_lead",
+      "column": "descricao",
+      "generator": "domain.logistics.shipment_status"
+    }
+  ],
+  "options": {
+    "strict": false
+  }
+}

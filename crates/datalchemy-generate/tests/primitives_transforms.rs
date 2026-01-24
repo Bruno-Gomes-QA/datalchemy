@@ -3,10 +3,10 @@ use rand::SeedableRng;
 use rand_chacha::ChaCha8Rng;
 use serde_json::json;
 
-use datalchemy_core::{Column, ColumnType};
+use datalchemy_core::{Column, ColumnType, ForeignKey};
 use datalchemy_generate::errors::GenerationError;
 use datalchemy_generate::generators::{
-    GeneratedValue, GeneratorContext, GeneratorRegistry, TransformContext,
+    GeneratedValue, GeneratorContext, GeneratorRegistry, RowContext, TransformContext,
 };
 
 fn test_column(name: &str, data_type: &str, is_nullable: bool) -> Column {
@@ -37,13 +37,18 @@ fn primitive_int_range_rejects_invalid_bounds() {
         .generator("primitive.int.range")
         .expect("generator exists");
     let column = test_column("quantidade", "integer", false);
+    let row = RowContext::new();
+    let foreign_keys: &[ForeignKey] = &[];
     let ctx = GeneratorContext {
         schema: "crm",
         table: "itens_cotacao",
         column: &column,
+        foreign_keys,
         base_date: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap_or_else(NaiveDate::default),
         row_index: 0,
         enum_values: None,
+        row: &row,
+        foreign: None,
     };
     let params = json!({"min": 10, "max": 1});
     let mut rng = ChaCha8Rng::seed_from_u64(1);

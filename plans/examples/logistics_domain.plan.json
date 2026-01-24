@@ -1,0 +1,58 @@
+{
+  "plan_version": "0.1",
+  "seed": 88,
+  "schema_ref": {
+    "schema_version": "0.2",
+    "engine": "postgres"
+  },
+  "targets": [
+    {
+      "schema": "crm",
+      "table": "produtos",
+      "rows": 15
+    },
+    {
+      "schema": "crm",
+      "table": "empresas",
+      "rows": 10
+    },
+    {
+      "schema": "crm",
+      "table": "fontes_lead",
+      "rows": 12
+    }
+  ],
+  "rules": [
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "sku",
+      "generator": "domain.logistics.tracking_code"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "descricao",
+      "generator": "domain.logistics.dimensions_cm"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "razao_social",
+      "generator": "domain.logistics.carrier"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "fontes_lead",
+      "column": "descricao",
+      "generator": "domain.logistics.shipment_status"
+    }
+  ],
+  "options": {
+    "strict": false
+  }
+}

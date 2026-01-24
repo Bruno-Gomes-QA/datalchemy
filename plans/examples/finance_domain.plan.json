@@ -1,0 +1,67 @@
+{
+  "plan_version": "0.1",
+  "seed": 77,
+  "schema_ref": {
+    "schema_version": "0.2",
+    "engine": "postgres"
+  },
+  "targets": [
+    {
+      "schema": "crm",
+      "table": "faturas",
+      "rows": 20
+    },
+    {
+      "schema": "crm",
+      "table": "pagamentos",
+      "rows": 40
+    },
+    {
+      "schema": "crm",
+      "table": "oportunidades",
+      "rows": 15
+    },
+    {
+      "schema": "crm",
+      "table": "leads",
+      "rows": 25
+    }
+  ],
+  "rules": [
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "faturas",
+      "column": "status",
+      "generator": "domain.finance.invoice_status"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "pagamentos",
+      "column": "metodo",
+      "generator": "domain.finance.payment_method"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "oportunidades",
+      "column": "titulo",
+      "generator": "domain.finance.transaction_type"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "score",
+      "generator": "domain.finance.installments",
+      "params": {
+        "min": 1,
+        "max": 12
+      }
+    }
+  ],
+  "options": {
+    "strict": false
+  }
+}

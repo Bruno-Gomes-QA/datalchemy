@@ -70,6 +70,12 @@ pub struct GenerationReport {
     pub unknown_generator_id_count: u64,
     pub pii_columns_touched: BTreeMap<String, u64>,
     pub warnings_by_code: BTreeMap<String, u64>,
+    #[serde(default)]
+    pub duration_ms: u64,
+    #[serde(default)]
+    pub bytes_written: u64,
+    #[serde(default)]
+    pub throughput_bytes_per_sec: f64,
     pub warnings: Vec<GenerationIssue>,
     pub unsupported: Vec<GenerationIssue>,
 }
@@ -87,6 +93,9 @@ impl GenerationReport {
             unknown_generator_id_count: 0,
             pii_columns_touched: BTreeMap::new(),
             warnings_by_code: BTreeMap::new(),
+            duration_ms: 0,
+            bytes_written: 0,
+            throughput_bytes_per_sec: 0.0,
             warnings: Vec::new(),
             unsupported: Vec::new(),
         }

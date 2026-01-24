@@ -1,0 +1,67 @@
+{
+  "plan_version": "0.1",
+  "seed": 55,
+  "schema_ref": {
+    "schema_version": "0.2",
+    "engine": "postgres"
+  },
+  "targets": [
+    {
+      "schema": "crm",
+      "table": "leads",
+      "rows": 30
+    },
+    {
+      "schema": "crm",
+      "table": "atividades",
+      "rows": 20
+    },
+    {
+      "schema": "crm",
+      "table": "oportunidades",
+      "rows": 15
+    },
+    {
+      "schema": "crm",
+      "table": "funis",
+      "rows": 5
+    }
+  ],
+  "rules": [
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "status",
+      "generator": "domain.crm.lead_stage"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "tipo",
+      "generator": "domain.crm.activity_type"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "oportunidades",
+      "column": "valor_estimado",
+      "generator": "domain.crm.deal_value",
+      "params": {
+        "min": 1000.0,
+        "max": 90000.0
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "funis",
+      "column": "nome",
+      "generator": "domain.crm.pipeline_name"
+    }
+  ],
+  "options": {
+    "strict": false
+  }
+}

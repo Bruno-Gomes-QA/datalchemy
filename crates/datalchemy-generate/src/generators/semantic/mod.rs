@@ -33,7 +33,7 @@ impl Generator for NameGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -71,7 +71,7 @@ impl Generator for EmailSafeGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -102,7 +102,7 @@ impl Generator for PhoneBrGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -128,7 +128,7 @@ impl Generator for CpfGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -158,7 +158,7 @@ impl Generator for CnpjGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -188,7 +188,7 @@ impl Generator for RgGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -210,7 +210,7 @@ impl Generator for CepGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -232,7 +232,7 @@ impl Generator for UfGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -254,7 +254,7 @@ impl Generator for CityGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -283,7 +283,7 @@ impl Generator for AddressGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -309,7 +309,7 @@ impl Generator for MoneyBrlGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -345,7 +345,7 @@ impl Generator for IpGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
@@ -373,7 +373,7 @@ impl Generator for UrlGenerator {
 
     fn generate(
         &self,
-        _ctx: &GeneratorContext<'_>,
+        _ctx: &mut GeneratorContext<'_>,
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {

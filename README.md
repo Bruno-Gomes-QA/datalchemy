@@ -10,7 +10,9 @@ O foco atual (PIT) e **Postgres-first** com output deterministico e artefatos re
 - **Introspeccao Postgres** -> `schema.json` deterministico.
 - **CLI** `datalchemy introspect` gerando uma pasta de run com logs e metricas.
 - **Plan** com JSON Schema oficial + validacao schema-aware.
-- **Geracao** com registry por IDs, primitives/transforms e relatorio de cobertura.
+- **Geracao** com registry por IDs, primitives/transforms, RowContext (derive) e ForeignContext (inter-tabelas).
+- **Domain packs** (CRM, Finance, Logistica) para geracao semantica.
+- **Relatorio de geracao** com contadores de cobertura e metricas de throughput.
 - **Fixtures + Docker** para testes de integracao.
 
 ---
@@ -149,6 +151,17 @@ cargo run -p datalchemy-core --example emit_schema_json_schema > schemas/schema.
 - `plans/examples/minimal.plan.json` usa generators por ID (`primitive.*`, `semantic.br.*`).
 - `plans/examples/m2_primitives.plan.json` cobre primitives/transforms.
 - `plans/examples/m3_ptbr.plan.json` cobre semantic pt-BR + masks.
+- `plans/examples/m4_derives.plan.json` cobre RowContext (`derive.*`).
+- `plans/examples/m5_relationships.plan.json` cobre ForeignContext (inter-tabelas).
+- `plans/examples/crm_domain.plan.json` cobre domain pack CRM.
+- `plans/examples/finance_domain.plan.json` cobre domain pack Finance.
+- `plans/examples/logistics_domain.plan.json` cobre domain pack Logistica.
+- `plans/examples/full_stack_ptbr.plan.json` integra pt-BR + domains (10k rows).
+
+Docs adicionais:
+- `docs/generators.md` (catalogo de geradores)
+- `docs/plan_generators.md` (guia de uso do plan)
+- `docs/privacy_lgpd.md` (privacidade e mascaramento)
 
 ### Regenerar o plan.schema.json
 ```bash

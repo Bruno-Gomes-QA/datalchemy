@@ -1,5 +1,6 @@
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::path::PathBuf;
+use std::time::Instant;
 
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 use rand::SeedableRng;
@@ -15,7 +16,10 @@ use datalchemy_plan::{ConstraintKind, ConstraintMode, ForeignKeyMode, Plan, Rule
 
 use crate::checks::{CheckContext, CheckOutcome, evaluate_check};
 use crate::errors::GenerationError;
-use crate::generators::{GeneratedValue, GeneratorContext, GeneratorRegistry, TransformContext};
+use crate::foreign::InMemoryForeignContext;
+use crate::generators::{
+    GeneratedValue, GeneratorContext, GeneratorRegistry, RowContext, TransformContext,
+};
 use crate::model::{GenerateOptions, GenerationIssue, GenerationReport, TableReport};
 use crate::output::csv::write_table_csv;
 use crate::planner::plan_tables;
@@ -43,6 +47,7 @@ impl GenerationEngine {
         schema: &DatabaseSchema,
         plan: &Plan,
     ) -> Result<GenerationResult, GenerationError> {
+        let start = Instant::now();
         let run_id = uuid::Uuid::new_v4().to_string();
         let timestamp = chrono::Utc::now().format("%Y-%m-%dT%H-%M-%SZ").to_string();
         let run_dir = self
@@ -56,29 +61,33 @@ impl GenerationEngine {
             .as_ref()
             .and_then(|opts| opts.strict)
             .unwrap_or(self.options.strict);
-        let plan_index = PlanIndex::new(plan, strict);
+        let plan_index = PlanIndex::new(plan, strict)?;
         let tasks = plan_tables(schema, plan, self.options.auto_generate_parents)?;
         let schema_index = SchemaIndex::new(schema);
         let enum_index = EnumIndex::new(schema);
         let registry = GeneratorRegistry::new();
+        let mut foreign_context = InMemoryForeignContext::new();
         let base_date = NaiveDate::from_ymd_opt(2024, 1, 1).unwrap_or_else(NaiveDate::default);
 
         let mut report = GenerationReport::new(run_id.clone());
+        let mut bytes_written = 0_u64;
 
         let mut table_data: HashMap<String, TableData> = HashMap::new();
 
         for task in tasks {
+            let schema_name = task.schema.clone();
+            let table_name = task.table.clone();
             let table = schema_index
-                .table(&task.schema, &task.table)
+                .table(&schema_name, &table_name)
                 .ok_or_else(|| {
                     GenerationError::InvalidPlan(format!(
                         "table '{}.{}' not found in schema",
-                        task.schema, task.table
+                        schema_name, table_name
                     ))
                 })?;
-            let table_key = table_key(&task.schema, &task.table);
+            let table_key = table_key(&schema_name, &table_name);
 
-            let table_ctx = TableContext::new(&task.schema, table, schema, &plan_index, base_date);
+            let table_ctx = TableContext::new(&schema_name, table, schema, &plan_index, base_date);
 
             let table_seed = hash_seed(plan.seed, &table_key);
             let result = generate_table(
@@ -86,6 +95,7 @@ impl GenerationEngine {
                 &registry,
                 &enum_index,
                 &plan_index,
+                &mut foreign_context,
                 table_seed,
                 task.rows,
                 &self.options,
@@ -93,18 +103,19 @@ impl GenerationEngine {
                 &mut report,
             )?;
 
-            let csv_path = run_dir.join(format!("{}.{}.csv", task.schema, task.table));
-            write_table_csv(&csv_path, table, &result.rows)?;
+            let csv_path = run_dir.join(format!("{}.{}.csv", schema_name, table_name));
+            bytes_written += write_table_csv(&csv_path, table, &result.rows)?;
 
             report.tables.push(TableReport {
-                schema: task.schema,
-                table: task.table,
+                schema: schema_name.clone(),
+                table: table_name.clone(),
                 rows_requested: task.rows,
                 rows_generated: result.rows.len() as u64,
                 retries: result.retries,
             });
             report.retries_total += result.retries;
 
+            foreign_context.ingest_table(&table_ctx.schema, table, &result.rows)?;
             table_data.insert(table_key, result);
         }
 
@@ -112,6 +123,14 @@ impl GenerationEngine {
         std::fs::write(&plan_path, serde_json::to_vec_pretty(plan)?)?;
 
         let report_path = run_dir.join("generation_report.json");
+        report.bytes_written = bytes_written;
+        let elapsed = start.elapsed();
+        report.duration_ms = elapsed.as_millis() as u64;
+        report.throughput_bytes_per_sec = if elapsed.as_secs_f64() > 0.0 {
+            bytes_written as f64 / elapsed.as_secs_f64()
+        } else {
+            0.0
+        };
         std::fs::write(&report_path, serde_json::to_vec_pretty(&report)?)?;
 
         Ok(GenerationResult { run_dir, report })
@@ -129,9 +148,8 @@ struct TableContext<'a> {
     primary_keys: Vec<Vec<String>>,
     unique_constraints: Vec<Vec<String>>,
     unique_columns: HashSet<String>,
-    fk_columns: HashSet<String>,
     check_constraints: Vec<&'a CheckConstraint>,
-    foreign_keys: Vec<&'a ForeignKey>,
+    foreign_keys: Vec<ForeignKey>,
     numeric_bounds: HashMap<String, NumericBounds>,
     base_date: NaiveDate,
 }
@@ -149,7 +167,6 @@ impl<'a> TableContext<'a> {
         let mut check_constraints = Vec::new();
         let mut foreign_keys = Vec::new();
         let mut unique_columns = HashSet::new();
-        let mut fk_columns = HashSet::new();
 
         for constraint in &table.constraints {
             match constraint {
@@ -167,10 +184,7 @@ impl<'a> TableContext<'a> {
                 }
                 Constraint::Check(check) => check_constraints.push(check),
                 Constraint::ForeignKey(fk) => {
-                    for column in &fk.columns {
-                        fk_columns.insert(column.to_lowercase());
-                    }
-                    foreign_keys.push(fk);
+                    foreign_keys.push(fk.clone());
                 }
             }
         }
@@ -185,7 +199,6 @@ impl<'a> TableContext<'a> {
             primary_keys,
             unique_constraints,
             unique_columns,
-            fk_columns,
             check_constraints,
             foreign_keys,
             numeric_bounds,
@@ -198,6 +211,7 @@ struct ColumnRule {
     generator_id: String,
     params: Option<Value>,
     transforms: Vec<TransformRule>,
+    input_columns: Vec<String>,
 }
 
 struct PlanIndex {
@@ -209,7 +223,7 @@ struct PlanIndex {
 }
 
 impl PlanIndex {
-    fn new(plan: &Plan, strict: bool) -> Self {
+    fn new(plan: &Plan, strict: bool) -> Result<Self, GenerationError> {
         let mut column_rules = HashMap::new();
         let mut constraint_policies = HashMap::new();
         let mut fk_strategies = HashMap::new();
@@ -224,6 +238,7 @@ impl PlanIndex {
                             generator_id: rule.generator.clone(),
                             params: rule.params.clone(),
                             transforms: rule.transforms.clone(),
+                            input_columns: parse_input_columns_strict(&rule.params)?,
                         },
                     );
                 }
@@ -244,13 +259,13 @@ impl PlanIndex {
             .and_then(|opts| opts.allow_fk_disable)
             .unwrap_or(false);
 
-        Self {
+        Ok(Self {
             column_rules,
             constraint_policies,
             fk_strategies,
             allow_fk_disable,
             strict,
-        }
+        })
     }
 
     fn constraint_mode(&self, schema: &str, table: &str, kind: ConstraintKind) -> ConstraintMode {
@@ -270,6 +285,30 @@ impl PlanIndex {
     fn column_rule(&self, schema: &str, table: &str, column: &str) -> Option<&ColumnRule> {
         self.column_rules.get(&column_key(schema, table, column))
     }
+}
+
+fn parse_input_columns_strict(params: &Option<Value>) -> Result<Vec<String>, GenerationError> {
+    let Some(params) = params else {
+        return Ok(Vec::new());
+    };
+    let Some(value) = params.get("input_columns") else {
+        return Ok(Vec::new());
+    };
+    let Some(array) = value.as_array() else {
+        return Err(GenerationError::InvalidPlan(
+            "input_columns must be an array of strings".to_string(),
+        ));
+    };
+
+    let mut columns = Vec::new();
+    for entry in array {
+        let column = entry.as_str().ok_or_else(|| {
+            GenerationError::InvalidPlan("input_columns must be strings".to_string())
+        })?;
+        columns.push(column.to_string());
+    }
+
+    Ok(columns)
 }
 
 struct SchemaIndex<'a> {
@@ -321,6 +360,7 @@ fn generate_table(
     registry: &GeneratorRegistry,
     enum_index: &EnumIndex,
     plan_index: &PlanIndex,
+    foreign_context: &mut InMemoryForeignContext,
     table_seed: u64,
     rows: u64,
     options: &GenerateOptions,
@@ -343,7 +383,7 @@ fn generate_table(
                 let mut row = HashMap::new();
 
                 if plan_index.fk_mode(ctx.schema, &ctx.table.name) == ForeignKeyMode::Respect {
-                    apply_foreign_keys(ctx, &mut row, &mut rng, table_data)?;
+                    apply_foreign_keys(ctx, plan_index, &mut row, &mut rng, table_data)?;
                 } else if !plan_index.allow_fk_disable {
                     record_warning(
                         report,
@@ -366,95 +406,47 @@ fn generate_table(
                 let mut columns = ctx.table.columns.clone();
                 columns.sort_by_key(|col| col.ordinal_position);
 
+                let mut base_columns = Vec::new();
+                let mut derive_columns = Vec::new();
                 for column in columns {
+                    let rule = plan_index.column_rule(ctx.schema, &ctx.table.name, &column.name);
+                    if rule
+                        .map(|rule| is_derive_generator(&rule.generator_id))
+                        .unwrap_or(false)
+                    {
+                        derive_columns.push(column);
+                    } else {
+                        base_columns.push(column);
+                    }
+                }
+
+                let derive_order = resolve_derive_order(ctx, plan_index, &derive_columns)?;
+
+                for column in base_columns.iter().chain(derive_order.iter()) {
                     let key = column.name.to_lowercase();
                     if row.contains_key(&key) {
                         continue;
                     }
 
-                    let rule = plan_index.column_rule(ctx.schema, &ctx.table.name, &column.name);
-                    let is_unique =
-                        ctx.unique_columns.contains(&key) && !ctx.fk_columns.contains(&key);
-
-                    let mut value = if let Some(rule) = rule {
-                        if is_unique {
-                            if registry.generator(&rule.generator_id).is_none() {
-                                report.record_unknown_generator();
-                                let issue = issue_for_column(
-                                    "unknown_generator_id",
-                                    format!(
-                                        "unknown generator id '{}' for '{}.{}.{}'",
-                                        rule.generator_id, ctx.schema, ctx.table.name, column.name
-                                    ),
-                                    ctx,
-                                    &column,
-                                    Some(&rule.generator_id),
-                                );
-                                record_warning(report, issue);
-                                if plan_index.strict {
-                                    return Err(GenerationError::InvalidPlan(format!(
-                                        "unknown generator id '{}'",
-                                        rule.generator_id
-                                    )));
-                                }
-                                let value =
-                                    generate_unique_value(&column, row_index, ctx.base_date);
-                                record_pii_tags(report, &column, &[]);
-                                value
-                            } else {
-                                let value = generate_unique_from_rule(
-                                    rule,
-                                    &column,
-                                    row_index,
-                                    ctx.base_date,
-                                );
-                                report.record_generator_usage(&rule.generator_id);
-                                record_pii_tags(
-                                    report,
-                                    &column,
-                                    pii_tags_for_generator_id(&rule.generator_id),
-                                );
-                                value
-                            }
-                        } else {
-                            generate_from_rule(
-                                rule, ctx, &column, row_index, registry, enum_index, &mut rng,
-                                report, plan_index,
-                            )?
-                        }
-                    } else if is_unique {
-                        let value = generate_unique_value(&column, row_index, ctx.base_date);
-                        record_pii_tags(report, &column, &[]);
-                        value
-                    } else if let Some(default_value) =
-                        generate_default(&column, ctx.base_date, &mut rng)
-                    {
-                        record_pii_tags(report, &column, &[]);
-                        default_value
-                    } else {
-                        if column.is_nullable && rng.gen_bool(0.1) {
-                            row.insert(key.clone(), GeneratedValue::Null);
-                            continue;
-                        }
-                        generate_from_fallback(
-                            ctx, &column, row_index, registry, enum_index, &mut rng, report,
-                            plan_index,
-                        )?
-                    };
-
-                    if let Some(rule) = rule {
-                        value = apply_transforms(
-                            rule, value, ctx, &column, row_index, registry, &mut rng, report,
-                            plan_index,
-                        )?;
-                    }
-
-                    if let Some(bounds) = ctx.numeric_bounds.get(&key) {
-                        value = apply_numeric_bounds(value, bounds);
-                    }
+                    let value = generate_column_value(
+                        ctx,
+                        column,
+                        row_index,
+                        &row,
+                        registry,
+                        enum_index,
+                        plan_index,
+                        foreign_context,
+                        &mut rng,
+                        report,
+                    )?;
 
                     row.insert(key.clone(), value);
                 }
+
+                apply_row_transforms(
+                    ctx, &mut row, row_index, registry, plan_index, &mut rng, report,
+                )?;
 
                 if let Some(error) = enforce_not_null(ctx, &row) {
                     if row_attempts >= options.max_attempts_row {
@@ -532,11 +524,28 @@ fn generate_table(
 
 fn apply_foreign_keys(
     ctx: &TableContext<'_>,
+    plan_index: &PlanIndex,
     row: &mut HashMap<String, GeneratedValue>,
     rng: &mut ChaCha8Rng,
     table_data: &mut HashMap<String, TableData>,
 ) -> Result<(), GenerationError> {
     for fk in &ctx.foreign_keys {
+        let mut skip_fk = false;
+        for child_col in &fk.columns {
+            let child_key = child_col.to_lowercase();
+            if row.contains_key(&child_key)
+                || plan_index
+                    .column_rule(ctx.schema, &ctx.table.name, child_col)
+                    .is_some()
+            {
+                skip_fk = true;
+                break;
+            }
+        }
+        if skip_fk {
+            continue;
+        }
+
         let parent_key = table_key(&fk.referenced_schema, &fk.referenced_table);
         let parent = table_data.get(&parent_key).ok_or_else(|| {
             GenerationError::Unsupported(format!(
@@ -572,13 +581,209 @@ fn apply_foreign_keys(
     Ok(())
 }
 
+fn is_derive_generator(generator_id: &str) -> bool {
+    generator_id.starts_with("derive.")
+}
+
+fn resolve_derive_order(
+    ctx: &TableContext<'_>,
+    plan_index: &PlanIndex,
+    derive_columns: &[datalchemy_core::Column],
+) -> Result<Vec<datalchemy_core::Column>, GenerationError> {
+    if derive_columns.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let table_columns: HashSet<String> = ctx
+        .table
+        .columns
+        .iter()
+        .map(|col| col.name.to_lowercase())
+        .collect();
+    let mut derive_map = HashMap::new();
+    let mut order_keys = HashMap::new();
+    let mut indegree = HashMap::new();
+    let mut dependents: HashMap<String, Vec<String>> = HashMap::new();
+
+    for column in derive_columns {
+        let name = column.name.to_lowercase();
+        derive_map.insert(name.clone(), column.clone());
+        order_keys.insert(name.clone(), (column.ordinal_position, name.clone()));
+        indegree.insert(name, 0_usize);
+    }
+
+    for column in derive_columns {
+        let name = column.name.to_lowercase();
+        let inputs = plan_index
+            .column_rule(ctx.schema, &ctx.table.name, &column.name)
+            .map(|rule| rule.input_columns.as_slice())
+            .unwrap_or(&[]);
+
+        for input in inputs {
+            let input_lower = input.to_lowercase();
+            if !table_columns.contains(&input_lower) {
+                return Err(GenerationError::InvalidPlan(format!(
+                    "input column '{}' not found for '{}.{}.{}'",
+                    input, ctx.schema, ctx.table.name, column.name
+                )));
+            }
+            if indegree.contains_key(&input_lower) {
+                if let Some(entry) = indegree.get_mut(&name) {
+                    *entry += 1;
+                }
+                dependents
+                    .entry(input_lower)
+                    .or_default()
+                    .push(name.clone());
+            }
+        }
+    }
+
+    let mut ready = BTreeSet::new();
+    for (name, degree) in &indegree {
+        if *degree == 0 {
+            if let Some(key) = order_keys.get(name) {
+                ready.insert(key.clone());
+            }
+        }
+    }
+
+    let mut ordered = Vec::new();
+    let mut indegree = indegree;
+    while let Some(key) = ready.iter().next().cloned() {
+        ready.remove(&key);
+        let name = key.1.clone();
+        ordered.push(name.clone());
+
+        if let Some(children) = dependents.get(&name) {
+            for child in children {
+                if let Some(entry) = indegree.get_mut(child) {
+                    *entry = entry.saturating_sub(1);
+                    if *entry == 0 {
+                        if let Some(key) = order_keys.get(child) {
+                            ready.insert(key.clone());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if ordered.len() != derive_columns.len() {
+        return Err(GenerationError::InvalidPlan(
+            "cyclic derive dependencies detected".to_string(),
+        ));
+    }
+
+    Ok(ordered
+        .into_iter()
+        .filter_map(|name| derive_map.get(&name).cloned())
+        .collect())
+}
+
+fn generate_column_value(
+    ctx: &TableContext<'_>,
+    column: &datalchemy_core::Column,
+    row_index: u64,
+    row: &RowContext,
+    registry: &GeneratorRegistry,
+    enum_index: &EnumIndex,
+    plan_index: &PlanIndex,
+    foreign_context: &mut InMemoryForeignContext,
+    rng: &mut ChaCha8Rng,
+    report: &mut GenerationReport,
+) -> Result<GeneratedValue, GenerationError> {
+    let key = column.name.to_lowercase();
+    let unique_hint = ctx.unique_columns.contains(&key);
+
+    let mut value =
+        if let Some(rule) = plan_index.column_rule(ctx.schema, &ctx.table.name, &column.name) {
+            if unique_hint && !is_derive_generator(&rule.generator_id) {
+                generate_unique_from_rule(rule, column, row_index, ctx.base_date)
+            } else {
+                generate_from_rule(
+                    rule,
+                    ctx,
+                    column,
+                    row_index,
+                    row,
+                    registry,
+                    enum_index,
+                    foreign_context,
+                    rng,
+                    report,
+                    plan_index,
+                )?
+            }
+        } else if let Some(default) = generate_default(column, ctx.base_date, rng) {
+            default
+        } else if unique_hint {
+            generate_unique_value(column, row_index, ctx.base_date)
+        } else {
+            generate_from_fallback(
+                ctx,
+                column,
+                row_index,
+                row,
+                registry,
+                enum_index,
+                foreign_context,
+                rng,
+                report,
+                plan_index,
+            )?
+        };
+
+    if let Some(bounds) = ctx.numeric_bounds.get(&key) {
+        value = apply_numeric_bounds(value, bounds);
+    }
+
+    Ok(value)
+}
+
+fn apply_row_transforms(
+    ctx: &TableContext<'_>,
+    row: &mut RowContext,
+    row_index: u64,
+    registry: &GeneratorRegistry,
+    plan_index: &PlanIndex,
+    rng: &mut ChaCha8Rng,
+    report: &mut GenerationReport,
+) -> Result<(), GenerationError> {
+    let mut columns = ctx.table.columns.clone();
+    columns.sort_by_key(|col| col.ordinal_position);
+
+    for column in &columns {
+        let Some(rule) = plan_index.column_rule(ctx.schema, &ctx.table.name, &column.name) else {
+            continue;
+        };
+        if rule.transforms.is_empty() {
+            continue;
+        }
+
+        let key = column.name.to_lowercase();
+        let value = match row.get(&key).cloned() {
+            Some(value) => value,
+            None => continue,
+        };
+        let next = apply_transforms(
+            rule, value, ctx, column, row_index, registry, rng, report, plan_index,
+        )?;
+        row.insert(key, next);
+    }
+
+    Ok(())
+}
+
 fn generate_from_rule(
     rule: &ColumnRule,
     ctx: &TableContext<'_>,
     column: &datalchemy_core::Column,
     row_index: u64,
+    row: &RowContext,
     registry: &GeneratorRegistry,
     enum_index: &EnumIndex,
+    foreign_context: &mut InMemoryForeignContext,
     rng: &mut ChaCha8Rng,
     report: &mut GenerationReport,
     plan_index: &PlanIndex,
@@ -608,21 +813,33 @@ fn generate_from_rule(
             }
 
             return generate_from_fallback(
-                ctx, column, row_index, registry, enum_index, rng, report, plan_index,
+                ctx,
+                column,
+                row_index,
+                row,
+                registry,
+                enum_index,
+                foreign_context,
+                rng,
+                report,
+                plan_index,
             );
         }
     };
 
-    let generator_ctx = GeneratorContext {
+    let mut generator_ctx = GeneratorContext {
         schema: ctx.schema,
         table: &ctx.table.name,
         column,
+        foreign_keys: &ctx.foreign_keys,
         base_date: ctx.base_date,
         row_index,
         enum_values: enum_index.values_for(column),
+        row,
+        foreign: Some(foreign_context),
     };
 
-    let value = match generator.generate(&generator_ctx, rule.params.as_ref(), rng) {
+    let value = match generator.generate(&mut generator_ctx, rule.params.as_ref(), rng) {
         Ok(value) => value,
         Err(err) => {
             if plan_index.strict {
@@ -636,12 +853,21 @@ fn generate_from_rule(
                 Some(generator_id),
             );
             record_warning(report, issue);
-            match generator.generate(&generator_ctx, None, rng) {
+            match generator.generate(&mut generator_ctx, None, rng) {
                 Ok(value) => value,
                 Err(_) => {
                     record_fallback_warning(report, ctx, column, Some(generator_id));
                     return generate_from_fallback(
-                        ctx, column, row_index, registry, enum_index, rng, report, plan_index,
+                        ctx,
+                        column,
+                        row_index,
+                        row,
+                        registry,
+                        enum_index,
+                        foreign_context,
+                        rng,
+                        report,
+                        plan_index,
                     );
                 }
             }
@@ -658,32 +884,44 @@ fn generate_from_fallback(
     ctx: &TableContext<'_>,
     column: &datalchemy_core::Column,
     row_index: u64,
+    row: &RowContext,
     registry: &GeneratorRegistry,
     enum_index: &EnumIndex,
+    foreign_context: &mut InMemoryForeignContext,
     rng: &mut ChaCha8Rng,
     report: &mut GenerationReport,
     plan_index: &PlanIndex,
 ) -> Result<GeneratedValue, GenerationError> {
     if let Some(generator) = registry.generator("primitive.enum") {
         if enum_index.values_for(column).is_some() {
-            let generator_ctx = GeneratorContext {
+            let mut generator_ctx = GeneratorContext {
                 schema: ctx.schema,
                 table: &ctx.table.name,
                 column,
+                foreign_keys: &ctx.foreign_keys,
                 base_date: ctx.base_date,
                 row_index,
                 enum_values: enum_index.values_for(column),
+                row,
+                foreign: Some(foreign_context),
             };
-            let value = generator.generate(&generator_ctx, None, rng)?;
+            let value = generator.generate(&mut generator_ctx, None, rng)?;
             report.record_generator_usage("primitive.enum");
             record_pii_tags(report, column, generator.pii_tags());
             return Ok(value);
         }
     }
 
-    if let Some((generator_id, value, tags)) =
-        generate_with_heuristic(ctx, column, row_index, registry, enum_index, rng)?
-    {
+    if let Some((generator_id, value, tags)) = generate_with_heuristic(
+        ctx,
+        column,
+        row_index,
+        row,
+        registry,
+        enum_index,
+        foreign_context,
+        rng,
+    )? {
         if plan_index.strict {
             return Err(GenerationError::Unsupported(format!(
                 "heuristic generation forbidden in strict mode for '{}.{}.{}'",
@@ -855,8 +1093,10 @@ fn generate_with_heuristic(
     ctx: &TableContext<'_>,
     column: &datalchemy_core::Column,
     row_index: u64,
+    row: &RowContext,
     registry: &GeneratorRegistry,
     enum_index: &EnumIndex,
+    foreign_context: &mut InMemoryForeignContext,
     rng: &mut ChaCha8Rng,
 ) -> Result<
     Option<(
@@ -872,15 +1112,18 @@ fn generate_with_heuristic(
 
     if let Some(generator_id) = heuristic_generator_id(column) {
         if let Some(generator) = registry.generator(generator_id) {
-            let generator_ctx = GeneratorContext {
+            let mut generator_ctx = GeneratorContext {
                 schema: ctx.schema,
                 table: &ctx.table.name,
                 column,
+                foreign_keys: &ctx.foreign_keys,
                 base_date: ctx.base_date,
                 row_index,
                 enum_values: enum_index.values_for(column),
+                row,
+                foreign: Some(foreign_context),
             };
-            let value = generator.generate(&generator_ctx, None, rng)?;
+            let value = generator.generate(&mut generator_ctx, None, rng)?;
             return Ok(Some((Some(generator_id), value, generator.pii_tags())));
         }
     }
@@ -1059,21 +1302,6 @@ fn column_pii_tags(column_name: &str) -> Vec<&'static str> {
         tags.push("pii.network");
     }
     tags
-}
-
-fn pii_tags_for_generator_id(generator_id: &str) -> &'static [&'static str] {
-    match generator_id {
-        "semantic.br.name" => &["pii.name"],
-        "semantic.br.email.safe" => &["pii.email"],
-        "semantic.br.phone" => &["pii.phone"],
-        "semantic.br.cpf" => &["pii.cpf"],
-        "semantic.br.cnpj" => &["pii.cnpj"],
-        "semantic.br.rg" => &["pii.rg"],
-        "semantic.br.cep" | "semantic.br.uf" | "semantic.br.city" => &["pii.location"],
-        "semantic.br.address" => &["pii.address"],
-        "semantic.br.ip" | "semantic.br.url" => &["pii.network"],
-        _ => EMPTY_TAGS,
-    }
 }
 
 fn record_fallback_warning(
