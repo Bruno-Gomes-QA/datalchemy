@@ -64,22 +64,22 @@ pub struct ColumnGeneratorRule {
     pub schema: String,
     pub table: String,
     pub column: String,
-    pub generator: ColumnGenerator,
+    pub generator: String,
     /// Generator parameters (shape depends on the generator).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub params: Option<serde_json::Value>,
+    /// Optional transforms applied after generation.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub transforms: Vec<TransformRule>,
 }
 
-/// Supported generators for MVP.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[serde(rename_all = "snake_case")]
-pub enum ColumnGenerator {
-    Uuid,
-    Email,
-    Name,
-    IntRange,
-    DateRange,
-    Regex,
+/// Transform rule applied to generated values.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct TransformRule {
+    pub transform: String,
+    /// Transform parameters (shape depends on the transform).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub params: Option<serde_json::Value>,
 }
 
 /// Constraint policy rule.
@@ -154,6 +154,9 @@ pub struct PlanOptions {
     /// Allow disabling foreign-key enforcement.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub allow_fk_disable: Option<bool>,
+    /// Enable strict generation mode (fallbacks become errors).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub strict: Option<bool>,
 }
 
 /// Canonical plan definition for generation.

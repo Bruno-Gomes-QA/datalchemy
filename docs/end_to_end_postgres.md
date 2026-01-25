@@ -143,6 +143,47 @@ wc -l "$OUT_DIR/crm.oportunidades.csv"
 sed -n '1,80p' "$OUT_DIR/generation_report.json"
 ```
 
+Campos novos no report:
+- `duration_ms`
+- `bytes_written`
+- `throughput_bytes_per_sec`
+
+### 4.1 Planos avancados
+
+RowContext (derive):
+```bash
+cargo run -p datalchemy-generate --example generate_csv -- \
+  --plan plans/examples/m4_derives.plan.json \
+  --schema "$RUN_DIR/schema.json" \
+  --out out/
+```
+
+ForeignContext (inter-tabelas):
+```bash
+cargo run -p datalchemy-generate --example generate_csv -- \
+  --plan plans/examples/m5_relationships.plan.json \
+  --schema "$RUN_DIR/schema.json" \
+  --out out/
+```
+
+Domain packs:
+```bash
+for plan in crm_domain finance_domain logistics_domain; do
+  cargo run -p datalchemy-generate --example generate_csv -- \
+    --plan "plans/examples/${plan}.plan.json" \
+    --schema "$RUN_DIR/schema.json" \
+    --out "out/${plan}/"
+done
+```
+
+Full stack (10k rows):
+```bash
+cargo run -p datalchemy-generate --example generate_csv -- \
+  --plan plans/examples/full_stack_ptbr.plan.json \
+  --schema "$RUN_DIR/schema.json" \
+  --out out/full_stack/
+```
+
 ---
 
 ## 5) Avaliar dataset (Plan 5)
@@ -198,6 +239,12 @@ diff -u "$OUT_DIR/crm.usuarios.csv" "$OUT_DIR_2/crm.usuarios.csv"
 ```
 
 Sem diferencas = determinismo OK.
+
+### 6.1 Golden files (regressao)
+
+```bash
+cargo test -p datalchemy-generate --test golden_files
+```
 
 ---
 

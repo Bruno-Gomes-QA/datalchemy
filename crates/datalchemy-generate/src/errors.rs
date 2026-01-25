@@ -15,6 +15,8 @@ pub enum GenerationError {
     Json(#[from] serde_json::Error),
     #[error("csv error: {0}")]
     Csv(#[from] csv::Error),
+    #[error("asset error: {0}")]
+    Asset(String),
     #[error("generation failed")]
     Failed(GenerationReport),
 }

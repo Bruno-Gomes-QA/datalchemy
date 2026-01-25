@@ -1,0 +1,77 @@
+{
+  "plan_version": "0.1",
+  "seed": 33,
+  "schema_ref": {
+    "schema_version": "0.2",
+    "engine": "postgres"
+  },
+  "targets": [
+    {
+      "schema": "crm",
+      "table": "empresas",
+      "rows": 10
+    },
+    {
+      "schema": "crm",
+      "table": "contatos",
+      "rows": 25
+    }
+  ],
+  "rules": [
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "nome_fantasia",
+      "generator": "semantic.br.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "razao_social",
+      "generator": "semantic.br.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "nome",
+      "generator": "semantic.br.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "email",
+      "generator": "derive.email_from_name",
+      "params": {
+        "input_columns": ["nome", "sobrenome"],
+        "domain": "example.com"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "empresa_id",
+      "generator": "derive.fk"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "data_criacao",
+      "generator": "derive.parent_value",
+      "params": {
+        "input_columns": ["empresa_id"],
+        "parent_schema": "crm",
+        "parent_table": "empresas",
+        "parent_column": "data_criacao"
+      }
+    }
+  ],
+  "options": {
+    "strict": false
+  }
+}

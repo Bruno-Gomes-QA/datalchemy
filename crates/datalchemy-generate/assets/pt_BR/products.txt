@@ -1,0 +1,1400 @@
+Licença Basic
+Licença Pro
+Licença Enterprise
+Assinatura Mensal
+Assinatura Anual
+Plano Start
+Plano Gold
+Plano Platinum
+Modulo Financeiro
+Modulo Vendas
+Modulo Estoque
+Modulo RH
+Consultoria 10h
+Consultoria 20h
+Consultoria 50h
+Suporte N1
+Suporte N2
+Suporte N3
+Implantação Remota
+Implantação Presencial
+Notebook Pro
+Monitor 24
+Monitor 27
+Teclado Mecanico
+Mouse Gamer
+Headset USB
+Webcam HD
+Cadeira Ergonomica
+Mesa Escritorio
+Servidor Rack
+Switch 24p
+Roteador WiFi6
+Firewall HW
+Nobreak 1500VA
+Impressora Laser
+Toner Black
+Cabos Rede 2m
+Licença Office
+Antivirus Corp
+Backup Cloud 1TB
+Backup Cloud 5TB
+Hospedagem Web
+Dominio .com.br
+Certificado SSL
+Email Corp 10cx
+Email Corp 50cx
+CRM User
+ERP User
+BI Dashboard
+App Mobile iOS
+App Mobile Android
+API Gateway
+Database SQL
+Database NoSQL
+Storage NAS
+Storage SAN
+VM Small
+VM Medium
+VM Large
+VM ExtraLarge
+Container Cluster
+Load Balancer
+CDN Traffic
+WAF Security
+DDoS Protection
+VPN Access
+MFA Token
+SSO Integration
+LDAP Service
+DNS Managed
+NTP Service
+SMTP Relay
+SMS Gateway
+Push Notification
+Chatbot AI
+Voice Assistant
+IVR System
+Call Recording
+Video Conf
+Screen Share
+File Share
+Doc Sign
+Workflow Auto
+BPM Tool
+RPA Bot
+ETL Job
+Data Lake
+Data Warehouse
+Data Mart
+Analytics Report
+ML Model
+AI Prediction
+IoT Sensor
+Edge Device
+Smart Gateway
+Hub Controller
+Camera IP
+NVR Recorder
+Access Control
+Badge Reader
+Biometric Scan
+Face Recog
+Alarm System
+Fire Detect
+Smoke Sensor
+Heat Sensor
+Water Sensor
+Motion Sensor
+Door Sensor
+Window Sensor
+Glass Break
+Panic Button
+Siren Horn
+Strobe Light
+Speaker PA
+Intercom Unit
+Phone IP
+Softphone App
+PBX Cloud
+SIP Trunk
+DID Number
+Toll Free
+Local Number
+Intl Number
+Fax Digital
+Voice Mail
+Conf Room
+Huddle Room
+Board Room
+Training Room
+Auditorium AV
+Projector 4K
+Screen Motor
+Sound System
+Mic Wireless
+Mixer Audio
+DSP Audio
+Amp Power
+Speaker Wall
+Speaker Ceiling
+Subwoofer Active
+Cable HDMI
+Cable Audio
+Cable Video
+Adapter USB
+Hub USB
+Dock Station
+Laptop Bag
+Backpack Tech
+Mouse Pad
+Wrist Rest
+Foot Rest
+Stand Monitor
+Arm Monitor
+Stand Laptop
+Lock Cable
+Privacy Filter
+Clean Kit
+Air Duster
+Wipes Screen
+Battery AA
+Battery AAA
+Power Strip
+Surge Protect
+Ext Cord
+Wall Charger
+Car Charger
+Power Bank
+Cable Lightning
+Cable USBC
+Cable MicroUSB
+Adapter Travel
+Headphone BT
+Earbud TWS
+Speaker BT
+Radio FM
+Clock Digital
+Thermometer IR
+Scale Digital
+Kettle Electric
+Coffee Maker
+Water Filter
+Air Purifier
+Fan Desk
+Heater Space
+Lamp Desk
+Bulb LED
+Strip LED
+Switch Smart
+Plug Smart
+Remote IR
+Hub Home
+Voice Speaker
+Display Smart
+Tablet 10
+Tablet 8
+Reader Ebook
+Cover Case
+Screen Protect
+Stylus Pen
+Keyboard BT
+Mouse BT
+Trackpad Touch
+Controller Game
+Console Game
+VR Headset
+Drone Camera
+Gimbal Phone
+Tripod Camera
+Light Ring
+Mic Studio
+Interface Audio
+Piano Digital
+Guitar Electric
+Bass Electric
+Drum Kit
+Amp Guitar
+Pedal Effect
+Cable Inst
+Strap Guitar
+Pick Guitar
+String Set
+Stand Music
+Case Inst
+Book Music
+Course Online
+Training Video
+Workshop Live
+Seminar Web
+Conf Pass
+Expo Booth
+Sponsor Gold
+Sponsor Silver
+Sponsor Bronze
+Ad Banner
+Ad Video
+Ad Post
+Social Media
+SEO Audit
+Content Blog
+Email Mkt
+Lead Gen
+Sales Funnel
+CRM Setup
+ERP Setup
+Dev Custom
+QA Test
+UX UI Design
+Logo Brand
+Video Edit
+Photo Shoot
+Audio Mix
+Voice Over
+Transcribe Text
+Translate Doc
+Interpret Live
+Legal Contract
+Tax Audit
+Fin Plan
+Invest Advice
+Loan Biz
+Credit Card
+Bank Account
+Insure Life
+Insure Health
+Insure Auto
+Insure Home
+Insure Biz
+Travel Flight
+Travel Hotel
+Travel Car
+Travel Meal
+Travel Tour
+Visa Service
+Passport Service
+Move Service
+Clean Service
+Repair Service
+Build Service
+Paint Service
+Garden Service
+Pool Service
+Pest Service
+Sec Service
+Cater Service
+Event Plan
+Wedding Plan
+Party Plan
+Funeral Plan
+Pet Service
+Vet Service
+Baby Service
+Elder Service
+Tutor Math
+Tutor Science
+Tutor Lang
+Tutor Art
+Tutor Music
+Coach Sport
+Coach Life
+Coach Biz
+Therapy Mind
+Therapy Body
+Massage Relax
+Yoga Class
+Pilates Class
+Gym Pass
+Swim Class
+Dance Class
+Martial Art
+Sport Club
+Golf Club
+Tennis Club
+Social Club
+Book Club
+Wine Club
+Beer Club
+Food Club
+Travel Club
+Movie Club
+Music Club
+Art Club
+Tech Club
+Game Club
+Nature Club
+Photo Club
+Video Club
+Maker Club
+Dev Club
+Startup Club
+Invest Club
+Crypto Club
+NFT Club
+Meta Club
+Space Club
+Robot Club
+AI Club
+Bio Club
+Eco Club
+Green Club
+Solar Club
+Wind Club
+Water Club
+Earth Club
+Life Club
+Love Club
+Hope Club
+Joy Club
+Peace Club
+Faith Club
+Soul Club
+Spirit Club
+God Club
+Zen Club
+Tao Club
+Om Club
+Chi Club
+Qi Club
+Reiki Club
+Chakra Club
+Aura Club
+Karma Club
+Dharma Club
+Yin Club
+Yang Club
+Feng Club
+Shui Club
+Wu Club
+Wei Club
+Tai Club
+Ji Club
+Ba Club
+Gua Club
+I Club
+Ching Club
+Lao Club
+Tzu Club
+Confucius Club
+Sun Club
+Tzu Club
+Buddha Club
+Jesus Club
+Moses Club
+Mohamed Club
+Krishna Club
+Rama Club
+Shiva Club
+Vishnu Club
+Brahma Club
+Ganesha Club
+Lakshmi Club
+Saraswati Club
+Kali Club
+Durga Club
+Parvati Club
+Sita Club
+Radha Club
+Hanuman Club
+Garuda Club
+Nandi Club
+Dattatreya Club
+Sai Club
+Baba Club
+Osho Club
+Rumi Club
+Hafiz Club
+Khayyam Club
+Gibran Club
+Tagore Club
+Gandhi Club
+Mandela Club
+King Club
+X Club
+Lennon Club
+Marley Club
+Dylan Club
+Bowie Club
+Prince Club
+Jackson Club
+Madonna Club
+Gaga Club
+Beyonce Club
+Swift Club
+Adele Club
+Lipas Club
+Anitta Club
+Neymar Club
+Messi Club
+Ronaldo Club
+Pele Club
+Senna Club
+Jordan Club
+Lebron Club
+Kobe Club
+Brady Club
+Woods Club
+Federer Club
+Nadal Club
+Djokovic Club
+Williams Club
+Biles Club
+Phelps Club
+Bolt Club
+Ali Club
+Tyson Club
+Lee Club
+Chan Club
+Norris Club
+Stallone Club
+Schwarzenegger Club
+Cruise Club
+Pitt Club
+Clooney Club
+DiCaprio Club
+Hanks Club
+DeNiro Club
+Pacino Club
+Streep Club
+Lawrence Club
+Johansson Club
+Robbie Club
+Gadot Club
+Portman Club
+Watson Club
+Stone Club
+Blanchett Club
+Kidman Club
+Roberts Club
+Bullock Club
+Aniston Club
+Jolie Club
+Berry Club
+Lopez Club
+Shakira Club
+Rihanna Club
+Perry Club
+Grande Club
+Gomez Club
+Cyrus Club
+Lovato Club
+Eilish Club
+Rodrigo Club
+Cabello Club
+Mendes Club
+Bieber Club
+Sheeran Club
+Styles Club
+Mars Club
+Timberlake Club
+Levine Club
+Martin Club
+Bono Club
+Jagger Club
+Richards Club
+McCartney Club
+Starr Club
+Harrison Club
+Mercury Club
+May Club
+Taylor Club
+Deacon Club
+Plant Club
+Page Club
+Jones Club
+Bonham Club
+Waters Club
+Gilmour Club
+Wright Club
+Mason Club
+Barrett Club
+Vedder Club
+Cornell Club
+Staley Club
+Cobain Club
+Grohl Club
+Novoselic Club
+Rose Club
+Slash Club
+McKagan [Bass]
+Adler [Drums]
+Stradlin [Guitar]
+Hetfield [Vocals]
+Ulrich [Drums]
+Hammett [Guitar]
+Burton [Bass]
+Newsted [Bass]
+Trujillo [Bass]
+Mustaine [Vocals]
+Ellefson [Bass]
+Friedman [Guitar]
+Menza [Drums]
+Araya [Vocals]
+King [Guitar]
+Hanneman [Guitar]
+Lombardo [Drums]
+Ian [Guitar]
+Benante [Drums]
+Bello [Bass]
+Belladonna [Vocals]
+Spitz [Guitar]
+Dickinson [Vocals]
+Harris [Bass]
+Murray [Guitar]
+Smith [Guitar]
+McBrain [Drums]
+Gers [Guitar]
+Halford [Vocals]
+Tipton [Guitar]
+Downing [Guitar]
+Hill [Bass]
+Travis [Drums]
+Dio [Vocals]
+Iommi [Guitar]
+Butler [Bass]
+Ward [Drums]
+Osbourne [Vocals]
+Gillan [Vocals]
+Blackmore [Guitar]
+Glover [Bass]
+Paice [Drums]
+Lord [Keyboards]
+Coverdale [Vocals]
+Hughes [Bass]
+Bolin [Guitar]
+Airey [Keyboards]
+Morse [Guitar]
+Satriani [Guitar]
+Vai [Guitar]
+Malmsteen [Guitar]
+Petrucci [Guitar]
+Myung [Bass]
+Portnoy [Drums]
+Rudess [Keyboards]
+LaBrie [Vocals]
+Mangini [Drums]
+Gildenlow [Vocals]
+Wilson [Vocals]
+Akerfeldt [Vocals]
+Townsend [Vocals]
+Devin [Vocals]
+Maynard [Vocals]
+Carey [Drums]
+Chancellor [Bass]
+Jones [Guitar]
+Reznor [Vocals]
+Manson [Vocals]
+Zombie [Vocals]
+Cooper [Vocals]
+Simmons [Bass]
+Stanley [Guitar]
+Frehley [Guitar]
+Criss [Drums]
+Carr [Drums]
+Kulick [Guitar]
+Singer [Drums]
+Thayer [Guitar]
+Tyler [Vocals]
+Perry [Guitar]
+Hamilton [Bass]
+Kramer [Drums]
+Whitford [Guitar]
+Johnson [Vocals]
+Young [Guitar]
+Young [Guitar]
+Williams [Bass]
+Rudd [Drums]
+Scott [Vocals]
+Lee [Vocals]
+Lifeson [Guitar]
+Peart [Drums]
+Anderson [Vocals]
+Howe [Guitar]
+Squire [Bass]
+Wakeman [Keyboards]
+Bruford [Drums]
+White [Drums]
+Kaye [Keyboards]
+Banks [Keyboards]
+Collins [Drums]
+Gabriel [Vocals]
+Hackett [Guitar]
+Rutherford [Bass]
+Phillips [Guitar]
+Fripp [Guitar]
+Lake [Vocals]
+McDonald [Sax]
+Giles [Drums]
+Sinfield [Lyrics]
+Wetton [Bass]
+Belew [Guitar]
+Levin [Bass]
+Bruford [Drums]
+Cross [Violin]
+Muir [Percussion]
+Jakszyk [Vocals]
+Harrison [Drums]
+Mastelotto [Drums]
+Rieflin [Drums]
+Stacey [Drums]
+Collins [Sax]
+Palmer [Drums]
+Emerson [Keyboards]
+Lake [Vocals]
+Wakeman [Keyboards]
+Moraz [Keyboards]
+Downes [Keyboards]
+Asia [Band]
+GTR [Band]
+UK [Band]
+Camel [Band]
+Caravan [Band]
+Gong [Band]
+Soft Machine [Band]
+Magma [Band]
+Henry Cow [Band]
+Faust [Band]
+Can [Band]
+Neu! [Band]
+Kraftwerk [Band]
+Tangerine Dream [Band]
+Klaus Schulze [Band]
+Vangelis [Artist]
+Jarre [Artist]
+Oldfield [Artist]
+Enya [Artist]
+Clannad [Band]
+Loreena [Artist]
+McKennitt [Artist]
+Celtic Woman [Band]
+Riverdance [Show]
+Lord of the Dance [Show]
+Feet of Flames [Show]
+Cirque du Soleil [Show]
+Blue Man Group [Show]
+Stomp [Show]
+Blast [Show]
+Drum Corps [Style]
+Marching Band [Style]
+Brass Band [Style]
+Wind Ensemble [Style]
+Orchestra [Style]
+Chamber Music [Style]
+String Quartet [Style]
+Piano Trio [Style]
+Solo Piano [Style]
+Violin Concerto [Style]
+Cello Suite [Style]
+Symphony No. 5 [Work]
+Symphony No. 9 [Work]
+Four Seasons [Work]
+Messiah [Work]
+Requiem [Work]
+Carmina Burana [Work]
+Bolero [Work]
+Rhapsody in Blue [Work]
+Nutcracker [Work]
+Swan Lake [Work]
+Rite of Spring [Work]
+Planets [Work]
+Adagio for Strings [Work]
+Fanfare for the Common Man [Work]
+Appalachian Spring [Work]
+West Side Story [Work]
+Sound of Music [Work]
+Phantom of the Opera [Work]
+Les Miserables [Work]
+Cats [Show]
+Hamilton [Show]
+Wicked [Show]
+Lion King [Show]
+Aladdin [Show]
+Frozen [Show]
+Beauty and the Beast [Show]
+Little Mermaid [Show]
+Mulan [Show]
+Pocahontas [Show]
+Hercules [Show]
+Tarzan [Show]
+Hunchback [Show]
+Nightmare Before Christmas [Show]
+Toy Story [Movie]
+Finding Nemo [Movie]
+Incredibles [Movie]
+Cars [Movie]
+Ratatouille [Movie]
+Wall-E [Movie]
+Up [Movie]
+Inside Out [Movie]
+Coco [Movie]
+Soul [Movie]
+Luca [Movie]
+Turning Red [Movie]
+Lightyear [Movie]
+Elemental [Movie]
+Shrek [Movie]
+Kung Fu Panda [Movie]
+Madagascar [Movie]
+How to Train Your Dragon [Movie]
+Despicable Me [Movie]
+Minions [Movie]
+Sing [Movie]
+Secret Life of Pets [Movie]
+Ice Age [Movie]
+Rio [Movie]
+Robots [Movie]
+Epic [Movie]
+Spies in Disguise [Movie]
+Ferdinand [Movie]
+Peanuts Movie [Movie]
+Angry Birds Movie [Movie]
+Lego Movie [Movie]
+Batman Lego [Movie]
+Ninjago Lego [Movie]
+Super Mario Bros [Movie]
+Sonic Hedgehog [Movie]
+Detective Pikachu [Movie]
+Uncharted [Movie]
+Last of Us [Series]
+Halo [Series]
+Fallout [Series]
+Witcher [Series]
+Arcane [Series]
+Cyberpunk [Series]
+Castlevania [Series]
+Dragon Age [Series]
+Dota [Series]
+Cuphead [Series]
+Pac-Man [Game]
+Donkey Kong [Game]
+Mario Bros [Game]
+Zelda [Game]
+Metroid [Game]
+Kirby [Game]
+Pokemon [Game]
+Final Fantasy [Game]
+Dragon Quest [Game]
+Chrono Trigger [Game]
+Persona [Game]
+Kingdom Hearts [Game]
+Street Fighter [Game]
+Mortal Kombat [Game]
+Tekken [Game]
+Soul Calibur [Game]
+Virtua Fighter [Game]
+Dead or Alive [Game]
+Guilty Gear [Game]
+BlazBlue [Game]
+Smash Bros [Game]
+Call of Duty [Game]
+Battlefield [Game]
+Halo [Game]
+Destiny [Game]
+Overwatch [Game]
+Team Fortress [Game]
+Counter Strike [Game]
+Valorant [Game]
+Rainbow Six [Game]
+Apex Legends [Game]
+Fortnite [Game]
+PUBG [Game]
+Minecraft [Game]
+Roblox [Game]
+Terraria [Game]
+Stardew Valley [Game]
+Animal Crossing [Game]
+Sims [Game]
+SimCity [Game]
+Civilization [Game]
+Age of Empires [Game]
+StarCraft [Game]
+Warcraft [Game]
+Diablo [Game]
+World of Warcraft [Game]
+League of Legends [Game]
+Dota 2 [Game]
+Heroes of the Storm [Game]
+Smite [Game]
+Grand Theft Auto [Game]
+Red Dead Redemption [Game]
+Assassin's Creed [Game]
+Far Cry [Game]
+Watch Dogs [Game]
+Tom Clancy [Game]
+Splinter Cell [Game]
+Ghost Recon [Game]
+The Division [Game]
+Just Dance [Game]
+Rock Band [Game]
+Guitar Hero [Game]
+Dance Dance Revolution [Game]
+Beat Saber [Game]
+Gran Turismo [Game]
+Forza [Game]
+Need for Speed [Game]
+Burnout [Game]
+Mario Kart [Game]
+Crash Team Racing [Game]
+F-Zero [Game]
+Wipeout [Game]
+Twisted Metal [Game]
+Rocket League [Game]
+FIFA [Game]
+PES [Game]
+NBA 2K [Game]
+Madden NFL [Game]
+NHL [Game]
+MLB The Show [Game]
+WWE 2K [Game]
+UFC [Game]
+Tony Hawk [Game]
+Skate [Game]
+SSX [Game]
+Resident Evil [Game]
+Silent Hill [Game]
+Metal Gear Solid [Game]
+God of War [Game]
+Uncharted [Game]
+The Last of Us [Game]
+Spider-Man [Game]
+Batman Arkham [Game]
+Tomb Raider [Game]
+Horizon Zero Dawn [Game]
+Elden Ring [Game]
+Dark Souls [Game]
+Bloodborne [Game]
+Sekiro [Game]
+Demon's Souls [Game]
+Nioh [Game]
+Ghost of Tsushima [Game]
+Cyberpunk 2077 [Game]
+Witcher 3 [Game]
+Skyrim [Game]
+Oblivion [Game]
+Morrowind [Game]
+Fallout 4 [Game]
+Starfield [Game]
+Mass Effect [Game]
+Dragon Age [Game]
+Baldur's Gate [Game]
+Divinity [Game]
+Pillars of Eternity [Game]
+Disco Elysium [Game]
+Hades [Game]
+Bastion [Game]
+Transistor [Game]
+Pyre [Game]
+Celeste [Game]
+Hollow Knight [Game]
+Ori [Game]
+Cuphead [Game]
+Undertale [Game]
+Deltarune [Game]
+Omori [Game]
+Earthbound [Game]
+Mother [Game]
+Portal [Game]
+Half-Life [Game]
+Left 4 Dead [Game]
+BioShock [Game]
+System Shock [Game]
+Deus Ex [Game]
+Dishonored [Game]
+Prey [Game]
+Dead Space [Game]
+Alien Isolation [Game]
+Doom [Game]
+Quake [Game]
+Wolfenstein [Game]
+Duke Nukem [Game]
+Serious Sam [Game]
+Painkiller [Game]
+Shadow Warrior [Game]
+Borderlands [Game]
+Destiny 2 [Game]
+Warframe [Game]
+Path of Exile [Game]
+Lost Ark [Game]
+Black Desert [Game]
+Guild Wars 2 [Game]
+Final Fantasy XIV [Game]
+Elder Scrolls Online [Game]
+EVE Online [Game]
+Runescape [Game]
+Albion Online [Game]
+Maplestory [Game]
+Ragnarok Online [Game]
+Tibia [Game]
+Lineage [Game]
+Aion [Game]
+Tera [Game]
+Blade and Soul [Game]
+ArcheAge [Game]
+Neverwinter [Game]
+Star Trek Online [Game]
+DC Universe Online [Game]
+Champions Online [Game]
+City of Heroes [Game]
+Secret World [Game]
+Rift [Game]
+Defiance [Game]
+Planetside 2 [Game]
+MechWarrior Online [Game]
+World of Tanks [Game]
+World of Warships [Game]
+War Thunder [Game]
+Crossout [Game]
+Enlisted [Game]
+Squad [Game]
+Arma 3 [Game]
+DayZ [Game]
+Rust [Game]
+Ark Survival Evolved [Game]
+Conan Exiles [Game]
+Valheim [Game]
+Raft [Game]
+Forest [Game]
+Subnautica [Game]
+No Man's Sky [Game]
+Elite Dangerous [Game]
+Star Citizen [Game]
+Kerbal Space Program [Game]
+Factorio [Game]
+Satisfactory [Game]
+Dyson Sphere Program [Game]
+RimWorld [Game]
+Dwarf Fortress [Game]
+Prison Architect [Game]
+Two Point Hospital [Game]
+Planet Coaster [Game]
+Planet Zoo [Game]
+Jurassic World Evolution [Game]
+Cities Skylines [Game]
+SimCity 4 [Game]
+Transport Tycoon [Game]
+RollerCoaster Tycoon [Game]
+Zoo Tycoon [Game]
+Theme Hospital [Game]
+Dungeon Keeper [Game]
+Black and White [Game]
+Populous [Game]
+Spore [Game]
+SimAnt [Game]
+SimTower [Game]
+SimEarth [Game]
+SimFarm [Game]
+SimCopter [Game]
+Streets of SimCity [Game]
+Flight Simulator [Game]
+X-Plane [Game]
+DCS World [Game]
+IL-2 Sturmovik [Game]
+Euro Truck Simulator [Game]
+American Truck Simulator [Game]
+Farming Simulator [Game]
+Train Simulator [Game]
+Bus Simulator [Game]
+Construction Simulator [Game]
+Car Mechanic Simulator [Game]
+PC Building Simulator [Game]
+Cooking Simulator [Game]
+Thief Simulator [Game]
+Goat Simulator [Game]
+Surgeon Simulator [Game]
+I Am Bread [Game]
+Octodad [Game]
+Human Fall Flat [Game]
+Gang Beasts [Game]
+Fall Guys [Game]
+Among Us [Game]
+Phasmophobia [Game]
+Dead by Daylight [Game]
+Friday the 13th [Game]
+Texas Chainsaw [Game]
+Evil Dead [Game]
+Predator [Game]
+Aliens Fireteam [Game]
+Starship Troopers [Game]
+Terminator [Game]
+Robocop [Game]
+Rambo [Game]
+Rocky [Game]
+Creed [Game]
+Karate Kid [Game]
+Cobra Kai [Game]
+Matrix [Game]
+John Wick [Game]
+James Bond [Game]
+Mission Impossible [Game]
+Bourne [Game]
+Jack Ryan [Game]
+Reacher [Game]
+Sherlock Holmes [Game]
+Poirot [Game]
+Marple [Game]
+Columbo [Game]
+Monk [Game]
+Psych [Game]
+Castle [Game]
+Bones [Game]
+NCIS [Game]
+CSI [Game]
+Law and Order [Game]
+Criminal Minds [Game]
+Mindhunter [Game]
+Dexter [Game]
+Breaking Bad [Game]
+Better Call Saul [Game]
+Sopranos [Game]
+Wire [Game]
+Mad Men [Game]
+House of Cards [Game]
+West Wing [Game]
+Newsroom [Game]
+Succession [Game]
+Billions [Game]
+Yellowstone [Game]
+Ted Lasso [Game]
+Office [Game]
+Parks and Rec [Game]
+Brooklyn 99 [Game]
+Community [Game]
+Scrubs [Game]
+Friends [Game]
+Seinfeld [Game]
+Frasier [Game]
+Cheers [Game]
+Big Bang Theory [Game]
+How I Met Your Mother [Game]
+Modern Family [Game]
+Family Guy [Game]
+Simpsons [Game]
+South Park [Game]
+Rick and Morty [Game]
+Futurama [Game]
+Archer [Game]
+Bob's Burgers [Game]
+King of the Hill [Game]
+Beavis and Butthead [Game]
+Ren and Stimpy [Game]
+SpongeBob [Game]
+Avatar Last Airbender [Game]
+Korra [Game]
+Dragon Ball [Game]
+Naruto [Game]
+One Piece [Game]
+Bleach [Game]
+Death Note [Game]
+Attack on Titan [Game]
+My Hero Academia [Game]
+Demon Slayer [Game]
+Jujutsu Kaisen [Game]
+Chainsaw Man [Game]
+Spy x Family [Game]
+Fullmetal Alchemist [Game]
+Cowboy Bebop [Game]
+Evangelion [Game]
+Gundam [Game]
+Macross [Game]
+Voltron [Game]
+Transformers [Game]
+GI Joe [Game]
+He-Man [Game]
+Thundercats [Game]
+Ninja Turtles [Game]
+Power Rangers [Game]
+Scooby Doo [Game]
+Flintstones [Game]
+Jetsons [Game]
+Looney Tunes [Game]
+Tom and Jerry [Game]
+Mickey Mouse [Game]
+Donald Duck [Game]
+Goofy [Game]
+Winnie the Pooh [Game]
+Princess [Disney]
+Villain [Disney]
+Hero [Marvel]
+Hero [DC]
+Avenger [Team]
+Justice League [Team]
+X-Men [Team]
+Fantastic Four [Team]
+Guardians [Team]
+Defenders [Team]
+Titans [Team]
+Suicide Squad [Team]
+Sinister Six [Team]
+Brotherhood [Team]
+Hydra [Org]
+Shield [Org]
+Argus [Org]
+Checkmate [Org]
+League of Shadows [Org]
+Court of Owls [Org]
+Watchmen [Team]
+Boys [Team]
+Umbrella Academy [Team]
+Invincible [Team]
+Walking Dead [Group]
+Game of Thrones [House]
+Harry Potter [House]
+Lord of the Rings [Race]
+Star Wars [Faction]
+Star Trek [Race]
+Doctor Who [Race]
+Stargate [Race]
+Babylon 5 [Race]
+Battlestar Galactica [Race]
+Firefly [Crew]
+Expanse [Faction]
+Dune [House]
+Foundation [Org]
+Wheel of Time [Group]
+Dark Tower [Group]
+Discworld [Group]
+Hitchhiker [Group]
+Narnian [Race]
+Oz [Race]
+Wonderland [Race]
+Neverland [Race]
+Middle Earth [Place]
+Westeros [Place]
+Hogwarts [Place]
+Gotham [Place]
+Metropolis [Place]
+Wakanda [Place]
+Asgard [Place]
+Atlantis [Place]
+Themyscira [Place]
+Krypton [Place]
+Cybertron [Place]
+Tatooine [Place]
+Vulcan [Place]
+Gallifrey [Place]
+Pandora [Place]
+Arrakis [Place]
+Terminus [Place]
+Trantor [Place]
+Coruscant [Place]
+Azeroth [Place]
+Hyrule [Place]
+Mushroom Kingdom [Place]
+Green Hill Zone [Place]
+Kanto [Place]
+Johto [Place]
+Hoenn [Place]
+Sinnoh [Place]
+Unova [Place]
+Kalos [Place]
+Alola [Place]
+Galar [Place]
+Paldea [Place]
+Summoner's Rift [Place]
+Dust2 [Place]
+Nuketown [Place]
+Blood Gulch [Place]
+2Fort [Place]
+Final Destination [Place]
+Rainbow Road [Place]
+Coconut Mall [Place]
+Bowser's Castle [Place]
+Peach's Castle [Place]
+Ganon's Castle [Place]
+Dracula's Castle [Place]
+Wily's Castle [Place]
+Sigma's Palace [Place]
+Death Star [Place]
+Enterprise [Ship]
+Millennium Falcon [Ship]
+Serenity [Ship]
+Rocinante [Ship]
+Galactica [Ship]
+Discovery [Ship]
+Voyager [Ship]
+Defiant [Ship]
+Tardis [Ship]
+DeLorean [Car]
+Ecto-1 [Car]
+Batmobile [Car]
+KITT [Car]
+General Lee [Car]
+Herbie [Car]
+Mach 5 [Car]
+Mystery Machine [Van]
+A-Team Van [Van]
+Turtle Van [Van]
+Thunderbird [Ship]
+X-Wing [Ship]
+TIE Fighter [Ship]
+Star Destroyer [Ship]
+Borg Cube [Ship]
+Cylon Raider [Ship]
+Viper [Ship]
+Wraith Dart [Ship]
+Puddle Jumper [Ship]
+Eagle 5 [Ship]
+Heart of Gold [Ship]
+Red Dwarf [Ship]
+Planet Express [Ship]
+Bebop [Ship]
+Swordfish II [Ship]
+Arwing [Ship]
+Blue Falcon [Ship]
+Samus Gunship [Ship]
+Pelican [Ship]
+Warthog [Vehicle]
+Scorpion [Tank]
+Banshee [Vehicle]
+Ghost [Vehicle]
+Wraith [Tank]
+Mongoose [Vehicle]
+Chopper [Vehicle]
+Prowler [Vehicle]
+Hornet [Vehicle]
+Falcon [Vehicle]
+Vulture [Vehicle]
+Hawk [Vehicle]
+Sparrow [Vehicle]
+Pike [Vehicle]
+Interceptor [Vehicle]
+Colossus [Vehicle]
+Goliath [Vehicle]
+Siege Tank [Vehicle]
+Vulture [Bike]
+Wraith [Plane]
+Viking [Mech]
+Banshee [Plane]
+Battlecruiser [Ship]
+Carrier [Ship]
+Void Ray [Ship]
+Phoenix [Ship]
+Oracle [Ship]
+Tempest [Ship]
+Mothership [Ship]
+Overlord [Alien]
+Zergling [Alien]
+Hydralisk [Alien]
+Mutalisk [Alien]
+Ultralisk [Alien]
+Roach [Alien]
+Baneling [Alien]
+Infestor [Alien]
+Viper [Alien]
+Corruptor [Alien]
+Brood Lord [Alien]
+Swarm Host [Alien]
+Ravager [Alien]
+Lurker [Alien]
+Queen [Alien]
+Drone [Alien]
+Probe [Alien]
+SCV [Unit]
+Marine [Unit]
+Marauder [Unit]
+Reaper [Unit]
+Ghost [Unit]
+Hellion [Unit]
+Hellbat [Unit]
+Cyclone [Unit]
+Thor [Unit]
+Zealot [Unit]
+Stalker [Unit]
+Sentry [Unit]
+Adept [Unit]
+High Templar [Unit]
+Dark Templar [Unit]
+Archon [Unit]
+Immortal [Unit]
+Colossus [Unit]
+Disruptor [Unit]
+Observer [Unit]
+Warp Prism [Unit]
+Photon Cannon [Build]
+Shield Battery [Build]
+Pylon [Build]
+Gateway [Build]
+Forge [Build]
+Cybernetics Core [Build]
+Robotics Facility [Build]
+Stargate [Build]
+Twilight Council [Build]
+Templar Archives [Build]
+Dark Shrine [Build]
+Robotics Bay [Build]
+Fleet Beacon [Build]
+Nexus [Build]
+Assimilator [Build]
+Command Center [Build]
+Orbital Command [Build]
+Planetary Fortress [Build]
+Supply Depot [Build]
+Refinery [Build]
+Barracks [Build]
+Engineering Bay [Build]
+Bunker [Build]
+Missile Turret [Build]
+Sensor Tower [Build]
+Factory [Build]
+Ghost Academy [Build]
+Starport [Build]
+Fusion Core [Build]
+Armory [Build]
+Hatchery [Build]
+Lair [Build]
+Hive [Build]
+Extractor [Build]
+Spawning Pool [Build]
+Evolution Chamber [Build]
+Roach Warren [Build]
+Baneling Nest [Build]
+Spine Crawler [Build]
+Spore Crawler [Build]
+Hydralisk Den [Build]
+Lurker Den [Build]
+Spire [Build]
+Greater Spire [Build]
+Nydus Network [Build]
+Infestation Pit [Build]
+Ultralisk Cavern [Build]
+Creep Tumor [Build]
+Larva [Unit]
+Egg [Unit]
+Cocoon [Unit]
+Broodling [Unit]
+Changeling [Unit]
+Locust [Unit]
+Auto Turret [Unit]
+Point Defense Drone [Unit]
+MULE [Unit]
+Scanner Sweep [Ability]
+Calldown Supplies [Ability]
+Stimpack [Ability]
+Combat Shield [Upgrade]
+Concussive Shells [Upgrade]
+Infernal Preigniter [Upgrade]
+Cloaking Field [Upgrade]
+Siege Mode [Ability]
+Yamato Cannon [Ability]
+Tactical Nuke [Ability]
+Emp [Ability]
+Snipe [Ability]
+Fungal Growth [Ability]
+Neural Parasite [Ability]
+Transfuse [Ability]
+Inject Larva [Ability]
+Creep Spread [Ability]
+Burrow [Ability]
+Blink [Ability]
+Psionic Storm [Ability]
+Feedback [Ability]
+Force Field [Ability]
+Guardian Shield [Ability]
+Hallucination [Ability]
+Prismatic Alignment [Ability]
+Purification Nova [Ability]
+Recall [Ability]
+Time Warp [Ability]
+Chrono Boost [Ability]
+Mass Recall [Ability]
+Shield Overcharge [Ability]

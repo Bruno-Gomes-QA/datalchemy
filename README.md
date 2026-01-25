@@ -9,6 +9,10 @@ O foco atual (PIT) e **Postgres-first** com output deterministico e artefatos re
 
 - **Introspeccao Postgres** -> `schema.json` deterministico.
 - **CLI** `datalchemy introspect` gerando uma pasta de run com logs e metricas.
+- **Plan** com JSON Schema oficial + validacao schema-aware.
+- **Geracao** com registry por IDs, primitives/transforms, RowContext (derive) e ForeignContext (inter-tabelas).
+- **Domain packs** (CRM, Finance, Logistica) para geracao semantica.
+- **Relatorio de geracao** com contadores de cobertura e metricas de throughput.
 - **Fixtures + Docker** para testes de integracao.
 
 ---
@@ -22,8 +26,8 @@ datalchemy/
 │  ├─ datalchemy-introspect/  # Adapters + queries (Postgres-first)
 │  ├─ datalchemy-cli/         # CLI e registry de runs
 │  ├─ datalchemy-eval/        # Metricas do schema
-│  ├─ datalchemy-plan/        # Stub (Plan 2+)
-│  └─ datalchemy-generate/    # Stub (Plan 2+)
+│  ├─ datalchemy-plan/        # Contrato do plan + JSON Schema
+│  └─ datalchemy-generate/    # Engine de geracao (Plan 4)
 ├─ fixtures/sql/postgres/     # Fixtures SQL para testes (tables/ + data/)
 ├─ docker/compose.postgres.yml
 ├─ scripts/                   # Scripts para subir banco e aplicar fixtures
@@ -55,6 +59,14 @@ cargo run -p datalchemy-cli -- introspect \
 ```bash
 export DATABASE_URL="postgres://user:pass@localhost:5432/db"
 cargo run -p datalchemy-introspect --example dump_json > schema.json
+```
+
+### 3.3 Exemplo: gerar CSV (plan)
+```bash
+cargo run -p datalchemy-generate --example generate_csv -- \\
+  --plan plans/examples/minimal.plan.json \\
+  --schema runs/<run>/schema.json \\
+  --out out/
 ```
 
 ---
@@ -133,7 +145,32 @@ cargo run -p datalchemy-core --example emit_schema_json_schema > schemas/schema.
 
 ---
 
-## 8) Fluxo de contribuicao (branches, commits e evidencia)
+## 8) Plan + geracao
+
+- `schemas/plan.schema.json` define o contrato do plan.
+- `plans/examples/minimal.plan.json` usa generators por ID (`primitive.*`, `semantic.br.*`).
+- `plans/examples/m2_primitives.plan.json` cobre primitives/transforms.
+- `plans/examples/m3_ptbr.plan.json` cobre semantic pt-BR + masks.
+- `plans/examples/m4_derives.plan.json` cobre RowContext (`derive.*`).
+- `plans/examples/m5_relationships.plan.json` cobre ForeignContext (inter-tabelas).
+- `plans/examples/crm_domain.plan.json` cobre domain pack CRM.
+- `plans/examples/finance_domain.plan.json` cobre domain pack Finance.
+- `plans/examples/logistics_domain.plan.json` cobre domain pack Logistica.
+- `plans/examples/full_stack_ptbr.plan.json` integra pt-BR + domains (10k rows).
+
+Docs adicionais:
+- `docs/generators.md` (catalogo de geradores)
+- `docs/plan_generators.md` (guia de uso do plan)
+- `docs/privacy_lgpd.md` (privacidade e mascaramento)
+
+### Regenerar o plan.schema.json
+```bash
+cargo run -p datalchemy-plan --example emit_plan_json_schema > schemas/plan.schema.json
+```
+
+---
+
+## 9) Fluxo de contribuicao (branches, commits e evidencia)
 
 ### 8.1 Tasks obrigatorias (PIT)
 - Toda mudanca deve ter um arquivo em `tasks/`:
@@ -166,7 +203,7 @@ feat(pr_task_instrospect-database-schema): add cli registry artifacts
 
 ---
 
-## 9) Como o CLI gera uma run
+## 10) Como o CLI gera uma run
 
 1) Detecta engine pela URL.
 2) Cria `runs/<timestamp>__run_<id>/`.
@@ -176,7 +213,7 @@ feat(pr_task_instrospect-database-schema): add cli registry artifacts
 
 ---
 
-## 10) Arquivos chave
+## 11) Arquivos chave
 
 - `crates/datalchemy-core/src/schema.rs` — contrato do schema.
 - `crates/datalchemy-introspect/src/postgres/queries.rs` — SQL do Postgres.

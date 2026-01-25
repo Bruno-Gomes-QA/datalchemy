@@ -6,8 +6,8 @@ use serde_json::Value;
 
 use crate::errors::{IssueSeverity, PlanError, ValidationIssue, ValidationReport};
 use crate::model::{
-    ColumnGenerator, ConstraintKind, ConstraintMode, ConstraintPolicyRule, ForeignKeyMode,
-    ForeignKeyStrategyRule, Plan, Rule, Target, UnsupportedRule,
+    ConstraintKind, ConstraintMode, ConstraintPolicyRule, ForeignKeyMode, ForeignKeyStrategyRule,
+    Plan, Rule, Target, UnsupportedRule,
 };
 
 /// Validated plan with accumulated warnings.
@@ -244,7 +244,7 @@ fn validate_targets(targets: &[Target], schema_index: &SchemaIndex, report: &mut
 }
 
 fn validate_rules(plan: &Plan, schema_index: &SchemaIndex, report: &mut ValidationReport) {
-    let mut column_generators: HashMap<String, ColumnGenerator> = HashMap::new();
+    let mut column_generators: HashMap<String, String> = HashMap::new();
     let mut constraint_policies: HashMap<String, ConstraintMode> = HashMap::new();
     let mut fk_policies: HashMap<String, ForeignKeyMode> = HashMap::new();
 
@@ -350,7 +350,7 @@ fn validate_column_generator_rule(
     rule: &crate::model::ColumnGeneratorRule,
     base_path: &str,
     schema_index: &SchemaIndex,
-    column_generators: &mut HashMap<String, ColumnGenerator>,
+    column_generators: &mut HashMap<String, String>,
     report: &mut ValidationReport,
 ) {
     let schema_name = rule.schema.as_str();
@@ -395,6 +395,9 @@ fn validate_column_generator_rule(
         }
     };
 
+    validate_input_columns(rule, base_path, table, report);
+    validate_parent_reference(rule, base_path, schema_index, report);
+
     let key = format!("{schema_name}.{table_name}.{column_name}");
     if let Some(existing) = column_generators.get(&key) {
         if existing != &rule.generator {
@@ -411,14 +414,207 @@ fn validate_column_generator_rule(
         column_generators.insert(key, rule.generator.clone());
     }
 
-    if !generator_compatible(&rule.generator, &column.column_type) {
+    match generator_compatible(&rule.generator, &column.column_type) {
+        Some(true) => {}
+        Some(false) => {
+            report.push_error(ValidationIssue::new(
+                IssueSeverity::Error,
+                "incompatible_generator",
+                base_path.to_string(),
+                format!(
+                    "generator '{}' is not compatible with column type '{}'",
+                    rule.generator, column.column_type.data_type
+                ),
+                None,
+            ));
+        }
+        None => {
+            report.push_warning(ValidationIssue::new(
+                IssueSeverity::Warning,
+                "unknown_generator_id",
+                base_path.to_string(),
+                format!(
+                    "generator '{}' is not recognized by the validator",
+                    rule.generator
+                ),
+                Some("ensure the generator exists in datalchemy-generate".to_string()),
+            ));
+        }
+    }
+
+    let mut seen_transforms = HashSet::new();
+    for (idx, transform) in rule.transforms.iter().enumerate() {
+        let transform_id = transform.transform.as_str();
+        if transform_id.trim().is_empty() {
+            report.push_error(ValidationIssue::new(
+                IssueSeverity::Error,
+                "transform_empty_id",
+                format!("{base_path}/transforms/{idx}/transform"),
+                "transform id must be a non-empty string".to_string(),
+                None,
+            ));
+            continue;
+        }
+        if !seen_transforms.insert(transform_id) {
+            report.push_warning(ValidationIssue::new(
+                IssueSeverity::Warning,
+                "duplicate_transform",
+                format!("{base_path}/transforms/{idx}/transform"),
+                format!("duplicate transform '{}' for the same column", transform_id),
+                None,
+            ));
+        }
+    }
+}
+
+fn validate_input_columns(
+    rule: &crate::model::ColumnGeneratorRule,
+    base_path: &str,
+    table: &TableInfo,
+    report: &mut ValidationReport,
+) {
+    let Some(params) = rule.params.as_ref() else {
+        return;
+    };
+    let Some(value) = params.get("input_columns") else {
+        return;
+    };
+    let Some(array) = value.as_array() else {
         report.push_error(ValidationIssue::new(
             IssueSeverity::Error,
-            "incompatible_generator",
-            base_path.to_string(),
+            "invalid_input_columns",
+            format!("{base_path}/params/input_columns"),
+            "input_columns must be an array of strings".to_string(),
+            None,
+        ));
+        return;
+    };
+
+    for (idx, entry) in array.iter().enumerate() {
+        let column = match entry.as_str() {
+            Some(column) => column,
+            None => {
+                report.push_error(ValidationIssue::new(
+                    IssueSeverity::Error,
+                    "invalid_input_columns",
+                    format!("{base_path}/params/input_columns/{idx}"),
+                    "input_columns must contain only strings".to_string(),
+                    None,
+                ));
+                continue;
+            }
+        };
+
+        if !table.columns.contains_key(column) {
+            report.push_error(ValidationIssue::new(
+                IssueSeverity::Error,
+                "unknown_input_column",
+                format!("{base_path}/params/input_columns/{idx}"),
+                format!(
+                    "input column '{}.{}.{}' not found",
+                    rule.schema, rule.table, column
+                ),
+                None,
+            ));
+        }
+    }
+}
+
+fn validate_parent_reference(
+    rule: &crate::model::ColumnGeneratorRule,
+    base_path: &str,
+    schema_index: &SchemaIndex,
+    report: &mut ValidationReport,
+) {
+    if rule.generator != "derive.parent_value" {
+        return;
+    }
+
+    let params = match rule.params.as_ref() {
+        Some(params) => params,
+        None => {
+            report.push_error(ValidationIssue::new(
+                IssueSeverity::Error,
+                "missing_parent_reference",
+                format!("{base_path}/params"),
+                "derive.parent_value requires parent_schema/parent_table/parent_column".to_string(),
+                None,
+            ));
+            return;
+        }
+    };
+
+    let parent_schema = match params.get("parent_schema").and_then(|value| value.as_str()) {
+        Some(value) => value,
+        None => {
+            report.push_error(ValidationIssue::new(
+                IssueSeverity::Error,
+                "missing_parent_reference",
+                format!("{base_path}/params/parent_schema"),
+                "derive.parent_value requires parent_schema".to_string(),
+                None,
+            ));
+            return;
+        }
+    };
+    let parent_table = match params.get("parent_table").and_then(|value| value.as_str()) {
+        Some(value) => value,
+        None => {
+            report.push_error(ValidationIssue::new(
+                IssueSeverity::Error,
+                "missing_parent_reference",
+                format!("{base_path}/params/parent_table"),
+                "derive.parent_value requires parent_table".to_string(),
+                None,
+            ));
+            return;
+        }
+    };
+    let parent_column = match params.get("parent_column").and_then(|value| value.as_str()) {
+        Some(value) => value,
+        None => {
+            report.push_error(ValidationIssue::new(
+                IssueSeverity::Error,
+                "missing_parent_reference",
+                format!("{base_path}/params/parent_column"),
+                "derive.parent_value requires parent_column".to_string(),
+                None,
+            ));
+            return;
+        }
+    };
+
+    let Some(schema_tables) = schema_index.schemas.get(parent_schema) else {
+        report.push_error(ValidationIssue::new(
+            IssueSeverity::Error,
+            "unknown_parent_reference",
+            format!("{base_path}/params/parent_schema"),
+            format!("parent schema '{}' not found", parent_schema),
+            None,
+        ));
+        return;
+    };
+    let Some(table) = schema_tables.tables.get(parent_table) else {
+        report.push_error(ValidationIssue::new(
+            IssueSeverity::Error,
+            "unknown_parent_reference",
+            format!("{base_path}/params/parent_table"),
             format!(
-                "generator '{:?}' is not compatible with column type '{}'",
-                rule.generator, column.column_type.data_type
+                "parent table '{}.{}' not found",
+                parent_schema, parent_table
+            ),
+            None,
+        ));
+        return;
+    };
+    if !table.columns.contains_key(parent_column) {
+        report.push_error(ValidationIssue::new(
+            IssueSeverity::Error,
+            "unknown_parent_reference",
+            format!("{base_path}/params/parent_column"),
+            format!(
+                "parent column '{}.{}.{}' not found",
+                parent_schema, parent_table, parent_column
             ),
             None,
         ));
@@ -563,29 +759,64 @@ fn validate_foreign_key_strategy_rule(
     }
 }
 
-fn generator_compatible(generator: &ColumnGenerator, column_type: &ColumnType) -> bool {
+fn generator_compatible(generator: &str, column_type: &ColumnType) -> Option<bool> {
     let normalized = normalize_type(&column_type.data_type);
     let data_type = normalized.as_str();
-    match generator {
-        ColumnGenerator::Uuid => data_type == "uuid",
-        ColumnGenerator::Email | ColumnGenerator::Name | ColumnGenerator::Regex => {
-            matches!(
-                data_type,
-                "text" | "character varying" | "character" | "bpchar"
-            )
+    let is_text = matches!(
+        data_type,
+        "text" | "character varying" | "character" | "bpchar"
+    );
+    let is_numeric = matches!(data_type, "smallint" | "integer" | "bigint" | "numeric");
+    let is_float = matches!(data_type, "numeric" | "real" | "double precision");
+    let is_date = data_type == "date";
+    let is_time = matches!(data_type, "time without time zone" | "time with time zone");
+    let is_timestamp = matches!(
+        data_type,
+        "timestamp without time zone" | "timestamp with time zone"
+    );
+
+    let compatibility = match generator {
+        "primitive.uuid.v4" => data_type == "uuid",
+        "primitive.bool" => data_type == "boolean",
+        "primitive.int.range" | "primitive.int.sequence_hint" => is_numeric,
+        "primitive.float.range" | "primitive.decimal.numeric" | "semantic.br.money.brl" => {
+            is_numeric || is_float
         }
-        ColumnGenerator::IntRange => {
-            matches!(data_type, "smallint" | "integer" | "bigint" | "numeric")
+        "primitive.text.pattern" | "primitive.text.lorem" => is_text,
+        "primitive.date.range" => is_date || is_timestamp,
+        "primitive.time.range" => is_time,
+        "primitive.timestamp.range" => is_timestamp || is_date,
+        "semantic.br.name"
+        | "semantic.br.email.safe"
+        | "semantic.br.phone"
+        | "semantic.br.cpf"
+        | "semantic.br.cnpj"
+        | "semantic.br.rg"
+        | "semantic.br.cep"
+        | "semantic.br.uf"
+        | "semantic.br.city"
+        | "semantic.br.address"
+        | "semantic.br.ip"
+        | "semantic.br.url" => is_text,
+        "derive.email_from_name" => is_text,
+        "derive.updated_after_created" | "derive.end_after_start" => {
+            is_date || is_time || is_timestamp
         }
-        ColumnGenerator::DateRange => matches!(
-            data_type,
-            "date"
-                | "timestamp without time zone"
-                | "timestamp with time zone"
-                | "time without time zone"
-                | "time with time zone"
-        ),
-    }
+        "derive.money_total" => is_numeric || is_float,
+        "derive.fk" | "derive.parent_value" => true,
+        "domain.crm.lead_stage" | "domain.crm.activity_type" | "domain.crm.pipeline_name" => true,
+        "domain.crm.deal_value" => is_numeric || is_float,
+        "domain.finance.transaction_type"
+        | "domain.finance.payment_method"
+        | "domain.finance.invoice_status" => true,
+        "domain.finance.installments" => is_numeric,
+        "domain.logistics.tracking_code"
+        | "domain.logistics.shipment_status"
+        | "domain.logistics.carrier"
+        | "domain.logistics.dimensions_cm" => is_text,
+        _ => return None,
+    };
+    Some(compatibility)
 }
 
 fn normalize_type(data_type: &str) -> String {

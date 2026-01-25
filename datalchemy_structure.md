@@ -19,7 +19,7 @@ datalchemy/
 │  ├─ datalchemy-introspect/  # Adapters + queries (Postgres-first)
 │  ├─ datalchemy-cli/         # CLI e registry de runs
 │  ├─ datalchemy-eval/        # Metricas do schema
-│  ├─ datalchemy-plan/        # Stub (Plan 2+)
+│  ├─ datalchemy-plan/        # Contrato do plan + JSON Schema
 │  └─ datalchemy-generate/    # Engine de geracao (Plan 4)
 ├─ fixtures/
 │  └─ sql/
@@ -29,9 +29,9 @@ datalchemy/
 ├─ docker/
 │  └─ compose.postgres.yml    # Postgres para testes de integracao (opcional)
 ├─ scripts/                   # Scripts de infraestrutura/teste (ex.: postgres_docker.sh)
-├─ docs/                      # Documentacao adicional
+├─ docs/                      # Documentacao adicional (geradores, plan, privacidade)
 ├─ schemas/                   # JSON Schema oficial do contrato
-├─ plans/                     # Exemplos de plan.json (Plan 3)
+├─ plans/                     # Exemplos de plan.json (Plan 4)
 ├─ evidence/                  # Evidencias por task/issue
 ├─ tasks/                     # Tasks (issue_task_*.md, pr_task_*.md)
 ├─ runs/                      # Artefatos gerados pelo CLI (gitignored)
@@ -95,9 +95,9 @@ datalchemy/
 - `crates/datalchemy-eval/src/metrics.rs`
 - `crates/datalchemy-eval/src/report.rs`
 
-### 2.5 `crates/datalchemy-plan` (stub)
+### 2.5 `crates/datalchemy-plan`
 **Responsavel por:**
-- Contrato do `plan.json`, JSON Schema e validacao schema-aware (Plan 3).
+- Contrato do `plan.json`, JSON Schema e validacao schema-aware (Plan 4).
 
 **Arquivos principais**
 - `crates/datalchemy-plan/src/model.rs`
@@ -108,12 +108,24 @@ datalchemy/
 ### 2.6 `crates/datalchemy-generate`
 **Responsavel por:**
 - Engine de geracao deterministica (CSV) guiada por `schema.json` + `plan.json`.
+- Registry de generators/transforms por ID (primitives, semantic, derive, domain packs).
+- RowContext (derives intra-linha) e ForeignContext (inter-tabelas).
+- Relatorio com metricas de throughput e contadores de cobertura.
+- Assets estaticos para pt-BR (nomes, cidades, ruas).
 
 **Arquivos principais**
 - `crates/datalchemy-generate/src/engine.rs`
 - `crates/datalchemy-generate/src/generators/mod.rs`
+- `crates/datalchemy-generate/src/generators/primitives/mod.rs`
+- `crates/datalchemy-generate/src/generators/transforms/mod.rs`
+- `crates/datalchemy-generate/src/generators/semantic/mod.rs`
+- `crates/datalchemy-generate/src/generators/derive/mod.rs`
+- `crates/datalchemy-generate/src/generators/domain/`
+- `crates/datalchemy-generate/src/foreign.rs`
+- `crates/datalchemy-generate/src/assets.rs`
 - `crates/datalchemy-generate/src/checks.rs`
 - `crates/datalchemy-generate/examples/generate_csv.rs`
+- `crates/datalchemy-generate/assets/pt_BR/`
 
 ---
 
@@ -130,9 +142,17 @@ datalchemy/
 - Script recomendado: `scripts/postgres_docker.sh` (sobe o container e aplica fixtures).
 - Para novos bancos: `scripts/<db>_docker.sh` + `docker/compose.<db>.yml`.
 
-### 3.3 Plan (Plan 3)
+### 3.3 Plan (Plan 4)
 - `schemas/plan.schema.json` (JSON Schema oficial do plan).
 - `plans/examples/minimal.plan.json` (exemplo minimo valido).
+- `plans/examples/m2_primitives.plan.json` (primitives + transforms).
+- `plans/examples/m3_ptbr.plan.json` (pt-BR + masks).
+- `plans/examples/m4_derives.plan.json` (RowContext/derive).
+- `plans/examples/m5_relationships.plan.json` (ForeignContext/inter-tabelas).
+- `plans/examples/crm_domain.plan.json` (domain CRM).
+- `plans/examples/finance_domain.plan.json` (domain Finance).
+- `plans/examples/logistics_domain.plan.json` (domain Logistica).
+- `plans/examples/full_stack_ptbr.plan.json` (pt-BR + domains, 10k rows).
 
 ---
 
