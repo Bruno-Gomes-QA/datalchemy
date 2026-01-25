@@ -25,5 +25,5 @@ sqlx = { version = "0.8.6", features = ["macros", "postgres", "runtime-tokio-rus
 thiserror = "1.0.69"
 tokio = { version = "1.48.0", features = ["macros", "rt-multi-thread"] }
 tracing = "0.1.41"
-tracing-subscriber = { version = "0.3.19", features = ["fmt", "json", "time"] }
+tracing-subscriber = { version = "0.3.19", features = ["fmt", "json", "time", "env-filter"] }
 uuid = { version = "1.10.0", features = ["serde", "v4"] }

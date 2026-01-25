@@ -18,6 +18,8 @@ pub fn register(registry: &mut GeneratorRegistry) {
     registry.register_generator(Box::new(MoneyBrlGenerator));
     registry.register_generator(Box::new(IpGenerator));
     registry.register_generator(Box::new(UrlGenerator));
+    registry.register_generator(Box::new(CompanyGenerator));
+    registry.register_generator(Box::new(ProductGenerator));
 }
 
 struct NameGenerator;
@@ -382,6 +384,56 @@ impl Generator for UrlGenerator {
     }
 }
 
+struct CompanyGenerator;
+
+impl Generator for CompanyGenerator {
+    fn id(&self) -> &'static str {
+        "semantic.br.company.name"
+    }
+
+    fn generate(
+        &self,
+        _ctx: &mut GeneratorContext<'_>,
+        _params: Option<&Value>,
+        rng: &mut dyn rand::RngCore,
+    ) -> Result<GeneratedValue, GenerationError> {
+        let loader = assets_loader();
+        let mut companies = loader
+            .load_lines("pt_BR/companies.txt")
+            .unwrap_or_else(|_| Vec::new());
+        if companies.is_empty() {
+            companies = DEFAULT_COMPANIES.iter().map(|s| s.to_string()).collect();
+        }
+        let company = pick(&companies, rng).unwrap_or("Empresa Teste Ltda");
+        Ok(GeneratedValue::Text(company.to_string()))
+    }
+}
+
+struct ProductGenerator;
+
+impl Generator for ProductGenerator {
+    fn id(&self) -> &'static str {
+        "semantic.br.product.name"
+    }
+
+    fn generate(
+        &self,
+        _ctx: &mut GeneratorContext<'_>,
+        _params: Option<&Value>,
+        rng: &mut dyn rand::RngCore,
+    ) -> Result<GeneratedValue, GenerationError> {
+        let loader = assets_loader();
+        let mut products = loader
+            .load_lines("pt_BR/products.txt")
+            .unwrap_or_else(|_| Vec::new());
+        if products.is_empty() {
+            products = DEFAULT_PRODUCTS.iter().map(|s| s.to_string()).collect();
+        }
+        let product = pick(&products, rng).unwrap_or("Produto Teste");
+        Ok(GeneratedValue::Text(product.to_string()))
+    }
+}
+
 fn pick<'a>(values: &'a [String], rng: &mut dyn rand::RngCore) -> Option<&'a str> {
     if values.is_empty() {
         return None;
@@ -461,3 +513,7 @@ const STATES: &[&str] = &[
 ];
 
 const DDD_CODES: &[&str] = &["11", "21", "31", "41", "51", "61", "71", "81", "91"];
+
+const DEFAULT_COMPANIES: &[&str] = &["Tech Solutions", "Padaria Central", "Mercado Express"];
+
+const DEFAULT_PRODUCTS: &[&str] = &["Consultoria", "Suporte", "Implantação", "Licença Software"];

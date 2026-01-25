@@ -1,0 +1,556 @@
+{
+  "plan_version": "0.1",
+  "seed": 999,
+  "schema_ref": {
+    "schema_version": "0.2",
+    "engine": "postgres"
+  },
+  "targets": [
+    { "schema": "crm", "table": "empresas", "rows": 40 },
+    { "schema": "crm", "table": "contatos", "rows": 100 },
+    { "schema": "crm", "table": "fontes_lead", "rows": 4 },
+    { "schema": "crm", "table": "funis", "rows": 2 },
+    { "schema": "crm", "table": "etapas_funil", "rows": 8 },
+    { "schema": "crm", "table": "listas_precos", "rows": 5 },
+    { "schema": "crm", "table": "produtos", "rows": 50 },
+    { "schema": "crm", "table": "itens_lista_precos", "rows": 20 },
+    { "schema": "crm", "table": "usuarios", "rows": 10 },
+    { "schema": "crm", "table": "leads", "rows": 100 },
+    { "schema": "crm", "table": "oportunidades", "rows": 50 },
+    { "schema": "crm", "table": "atividades", "rows": 200 },
+    { "schema": "crm", "table": "anotacoes", "rows": 5 },
+    { "schema": "crm", "table": "cotacoes", "rows": 50 },
+    { "schema": "crm", "table": "itens_cotacao", "rows": 20 },
+    { "schema": "crm", "table": "faturas", "rows": 50 },
+    { "schema": "crm", "table": "itens_fatura", "rows": 20 },
+    { "schema": "crm", "table": "pagamentos", "rows": 20 },
+    { "schema": "crm", "table": "reunioes", "rows": 5 },
+    { "schema": "crm", "table": "tarefas", "rows": 5 }
+  ],
+  "rules": [
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "nome_fantasia",
+      "generator": "semantic.br.company.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "cnpj",
+      "generator": "semantic.br.cnpj"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "data_fundacao",
+      "generator": "primitive.date.range",
+      "params": { "min": "2000-01-01", "max": "2020-01-01" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "nome",
+      "generator": "semantic.br.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "email",
+      "generator": "semantic.br.email.safe"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "cargo",
+      "generator": "primitive.text.pattern",
+      "params": { "pattern": "(Diretor|Gerente|Analista|Vendedor|CEO|CTO|CFO|Assistente|Coordenador)" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "fontes_lead",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "fontes_lead",
+      "column": "nome",
+      "generator": "primitive.text.pattern",
+      "params": { "pattern": "(Google Ads|Facebook Ads|Instagram|Linkedin|Indicação|Evento|Email Marketing|Busca Orgânica|Parceiro)" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "funis",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "funis",
+      "column": "nome",
+      "generator": "primitive.text.pattern",
+      "params": { "pattern": "(Vendas Enterprise|Vendas SMB|Pós-venda|Renovação|Parcerias)" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "etapas_funil",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "etapas_funil",
+      "column": "nome",
+      "generator": "primitive.text.pattern",
+      "params": { "pattern": "(Prospecção|Qualificação|Apresentação|Demo|Proposta|Negociação|Fechamento|Onboarding)" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "etapas_funil",
+      "column": "ordem",
+      "generator": "primitive.int.range",
+      "params": { "min": 1, "max": 10 }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "listas_precos",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "listas_precos",
+      "column": "nome",
+      "generator": "primitive.text.pattern",
+      "params": { "pattern": "Tabela (2024|2025|2026|Varejo|Atacado|Distribuidor|Parceiro)" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "nome",
+      "generator": "semantic.br.product.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "codigo",
+      "generator": "primitive.text.pattern",
+      "params": { "pattern": "PRD-[0-9]{4}" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "preco_base",
+      "generator": "primitive.float.range",
+      "params": { "min": 100.0, "max": 5000.0 }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "itens_lista_precos",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "itens_lista_precos",
+      "column": "preco",
+      "generator": "primitive.float.range",
+      "params": { "min": 90.0, "max": 4900.0 }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "nome",
+      "generator": "semantic.br.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "email",
+      "generator": "semantic.br.email.safe"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "nome",
+      "generator": "semantic.br.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "email",
+      "generator": "semantic.br.email.safe"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "telefone",
+      "generator": "semantic.br.phone"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "cargo",
+      "generator": "primitive.text.pattern",
+      "params": { "pattern": "(Diretor|Gerente|Analista|Coordenador)" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "empresa",
+      "generator": "semantic.br.company.name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "oportunidades",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "oportunidades",
+      "column": "nome",
+      "generator": "primitive.text.pattern",
+      "params": { "pattern": "Oportunidade [A-Z]{3}-[0-9]{3}" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "oportunidades",
+      "column": "valor_estimado",
+      "generator": "primitive.float.range",
+      "params": { "min": 1000.0, "max": 100000.0 }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "oportunidades",
+      "column": "data_abertura",
+      "generator": "primitive.date.range",
+      "params": { "min": "2025-01-01", "max": "2025-06-30" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "oportunidades",
+      "column": "data_fechamento",
+      "generator": "primitive.date.range",
+      "params": { "min": "2025-07-01", "max": "2025-12-31" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "tipo",
+      "generator": "domain.crm.activity_type"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "assunto",
+      "generator": "primitive.text.pattern",
+      "params": { "pattern": "(Reunião|Call|Email|Almoço|Visita) com (Cliente|Lead|Parceiro)" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "descricao",
+      "generator": "primitive.text.lorem"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "data_inicio",
+      "generator": "primitive.timestamp.range",
+      "params": { "min": "2025-06-01T08:00:00", "max": "2025-06-30T18:00:00" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "data_fim",
+      "generator": "primitive.timestamp.range",
+      "params": { "min": "2025-07-01T08:00:00", "max": "2025-07-01T18:00:00" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "anotacoes",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "anotacoes",
+      "column": "conteudo",
+      "generator": "primitive.text.lorem"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "cotacoes",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "cotacoes",
+      "column": "codigo",
+      "generator": "primitive.text.pattern",
+      "params": { "pattern": "COT-[0-9]{6}" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "cotacoes",
+      "column": "validade",
+      "generator": "primitive.date.range",
+      "params": { "min": "2025-08-01", "max": "2025-12-31" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "cotacoes",
+      "column": "data_emissao",
+      "generator": "primitive.date.range",
+      "params": { "min": "2025-01-01", "max": "2025-06-30" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "itens_cotacao",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "itens_cotacao",
+      "column": "quantidade",
+      "generator": "primitive.int.range",
+      "params": { "min": 1, "max": 10 }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "itens_cotacao",
+      "column": "preco_unitario",
+      "generator": "primitive.float.range",
+      "params": { "min": 50.0, "max": 2000.0 }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "itens_cotacao",
+      "column": "desconto_percentual",
+      "generator": "primitive.float.range",
+      "params": { "min": 0.0, "max": 15.0 }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "faturas",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "faturas",
+      "column": "numero",
+      "generator": "primitive.text.pattern",
+      "params": { "pattern": "NF-[0-9]{6}" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "faturas",
+      "column": "valor_total",
+      "generator": "primitive.float.range",
+      "params": { "min": 100.0, "max": 10000.0 }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "faturas",
+      "column": "data_emissao",
+      "generator": "primitive.date.range",
+      "params": { "min": "2025-01-01", "max": "2025-06-30" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "faturas",
+      "column": "data_vencimento",
+      "generator": "primitive.date.range",
+      "params": { "min": "2025-07-01", "max": "2025-12-31" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "itens_fatura",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "itens_fatura",
+      "column": "quantidade",
+      "generator": "primitive.int.range",
+      "params": { "min": 1, "max": 10 }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "itens_fatura",
+      "column": "preco_unitario",
+      "generator": "primitive.float.range",
+      "params": { "min": 50.0, "max": 2000.0 }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "pagamentos",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "pagamentos",
+      "column": "valor",
+      "generator": "primitive.float.range",
+      "params": { "min": 50.0, "max": 5000.0 }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "pagamentos",
+      "column": "data_pagamento",
+      "generator": "primitive.date.range",
+      "params": { "min": "2025-01-01", "max": "2025-12-31" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "pagamentos",
+      "column": "referencia",
+      "generator": "primitive.text.pattern",
+      "params": { "pattern": "REF-[A-Z0-9]{8}" }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "reunioes",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "reunioes",
+      "column": "pauta",
+      "generator": "primitive.text.lorem"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "reunioes",
+      "column": "resultado",
+      "generator": "primitive.text.lorem"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "tarefas",
+      "column": "id",
+      "generator": "primitive.uuid.v4"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "tarefas",
+      "column": "prioridade",
+      "generator": "primitive.text.pattern",
+      "params": { "pattern": "(Alta|Média|Baixa)" }
+    }
+  ]
+}

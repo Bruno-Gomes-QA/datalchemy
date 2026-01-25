@@ -4,8 +4,12 @@ use std::path::PathBuf;
 use datalchemy_core::DatabaseSchema;
 use datalchemy_generate::{GenerateOptions, GenerationEngine};
 use datalchemy_plan::Plan;
+use tracing_subscriber::EnvFilter;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    tracing_subscriber::fmt().with_env_filter(filter).init();
+
     let mut args = env::args().skip(1);
     let mut plan_path: Option<PathBuf> = None;
     let mut schema_path: Option<PathBuf> = None;

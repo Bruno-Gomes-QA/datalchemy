@@ -5,6 +5,7 @@
 - Warnings padronizados via `tracing` + agregacao em `generation_report.json`.
 - Strict mode passou a ser configuravel via `plan.options.strict` (default false).
 - Regras de fallback/heuristica/unknown generator ajustadas para strict vs non-strict.
+- Logs estruturados de progresso por tabela (sem PII) para diagnostico.
 
 ## Por que mudou
 - Implementar guard rails do M0 (strict, warnings, cobertura) e garantir observabilidade sem vazar PII.
@@ -29,4 +30,4 @@ cat "$OUT_DIR/generation_report.json"
 ```
 
 ## Testes executados
-- `cargo test` (falhou no teste de integracao do introspect por falta de `DATABASE_URL`/`TEST_DATABASE_URL`).
+- Nao executado nesta atualizacao.

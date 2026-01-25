@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::path::PathBuf;
 use std::time::Instant;
@@ -7,7 +8,7 @@ use rand::SeedableRng;
 use rand::{Rng, RngCore};
 use rand_chacha::ChaCha8Rng;
 use serde_json::Value;
-use tracing::warn;
+use tracing::{info, warn};
 
 use datalchemy_core::{
     CheckConstraint, ColumnType, Constraint, DatabaseSchema, EnumType, ForeignKey, Table,
@@ -63,77 +64,137 @@ impl GenerationEngine {
             .unwrap_or(self.options.strict);
         let plan_index = PlanIndex::new(plan, strict)?;
         let tasks = plan_tables(schema, plan, self.options.auto_generate_parents)?;
+        let tasks_count = tasks.len();
         let schema_index = SchemaIndex::new(schema);
         let enum_index = EnumIndex::new(schema);
         let registry = GeneratorRegistry::new();
         let mut foreign_context = InMemoryForeignContext::new();
         let base_date = NaiveDate::from_ymd_opt(2024, 1, 1).unwrap_or_else(NaiveDate::default);
 
-        let mut report = GenerationReport::new(run_id.clone());
-        let mut bytes_written = 0_u64;
-
-        let mut table_data: HashMap<String, TableData> = HashMap::new();
-
-        for task in tasks {
-            let schema_name = task.schema.clone();
-            let table_name = task.table.clone();
-            let table = schema_index
-                .table(&schema_name, &table_name)
-                .ok_or_else(|| {
-                    GenerationError::InvalidPlan(format!(
-                        "table '{}.{}' not found in schema",
-                        schema_name, table_name
-                    ))
-                })?;
-            let table_key = table_key(&schema_name, &table_name);
-
-            let table_ctx = TableContext::new(&schema_name, table, schema, &plan_index, base_date);
-
-            let table_seed = hash_seed(plan.seed, &table_key);
-            let result = generate_table(
-                &table_ctx,
-                &registry,
-                &enum_index,
-                &plan_index,
-                &mut foreign_context,
-                table_seed,
-                task.rows,
-                &self.options,
-                &mut table_data,
-                &mut report,
-            )?;
-
-            let csv_path = run_dir.join(format!("{}.{}.csv", schema_name, table_name));
-            bytes_written += write_table_csv(&csv_path, table, &result.rows)?;
-
-            report.tables.push(TableReport {
-                schema: schema_name.clone(),
-                table: table_name.clone(),
-                rows_requested: task.rows,
-                rows_generated: result.rows.len() as u64,
-                retries: result.retries,
-            });
-            report.retries_total += result.retries;
-
-            foreign_context.ingest_table(&table_ctx.schema, table, &result.rows)?;
-            table_data.insert(table_key, result);
-        }
-
         let plan_path = run_dir.join("resolved_plan.json");
         std::fs::write(&plan_path, serde_json::to_vec_pretty(plan)?)?;
 
-        let report_path = run_dir.join("generation_report.json");
-        report.bytes_written = bytes_written;
+        let mut report = GenerationReport::new(run_id.clone());
+        let mut bytes_written = 0_u64;
+        let mut table_data: HashMap<String, TableData> = HashMap::new();
+
+        info!(
+            run_id = %run_id,
+            tables = tasks_count,
+            strict,
+            seed = plan.seed,
+            "generation started"
+        );
+
+        let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(
+            || -> Result<(), GenerationError> {
+                for task in tasks {
+                    let schema_name = task.schema.clone();
+                    let table_name = task.table.clone();
+                    let table_start = Instant::now();
+                    let table = schema_index
+                        .table(&schema_name, &table_name)
+                        .ok_or_else(|| {
+                            GenerationError::InvalidPlan(format!(
+                                "table '{}.{}' not found in schema",
+                                schema_name, table_name
+                            ))
+                        })?;
+                    let table_key = table_key(&schema_name, &table_name);
+
+                    let table_ctx =
+                        TableContext::new(&schema_name, table, schema, &plan_index, base_date);
+
+                    let table_seed = hash_seed(plan.seed, &table_key);
+                    info!(
+                        schema = %schema_name,
+                        table = %table_name,
+                        rows = task.rows,
+                        "generating table"
+                    );
+
+                    let result = generate_table(
+                        &table_ctx,
+                        &registry,
+                        &enum_index,
+                        &plan_index,
+                        &mut foreign_context,
+                        table_seed,
+                        task.rows,
+                        &self.options,
+                        &mut table_data,
+                        &mut report,
+                    )?;
+
+                    let csv_path = run_dir.join(format!("{}.{}.csv", schema_name, table_name));
+                    bytes_written += write_table_csv(&csv_path, table, &result.rows)?;
+
+                    report.tables.push(TableReport {
+                        schema: schema_name.clone(),
+                        table: table_name.clone(),
+                        rows_requested: task.rows,
+                        rows_generated: result.rows.len() as u64,
+                        retries: result.retries,
+                    });
+                    report.retries_total += result.retries;
+
+                    foreign_context.ingest_table(&table_ctx.schema, table, &result.rows)?;
+                    table_data.insert(table_key, result);
+
+                    info!(
+                        schema = %schema_name,
+                        table = %table_name,
+                        rows_generated = report.tables.last().map(|t| t.rows_generated).unwrap_or(0),
+                        retries = report.tables.last().map(|t| t.retries).unwrap_or(0),
+                        duration_ms = table_start.elapsed().as_millis() as u64,
+                        "table generated"
+                    );
+                }
+
+                Ok(())
+            },
+        ));
+
         let elapsed = start.elapsed();
+        report.bytes_written = bytes_written;
         report.duration_ms = elapsed.as_millis() as u64;
         report.throughput_bytes_per_sec = if elapsed.as_secs_f64() > 0.0 {
             bytes_written as f64 / elapsed.as_secs_f64()
         } else {
             0.0
         };
-        std::fs::write(&report_path, serde_json::to_vec_pretty(&report)?)?;
 
-        Ok(GenerationResult { run_dir, report })
+        let report_path = run_dir.join("generation_report.json");
+        let write_report = |report: &GenerationReport| -> Result<(), GenerationError> {
+            std::fs::write(&report_path, serde_json::to_vec_pretty(report)?)?;
+            Ok(())
+        };
+
+        match outcome {
+            Ok(Ok(())) => {
+                write_report(&report)?;
+                info!(
+                    run_id = %run_id,
+                    tables = report.tables.len(),
+                    duration_ms = report.duration_ms,
+                    bytes_written = report.bytes_written,
+                    "generation completed"
+                );
+                Ok(GenerationResult { run_dir, report })
+            }
+            Ok(Err(err)) => {
+                record_generation_failure(&mut report, err.to_string());
+                write_report(&report)?;
+                warn!(run_id = %run_id, error = %err, "generation failed");
+                Err(err)
+            }
+            Err(panic) => {
+                record_generation_failure(&mut report, panic_message(panic));
+                write_report(&report)?;
+                warn!(run_id = %run_id, "generation panicked");
+                Err(GenerationError::Failed(report))
+            }
+        }
     }
 }
 
@@ -151,6 +212,7 @@ struct TableContext<'a> {
     check_constraints: Vec<&'a CheckConstraint>,
     foreign_keys: Vec<ForeignKey>,
     numeric_bounds: HashMap<String, NumericBounds>,
+    current_date_columns: HashSet<String>,
     base_date: NaiveDate,
 }
 
@@ -190,6 +252,7 @@ impl<'a> TableContext<'a> {
         }
 
         let numeric_bounds = extract_numeric_bounds(schema_name, table, plan_index);
+        let current_date_columns = extract_current_date_columns(table);
 
         let _ = schema; // reserved for future schema-aware extensions
 
@@ -202,6 +265,7 @@ impl<'a> TableContext<'a> {
             check_constraints,
             foreign_keys,
             numeric_bounds,
+            current_date_columns,
             base_date,
         }
     }
@@ -696,31 +760,13 @@ fn generate_column_value(
     let key = column.name.to_lowercase();
     let unique_hint = ctx.unique_columns.contains(&key);
 
-    let mut value =
-        if let Some(rule) = plan_index.column_rule(ctx.schema, &ctx.table.name, &column.name) {
-            if unique_hint && !is_derive_generator(&rule.generator_id) {
-                generate_unique_from_rule(rule, column, row_index, ctx.base_date)
-            } else {
-                generate_from_rule(
-                    rule,
-                    ctx,
-                    column,
-                    row_index,
-                    row,
-                    registry,
-                    enum_index,
-                    foreign_context,
-                    rng,
-                    report,
-                    plan_index,
-                )?
-            }
-        } else if let Some(default) = generate_default(column, ctx.base_date, rng) {
-            default
-        } else if unique_hint {
-            generate_unique_value(column, row_index, ctx.base_date)
+    let rule = plan_index.column_rule(ctx.schema, &ctx.table.name, &column.name);
+    let mut value = if let Some(rule) = rule {
+        if unique_hint && !is_derive_generator(&rule.generator_id) {
+            generate_unique_from_rule(rule, column, row_index, ctx.base_date)
         } else {
-            generate_from_fallback(
+            generate_from_rule(
+                rule,
                 ctx,
                 column,
                 row_index,
@@ -732,7 +778,29 @@ fn generate_column_value(
                 report,
                 plan_index,
             )?
-        };
+        }
+    } else if let Some(default) = generate_default(column, ctx.base_date, rng) {
+        default
+    } else if unique_hint {
+        generate_unique_value(column, row_index, ctx.base_date)
+    } else {
+        generate_from_fallback(
+            ctx,
+            column,
+            row_index,
+            row,
+            registry,
+            enum_index,
+            foreign_context,
+            rng,
+            report,
+            plan_index,
+        )?
+    };
+
+    if rule.is_none() && ctx.current_date_columns.contains(&key) {
+        value = clamp_to_base_date(value, ctx.base_date);
+    }
 
     if let Some(bounds) = ctx.numeric_bounds.get(&key) {
         value = apply_numeric_bounds(value, bounds);
@@ -1353,6 +1421,30 @@ fn record_unsupported(report: &mut GenerationReport, issue: GenerationIssue) {
     report.record_unsupported(issue);
 }
 
+fn record_generation_failure(report: &mut GenerationReport, message: String) {
+    let issue = GenerationIssue {
+        level: "error".to_string(),
+        code: "generation_failed".to_string(),
+        message,
+        path: None,
+        schema: None,
+        table: None,
+        column: None,
+        generator_id: None,
+    };
+    record_unsupported(report, issue);
+}
+
+fn panic_message(panic: Box<dyn Any + Send>) -> String {
+    if let Some(message) = panic.downcast_ref::<&str>() {
+        (*message).to_string()
+    } else if let Some(message) = panic.downcast_ref::<String>() {
+        message.clone()
+    } else {
+        "panic during generation".to_string()
+    }
+}
+
 fn log_issue(issue: &GenerationIssue) {
     warn!(
         code = %issue.code,
@@ -1631,6 +1723,41 @@ fn apply_numeric_bounds(value: GeneratedValue, bounds: &NumericBounds) -> Genera
                 value = value.min(max);
             }
             GeneratedValue::Float(value)
+        }
+        other => other,
+    }
+}
+
+fn extract_current_date_columns(table: &Table) -> HashSet<String> {
+    let mut columns = HashSet::new();
+    let re_column = regex::Regex::new(r"(?i)(\w+)\s*(<=|>=|<|>)\s*current_date").ok();
+    let re_reverse = regex::Regex::new(r"(?i)current_date\s*(<=|>=|<|>)\s*(\w+)").ok();
+
+    for constraint in &table.constraints {
+        let Constraint::Check(check) = constraint else {
+            continue;
+        };
+        if let Some(re_column) = &re_column {
+            for caps in re_column.captures_iter(&check.expression) {
+                columns.insert(caps[1].to_lowercase());
+            }
+        }
+        if let Some(re_reverse) = &re_reverse {
+            for caps in re_reverse.captures_iter(&check.expression) {
+                columns.insert(caps[2].to_lowercase());
+            }
+        }
+    }
+
+    columns
+}
+
+fn clamp_to_base_date(value: GeneratedValue, base_date: NaiveDate) -> GeneratedValue {
+    match value {
+        GeneratedValue::Date(_) => GeneratedValue::Date(base_date),
+        GeneratedValue::Timestamp(_) => {
+            let time = NaiveTime::from_hms_opt(12, 0, 0).unwrap_or_else(NaiveTime::default);
+            GeneratedValue::Timestamp(NaiveDateTime::new(base_date, time))
         }
         other => other,
     }
