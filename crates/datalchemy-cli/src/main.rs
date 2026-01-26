@@ -1,4 +1,6 @@
 mod registry;
+mod tui;
+mod workspace;
 
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
@@ -7,7 +9,9 @@ use clap::{Args, Parser, Subcommand};
 use datalchemy_core::{
     Error as CoreError, SCHEMA_VERSION, redact_connection_string, validate_schema,
 };
+use datalchemy_eval::EvalError;
 use datalchemy_eval::collect_schema_metrics;
+use datalchemy_generate::GenerationError;
 use datalchemy_introspect::{IntrospectOptions, introspect_postgres_with_options};
 use registry::{RunContext, RunOptions, init_run_logging, start_run, write_metrics, write_schema};
 use sqlx::postgres::PgPoolOptions;
@@ -22,10 +26,26 @@ enum CliError {
     Core(#[from] CoreError),
     #[error("database error: {0}")]
     Database(#[from] sqlx::Error),
+    #[error("json error: {0}")]
+    Json(#[from] serde_json::Error),
+    #[error("evaluation error: {0}")]
+    Evaluation(#[from] EvalError),
+    #[error("generation error: {0}")]
+    Generation(#[from] GenerationError),
     #[error("invalid configuration: {0}")]
     InvalidConfig(String),
+    #[error("io error: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("crypto error: {0}")]
+    Crypto(String),
+    #[error("plan error: {0}")]
+    Plan(String),
+    #[error("runtime error: {0}")]
+    Runtime(String),
     #[error("unsupported engine: {0}")]
     UnsupportedEngine(String),
+    #[error("workspace error: {0}")]
+    Workspace(#[from] workspace::WorkspaceError),
 }
 
 #[derive(Parser, Debug)]
@@ -38,6 +58,14 @@ struct Cli {
 #[derive(Subcommand, Debug)]
 enum Command {
     Introspect(IntrospectArgs),
+    Tui(TuiArgs),
+}
+
+#[derive(Args, Debug)]
+struct TuiArgs {
+    /// Workspace root path.
+    #[arg(long, default_value = "datalchemy-cli")]
+    workspace: PathBuf,
 }
 
 #[derive(Args, Debug)]
@@ -46,7 +74,7 @@ struct IntrospectArgs {
     #[arg(long, value_name = "CONNECTION_STRING", conflicts_with = "conn_pos")]
     conn: Option<String>,
     /// Database connection string (positional form).
-    #[arg(value_name = "CONNECTION_STRING", required_unless_present = "conn")]
+    #[arg(value_name = "CONNECTION_STRING")]
     conn_pos: Option<String>,
     /// Output directory for runs.
     #[arg(long, default_value = "runs")]
@@ -83,12 +111,14 @@ struct IntrospectArgs {
     include_comments: bool,
 }
 
-#[tokio::main]
-async fn main() -> Result<(), CliError> {
+fn main() -> Result<(), CliError> {
     let cli = Cli::parse();
+    let runtime =
+        tokio::runtime::Runtime::new().map_err(|err| CliError::Runtime(err.to_string()))?;
 
     match cli.command {
-        Command::Introspect(args) => run_introspect(args).await,
+        Command::Introspect(args) => runtime.block_on(run_introspect(args)),
+        Command::Tui(args) => tui::run(runtime.handle().clone(), args.workspace),
     }
 }
 
@@ -126,11 +156,11 @@ async fn run_introspect(args: IntrospectArgs) -> Result<(), CliError> {
                 "use either --conn or positional connection string".to_string(),
             ));
         }
-        (None, None) => {
-            return Err(CliError::InvalidConfig(
-                "connection string is required".to_string(),
-            ));
-        }
+        (None, None) => std::env::var("DATABASE_URL").map_err(|_| {
+            CliError::InvalidConfig(
+                "connection string is required (pass --conn or set DATABASE_URL)".to_string(),
+            )
+        })?,
     };
 
     let engine = detect_engine(&conn)?;

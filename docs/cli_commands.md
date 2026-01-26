@@ -6,7 +6,41 @@ Este documento descreve **todos os comandos existentes no CLI hoje**, sua finali
 
 ---
 
-## 1) Comando: `datalchemy introspect`
+## 1) Comando: `datalchemy tui`
+
+### 2.1 Objetivo
+Abre a interface de terminal (TUI) com fluxo guiado:
+**Introspect -> Plan -> Generate -> Eval**.
+
+### 2.2 Sintaxe
+```bash
+datalchemy tui --workspace datalchemy-cli
+```
+
+### 1.3 Exemplo (cargo run)
+```bash
+cargo run -p datalchemy-cli -- tui
+```
+
+### 1.4 Comandos principais da TUI
+- `/init` (cria workspace local `datalchemy-cli/`)
+- `/profiles` e `/db` (perfis e conexao)
+- `/introspect` (gera run + schema.json)
+- `/plan new|edit|validate`
+- `/generate` (CSV)
+- `/eval` (avaliacao)
+- `/doctor` (diagnostico)
+- `/logs` (viewer)
+- `/secrets` (vault + `.env`)
+- `/llm` (provider/model)
+
+### 1.5 Artefatos
+Os artefatos ficam em `datalchemy-cli/`:
+- `runs/`, `plans/`, `out/`, `eval/`, `logs/`
+
+---
+
+## 2) Comando: `datalchemy introspect`
 
 ### 1.1 Objetivo
 Executa a introspeccao do banco (Postgres) e cria uma **run completa** no diretorio indicado, com artefatos versionaveis:
@@ -24,7 +58,7 @@ datalchemy introspect \
   --run-dir runs/
 ```
 
-### 1.3 Argumentos e flags
+### 2.3 Argumentos e flags
 - `--conn <CONNECTION_STRING>`
   - **Obrigatorio** (a nao ser que a string seja passada como argumento posicional).
   - Ex.: `postgres://datalchemy:datalchemy@localhost:5432/datalchemy_crm`
@@ -66,7 +100,7 @@ datalchemy introspect \
   - Inclui comentarios.
   - Default: `true`
 
-### 1.4 Saida esperada
+### 2.4 Saida esperada
 Dentro de `--run-dir`, o CLI cria uma pasta:
 ```
 <timestamp>__run_<uuid>/
@@ -81,14 +115,14 @@ Dentro de `--run-dir`, o CLI cria uma pasta:
 - `logs.ndjson` registra eventos do processo.
 - `metrics.json` contem metricas calculadas a partir do schema.
 
-### 1.5 Exemplo real (com o CRM local)
+### 2.5 Exemplo real (com o CRM local)
 ```bash
 cargo run -p datalchemy-cli -- introspect \
   --conn "postgres://datalchemy:datalchemy@localhost:5432/datalchemy_crm" \
   --run-dir runs/
 ```
 
-### 1.6 O que ele chama (cadeia de funcoes/crates)
+### 2.6 O que ele chama (cadeia de funcoes/crates)
 - Crate principal: `crates/datalchemy-cli`
 - Funcao de entrada: `crates/datalchemy-cli/src/main.rs`:
   - `main()` -> `run_introspect()`
@@ -105,7 +139,7 @@ cargo run -p datalchemy-cli -- introspect \
   - Crate: `crates/datalchemy-cli` (modulo `registry`)
   - Funcoes: `start_run()`, `init_run_logging()`, `write_schema()`, `write_metrics()`
 
-### 1.7 Erros comuns
+### 2.7 Erros comuns
 - **Conexao invalida**: retorna erro de banco (`sqlx::Error`).
 - **Engine nao suportado**: apenas `postgres://` e `postgresql://` sao aceitos.
 - **Redaction desabilitada**: o CLI falha com erro de configuracao.
@@ -113,11 +147,11 @@ cargo run -p datalchemy-cli -- introspect \
 
 ---
 
-## 2) Comandos de teste (nao sao do CLI)
+## 3) Comandos de teste (nao sao do CLI)
 
 Estes **nao** fazem parte do CLI oficial, mas sao usados em desenvolvimento/testes.
 
-### 2.1 Exemplo: `dump_json`
+### 3.1 Exemplo: `dump_json`
 - **Crate**: `crates/datalchemy-introspect`
 - **Comando**:
   ```bash
