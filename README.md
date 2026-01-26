@@ -14,6 +14,16 @@ O foco atual (PIT) e **Postgres-first** com output deterministico e artefatos re
 - **Domain packs** (CRM, Finance, Logistica) para geracao semantica.
 - **Relatorio de geracao** com contadores de cobertura e metricas de throughput.
 - **Fixtures + Docker** para testes de integracao.
+- **TUI (MVP)** `datalchemy tui` com workspace local e fluxo Introspect -> Plan -> Generate -> Eval.
+
+---
+
+## 1.1) Em planejamento (nao implementado)
+
+- **LLM real (Gemini)** e catalogo dinamico de modelos sem mock.
+- **Insert mode** (pipeline com INSERT + dry-run).
+- **Migrations de artefatos** via `/doctor`.
+  Detalhes em `tasks/pr_task_datalchemy-cli-tui/pr_task_datalchemy-cli-tui.md`.
 
 ---
 
@@ -42,6 +52,8 @@ datalchemy/
 
 ## 3) Como executar (estado atual)
 
+Para um passo a passo via `cargo run` (sem build manual), veja `docs/cli_cargo_run.md`.
+
 ### 3.1 CLI: introspect
 ```bash
 cargo run -p datalchemy-cli -- introspect \
@@ -55,13 +67,19 @@ cargo run -p datalchemy-cli -- introspect \
 - `logs.ndjson`
 - `metrics.json`
 
-### 3.2 Exemplo: dump_json
+### 3.2 TUI (MVP)
+```bash
+cargo run -p datalchemy-cli -- tui
+```
+Dentro da TUI, use `/init` e `/help` para iniciar o fluxo.
+
+### 3.3 Exemplo: dump_json
 ```bash
 export DATABASE_URL="postgres://user:pass@localhost:5432/db"
 cargo run -p datalchemy-introspect --example dump_json > schema.json
 ```
 
-### 3.3 Exemplo: gerar CSV (plan)
+### 3.4 Exemplo: gerar CSV (plan)
 ```bash
 cargo run -p datalchemy-generate --example generate_csv -- \\
   --plan plans/examples/minimal.plan.json \\

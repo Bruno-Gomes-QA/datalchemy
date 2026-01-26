@@ -29,12 +29,13 @@ datalchemy/
 ├─ docker/
 │  └─ compose.postgres.yml    # Postgres para testes de integracao (opcional)
 ├─ scripts/                   # Scripts de infraestrutura/teste (ex.: postgres_docker.sh)
-├─ docs/                      # Documentacao adicional (geradores, plan, privacidade)
+├─ docs/                      # Documentacao adicional (geradores, plan, privacidade, CLI)
 ├─ schemas/                   # JSON Schema oficial do contrato
 ├─ plans/                     # Exemplos de plan.json (Plan 4)
 ├─ evidence/                  # Evidencias por task/issue
 ├─ tasks/                     # Tasks (issue_task_*.md, pr_task_*.md)
 ├─ runs/                      # Artefatos gerados pelo CLI (gitignored)
+├─ datalchemy-cli/            # Workspace local do TUI (config/, runs/, plans/, out/, eval/)
 ├─ target/                    # Build artifacts (gitignored)
 └─ schema.json                # Exemplo local/artefato (gitignored)
 ```
@@ -76,6 +77,7 @@ datalchemy/
 ### 2.3 `crates/datalchemy-cli`
 **Responsavel por:**
 - CLI `datalchemy` com o comando `introspect`.
+- TUI `datalchemy tui` com workspace local e fluxo Introspect -> Plan -> Generate -> Eval.
 - Registry de runs (`runs/<timestamp>__run_<id>/`).
 - Logs estruturados (`logs.ndjson`) e artefatos (`schema.json`, `config.json`, `metrics.json`).
 
@@ -83,6 +85,7 @@ datalchemy/
 - `crates/datalchemy-cli/src/main.rs`
 - `crates/datalchemy-cli/src/registry/run.rs`
 - `crates/datalchemy-cli/src/registry/logging.rs`
+- `crates/datalchemy-cli/src/tui/mod.rs`
 
 ### 2.4 `crates/datalchemy-eval`
 **Responsavel por:**
