@@ -338,9 +338,7 @@ fn sanitize_identifier(value: &str) -> String {
         if ch.is_ascii_alphanumeric() {
             out.push(ch.to_ascii_lowercase());
             last_dot = false;
-        } else if (ch.is_whitespace() || ch == '-' || ch == '_' || ch == '.')
-            && !last_dot
-        {
+        } else if (ch.is_whitespace() || ch == '-' || ch == '_' || ch == '.') && !last_dot {
             out.push('.');
             last_dot = true;
         }
@@ -383,8 +381,8 @@ fn derive_after(
             let start = value.num_seconds_from_midnight() as i64;
             let delta = rng.random_range(0..=max_seconds);
             let end = (start + delta).min(86_399);
-            let time = NaiveTime::from_num_seconds_from_midnight_opt(end as u32, 0)
-                .unwrap_or_default();
+            let time =
+                NaiveTime::from_num_seconds_from_midnight_opt(end as u32, 0).unwrap_or_default();
             Ok(GeneratedValue::Time(time))
         }
         GeneratedValue::Null => Ok(GeneratedValue::Null),

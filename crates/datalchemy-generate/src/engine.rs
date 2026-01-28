@@ -743,7 +743,9 @@ fn resolve_derive_order(
 
     let mut ready = BTreeSet::new();
     for (name, degree) in &indegree {
-        if *degree == 0 && let Some(key) = order_keys.get(name) {
+        if *degree == 0
+            && let Some(key) = order_keys.get(name)
+        {
             ready.insert(key.clone());
         }
     }
@@ -758,7 +760,9 @@ fn resolve_derive_order(
             for child in children {
                 if let Some(entry) = indegree.get_mut(child) {
                     *entry = entry.saturating_sub(1);
-                    if *entry == 0 && let Some(key) = order_keys.get(child) {
+                    if *entry == 0
+                        && let Some(key) = order_keys.get(child)
+                    {
                         ready.insert(key.clone());
                     }
                 }
