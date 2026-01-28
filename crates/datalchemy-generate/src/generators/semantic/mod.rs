@@ -85,7 +85,7 @@ impl Generator for EmailSafeGenerator {
             let name = pick(&names, rng).unwrap_or("usuario");
             slugify(name)
         } else {
-            format!("user{}", rng.gen_range(1..=9999))
+            format!("user{}", rng.random_range(1..=9999))
         };
         Ok(GeneratedValue::Text(format!("{base}@example.com")))
     }
@@ -108,9 +108,9 @@ impl Generator for PhoneBrGenerator {
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
-        let ddd = DDD_CODES[rng.gen_range(0..DDD_CODES.len())];
-        let prefix = rng.gen_range(90000..=99999);
-        let suffix = rng.gen_range(0..=9999);
+        let ddd = DDD_CODES[rng.random_range(0..DDD_CODES.len())];
+        let prefix = rng.random_range(90000..=99999);
+        let suffix = rng.random_range(0..=9999);
         Ok(GeneratedValue::Text(format!(
             "+55{ddd}{prefix:05}{suffix:04}"
         )))
@@ -136,7 +136,7 @@ impl Generator for CpfGenerator {
     ) -> Result<GeneratedValue, GenerationError> {
         let mut digits = [0_u8; 11];
         for digit in digits.iter_mut().take(9) {
-            *digit = rng.gen_range(0..=9);
+            *digit = rng.random_range(0..=9);
         }
         let d1 = cpf_check_digit(&digits[..9]);
         let d2 = cpf_check_digit(&[&digits[..9], &[d1]].concat());
@@ -166,7 +166,7 @@ impl Generator for CnpjGenerator {
     ) -> Result<GeneratedValue, GenerationError> {
         let mut digits = [0_u8; 14];
         for digit in digits.iter_mut().take(12) {
-            *digit = rng.gen_range(0..=9);
+            *digit = rng.random_range(0..=9);
         }
         let d1 = cnpj_check_digit(&digits[..12]);
         let d2 = cnpj_check_digit(&[&digits[..12], &[d1]].concat());
@@ -194,7 +194,7 @@ impl Generator for RgGenerator {
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
-        let value = format!("{:09}", rng.gen_range(0..=999_999_999));
+        let value = format!("{:09}", rng.random_range(0..=999_999_999));
         Ok(GeneratedValue::Text(value))
     }
 }
@@ -216,7 +216,7 @@ impl Generator for CepGenerator {
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
-        let value = format!("{:08}", rng.gen_range(0..=99_999_999));
+        let value = format!("{:08}", rng.random_range(0..=99_999_999));
         Ok(GeneratedValue::Text(value))
     }
 }
@@ -238,7 +238,7 @@ impl Generator for UfGenerator {
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
-        let value = STATES[rng.gen_range(0..STATES.len())];
+        let value = STATES[rng.random_range(0..STATES.len())];
         Ok(GeneratedValue::Text(value.to_string()))
     }
 }
@@ -297,7 +297,7 @@ impl Generator for AddressGenerator {
             streets = DEFAULT_STREETS.iter().map(|s| s.to_string()).collect();
         }
         let street = pick(&streets, rng).unwrap_or("Rua Central");
-        let number = rng.gen_range(1..=9999);
+        let number = rng.random_range(1..=9999);
         Ok(GeneratedValue::Text(format!("{street}, {number}")))
     }
 }
@@ -328,7 +328,7 @@ impl Generator for MoneyBrlGenerator {
                 "semantic.br.money.brl min must be <= max".to_string(),
             ));
         }
-        let value = rng.gen_range(min..=max);
+        let value = rng.random_range(min..=max);
         let rounded = (value * 100.0).round() / 100.0;
         Ok(GeneratedValue::Float(rounded))
     }
@@ -351,7 +351,7 @@ impl Generator for IpGenerator {
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
-        let mut octet = || rng.gen_range(1..=254);
+        let mut octet = || rng.random_range(1..=254);
         Ok(GeneratedValue::Text(format!(
             "{}.{}.{}.{}",
             octet(),
@@ -379,7 +379,7 @@ impl Generator for UrlGenerator {
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
-        let slug = format!("pagina-{}", rng.gen_range(1..=9999));
+        let slug = format!("pagina-{}", rng.random_range(1..=9999));
         Ok(GeneratedValue::Text(format!("https://example.com/{slug}")))
     }
 }
@@ -438,7 +438,7 @@ fn pick<'a>(values: &'a [String], rng: &mut dyn rand::RngCore) -> Option<&'a str
     if values.is_empty() {
         return None;
     }
-    let idx = rng.gen_range(0..values.len());
+    let idx = rng.random_range(0..values.len());
     values.get(idx).map(String::as_str)
 }
 

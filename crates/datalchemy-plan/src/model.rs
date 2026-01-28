@@ -64,13 +64,80 @@ pub struct ColumnGeneratorRule {
     pub schema: String,
     pub table: String,
     pub column: String,
-    pub generator: String,
-    /// Generator parameters (shape depends on the generator).
+    pub generator: GeneratorRef,
+    /// Legacy generator parameters (deprecated; prefer generator.params).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub params: Option<serde_json::Value>,
     /// Optional transforms applied after generation.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub transforms: Vec<TransformRule>,
+}
+
+/// Generator reference; accepts legacy string id or full spec.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum GeneratorRef {
+    Id(String),
+    Spec(GeneratorSpec),
+}
+
+/// Generator spec with optional locale and params.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct GeneratorSpec {
+    pub id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub params: Option<serde_json::Value>,
+}
+
+impl GeneratorRef {
+    pub fn id(&self) -> &str {
+        match self {
+            GeneratorRef::Id(value) => value.as_str(),
+            GeneratorRef::Spec(spec) => spec.id.as_str(),
+        }
+    }
+
+    pub fn locale(&self) -> Option<&str> {
+        match self {
+            GeneratorRef::Id(_) => None,
+            GeneratorRef::Spec(spec) => spec.locale.as_deref(),
+        }
+    }
+
+    pub fn params(&self) -> Option<&serde_json::Value> {
+        match self {
+            GeneratorRef::Id(_) => None,
+            GeneratorRef::Spec(spec) => spec.params.as_ref(),
+        }
+    }
+}
+
+impl ColumnGeneratorRule {
+    pub fn generator_id(&self) -> &str {
+        self.generator.id()
+    }
+
+    pub fn generator_locale(&self) -> Option<&str> {
+        self.generator.locale()
+    }
+
+    pub fn generator_params(&self) -> Option<&serde_json::Value> {
+        self.generator.params().or(self.params.as_ref())
+    }
+
+    pub fn normalized_generator(&self) -> GeneratorSpec {
+        GeneratorSpec {
+            id: self.generator.id().to_string(),
+            locale: self.generator.locale().map(|value| value.to_string()),
+            params: self
+                .generator
+                .params()
+                .cloned()
+                .or_else(|| self.params.clone()),
+        }
+    }
 }
 
 /// Transform rule applied to generated values.
@@ -159,6 +226,14 @@ pub struct PlanOptions {
     pub strict: Option<bool>,
 }
 
+/// Optional plan-level globals shared by all rules.
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+pub struct PlanGlobal {
+    /// Default locale for generators.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub locale: Option<String>,
+}
+
 /// Canonical plan definition for generation.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Plan {
@@ -168,6 +243,9 @@ pub struct Plan {
     pub seed: u64,
     /// Reference to the schema used when authoring the plan.
     pub schema_ref: SchemaRef,
+    /// Optional plan-level globals (locale, etc).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub global: Option<PlanGlobal>,
     /// Targets to generate.
     pub targets: Vec<Target>,
     /// Rules that apply to tables/columns.

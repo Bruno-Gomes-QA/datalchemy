@@ -968,7 +968,6 @@ fn parse_value(column: &ColumnInfo, value: &str) -> Result<GeneratedValue, Strin
         }
         _ => Ok(GeneratedValue::Text(trimmed.to_string())),
     }
-    .map_err(|err| err)
 }
 
 fn parse_bool(value: &str) -> Option<bool> {
@@ -991,12 +990,11 @@ fn normalize_type(column_type: &ColumnType) -> String {
 
 fn detect_run_id(dataset_dir: &Path) -> Option<String> {
     let report_path = dataset_dir.join("generation_report.json");
-    if report_path.exists() {
-        if let Ok(contents) = std::fs::read_to_string(report_path) {
-            if let Ok(report) = serde_json::from_str::<GenerationReport>(&contents) {
-                return Some(report.run_id);
-            }
-        }
+    if report_path.exists()
+        && let Ok(contents) = std::fs::read_to_string(report_path)
+        && let Ok(report) = serde_json::from_str::<GenerationReport>(&contents)
+    {
+        return Some(report.run_id);
     }
 
     let name = dataset_dir.file_name()?.to_string_lossy();
@@ -1056,12 +1054,12 @@ fn constraint_kind_key(kind: ConstraintKind) -> &'static str {
     }
 }
 
-fn sort_warnings(warnings: &mut Vec<WarningItem>) {
+fn sort_warnings(warnings: &mut [WarningItem]) {
     warnings
         .sort_by(|a, b| (a.path.clone(), a.code.clone()).cmp(&(b.path.clone(), b.code.clone())));
 }
 
-fn sort_violations(violations: &mut Vec<Violation>) {
+fn sort_violations(violations: &mut [Violation]) {
     violations.sort_by(|a, b| {
         (
             a.path.clone(),

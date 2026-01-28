@@ -13,7 +13,9 @@ use tracing::{info, warn};
 use datalchemy_core::{
     CheckConstraint, ColumnType, Constraint, DatabaseSchema, EnumType, ForeignKey, Table,
 };
-use datalchemy_plan::{ConstraintKind, ConstraintMode, ForeignKeyMode, Plan, Rule, TransformRule};
+use datalchemy_plan::{
+    ConstraintKind, ConstraintMode, ForeignKeyMode, GeneratorRef, Plan, Rule, TransformRule,
+};
 
 use crate::checks::{CheckContext, CheckOutcome, evaluate_check};
 use crate::errors::GenerationError;
@@ -62,17 +64,18 @@ impl GenerationEngine {
             .as_ref()
             .and_then(|opts| opts.strict)
             .unwrap_or(self.options.strict);
-        let plan_index = PlanIndex::new(plan, strict)?;
-        let tasks = plan_tables(schema, plan, self.options.auto_generate_parents)?;
+        let plan = normalize_plan(plan);
+        let plan_index = PlanIndex::new(&plan, strict)?;
+        let tasks = plan_tables(schema, &plan, self.options.auto_generate_parents)?;
         let tasks_count = tasks.len();
         let schema_index = SchemaIndex::new(schema);
         let enum_index = EnumIndex::new(schema);
         let registry = GeneratorRegistry::new();
         let mut foreign_context = InMemoryForeignContext::new();
-        let base_date = NaiveDate::from_ymd_opt(2024, 1, 1).unwrap_or_else(NaiveDate::default);
+        let base_date = NaiveDate::from_ymd_opt(2024, 1, 1).unwrap_or_default();
 
         let plan_path = run_dir.join("resolved_plan.json");
-        std::fs::write(&plan_path, serde_json::to_vec_pretty(plan)?)?;
+        std::fs::write(&plan_path, serde_json::to_vec_pretty(&plan)?)?;
 
         let mut report = GenerationReport::new(run_id.clone());
         let mut bytes_written = 0_u64;
@@ -138,7 +141,7 @@ impl GenerationEngine {
                     });
                     report.retries_total += result.retries;
 
-                    foreign_context.ingest_table(&table_ctx.schema, table, &result.rows)?;
+                    foreign_context.ingest_table(table_ctx.schema, table, &result.rows)?;
                     table_data.insert(table_key, result);
 
                     info!(
@@ -213,6 +216,7 @@ struct TableContext<'a> {
     foreign_keys: Vec<ForeignKey>,
     numeric_bounds: HashMap<String, NumericBounds>,
     current_date_columns: HashSet<String>,
+    email_columns: HashSet<String>,
     base_date: NaiveDate,
 }
 
@@ -253,6 +257,7 @@ impl<'a> TableContext<'a> {
 
         let numeric_bounds = extract_numeric_bounds(schema_name, table, plan_index);
         let current_date_columns = extract_current_date_columns(table);
+        let email_columns = extract_email_columns(table);
 
         let _ = schema; // reserved for future schema-aware extensions
 
@@ -266,6 +271,7 @@ impl<'a> TableContext<'a> {
             foreign_keys,
             numeric_bounds,
             current_date_columns,
+            email_columns,
             base_date,
         }
     }
@@ -273,6 +279,7 @@ impl<'a> TableContext<'a> {
 
 struct ColumnRule {
     generator_id: String,
+    generator_locale: Option<String>,
     params: Option<Value>,
     transforms: Vec<TransformRule>,
     input_columns: Vec<String>,
@@ -283,7 +290,27 @@ struct PlanIndex {
     constraint_policies: HashMap<String, ConstraintMode>,
     fk_strategies: HashMap<String, ForeignKeyMode>,
     allow_fk_disable: bool,
+    global_locale: Option<String>,
     strict: bool,
+}
+
+fn normalize_plan(plan: &Plan) -> Plan {
+    let mut plan = plan.clone();
+    let mut rules = Vec::with_capacity(plan.rules.len());
+    for rule in plan.rules {
+        let normalized = match rule {
+            Rule::ColumnGenerator(mut rule) => {
+                let spec = rule.normalized_generator();
+                rule.generator = GeneratorRef::Spec(spec);
+                rule.params = None;
+                Rule::ColumnGenerator(rule)
+            }
+            other => other,
+        };
+        rules.push(normalized);
+    }
+    plan.rules = rules;
+    plan
 }
 
 impl PlanIndex {
@@ -291,18 +318,28 @@ impl PlanIndex {
         let mut column_rules = HashMap::new();
         let mut constraint_policies = HashMap::new();
         let mut fk_strategies = HashMap::new();
+        let global_locale = plan
+            .global
+            .as_ref()
+            .and_then(|global| global.locale.as_ref())
+            .map(|value| value.to_string());
 
         for rule in &plan.rules {
             match rule {
                 Rule::ColumnGenerator(rule) => {
                     let key = column_key(&rule.schema, &rule.table, &rule.column);
+                    let params = rule.generator_params().cloned();
                     column_rules.insert(
                         key,
                         ColumnRule {
-                            generator_id: rule.generator.clone(),
-                            params: rule.params.clone(),
+                            generator_id: rule.generator_id().to_string(),
+                            generator_locale: rule
+                                .generator_locale()
+                                .map(|value| value.to_string())
+                                .or_else(|| global_locale.clone()),
+                            params: params.clone(),
                             transforms: rule.transforms.clone(),
-                            input_columns: parse_input_columns_strict(&rule.params)?,
+                            input_columns: parse_input_columns_strict(&params)?,
                         },
                     );
                 }
@@ -328,6 +365,7 @@ impl PlanIndex {
             constraint_policies,
             fk_strategies,
             allow_fk_disable,
+            global_locale,
             strict,
         })
     }
@@ -625,7 +663,7 @@ fn apply_foreign_keys(
             )));
         }
 
-        let index = rng.gen_range(0..parent.rows.len());
+        let index = rng.random_range(0..parent.rows.len());
         let parent_row = &parent.rows[index];
 
         for (child_col, parent_col) in fk.columns.iter().zip(&fk.referenced_columns) {
@@ -705,15 +743,12 @@ fn resolve_derive_order(
 
     let mut ready = BTreeSet::new();
     for (name, degree) in &indegree {
-        if *degree == 0 {
-            if let Some(key) = order_keys.get(name) {
-                ready.insert(key.clone());
-            }
+        if *degree == 0 && let Some(key) = order_keys.get(name) {
+            ready.insert(key.clone());
         }
     }
 
     let mut ordered = Vec::new();
-    let mut indegree = indegree;
     while let Some(key) = ready.iter().next().cloned() {
         ready.remove(&key);
         let name = key.1.clone();
@@ -723,10 +758,8 @@ fn resolve_derive_order(
             for child in children {
                 if let Some(entry) = indegree.get_mut(child) {
                     *entry = entry.saturating_sub(1);
-                    if *entry == 0 {
-                        if let Some(key) = order_keys.get(child) {
-                            ready.insert(key.clone());
-                        }
+                    if *entry == 0 && let Some(key) = order_keys.get(child) {
+                        ready.insert(key.clone());
                     }
                 }
             }
@@ -781,6 +814,20 @@ fn generate_column_value(
         }
     } else if let Some(default) = generate_default(column, ctx.base_date, rng) {
         default
+    } else if let Some((generator_id, value, tags)) = generate_from_default_generator(
+        ctx,
+        column,
+        row_index,
+        row,
+        registry,
+        enum_index,
+        foreign_context,
+        rng,
+        plan_index.global_locale.as_deref(),
+    )? {
+        report.record_generator_usage(generator_id);
+        record_pii_tags(report, column, tags);
+        value
     } else if unique_hint {
         generate_unique_value(column, row_index, ctx.base_date)
     } else {
@@ -854,7 +901,7 @@ fn generate_from_rule(
     foreign_context: &mut InMemoryForeignContext,
     rng: &mut ChaCha8Rng,
     report: &mut GenerationReport,
-    plan_index: &PlanIndex,
+    _plan_index: &PlanIndex,
 ) -> Result<GeneratedValue, GenerationError> {
     let generator_id = rule.generator_id.as_str();
     let generator = match registry.generator(generator_id) {
@@ -872,26 +919,10 @@ fn generate_from_rule(
                 Some(generator_id),
             );
             record_warning(report, issue);
-
-            if plan_index.strict {
-                return Err(GenerationError::InvalidPlan(format!(
-                    "unknown generator id '{}'",
-                    generator_id
-                )));
-            }
-
-            return generate_from_fallback(
-                ctx,
-                column,
-                row_index,
-                row,
-                registry,
-                enum_index,
-                foreign_context,
-                rng,
-                report,
-                plan_index,
-            );
+            return Err(GenerationError::InvalidPlan(format!(
+                "unknown generator id '{}'",
+                generator_id
+            )));
         }
     };
 
@@ -905,14 +936,12 @@ fn generate_from_rule(
         enum_values: enum_index.values_for(column),
         row,
         foreign: Some(foreign_context),
+        generator_locale: rule.generator_locale.as_deref(),
     };
 
     let value = match generator.generate(&mut generator_ctx, rule.params.as_ref(), rng) {
         Ok(value) => value,
         Err(err) => {
-            if plan_index.strict {
-                return Err(err);
-            }
             let issue = issue_for_column(
                 "invalid_generator_params",
                 format!("invalid generator params for '{}': {}", generator_id, err),
@@ -921,24 +950,7 @@ fn generate_from_rule(
                 Some(generator_id),
             );
             record_warning(report, issue);
-            match generator.generate(&mut generator_ctx, None, rng) {
-                Ok(value) => value,
-                Err(_) => {
-                    record_fallback_warning(report, ctx, column, Some(generator_id));
-                    return generate_from_fallback(
-                        ctx,
-                        column,
-                        row_index,
-                        row,
-                        registry,
-                        enum_index,
-                        foreign_context,
-                        rng,
-                        report,
-                        plan_index,
-                    );
-                }
-            }
+            return Err(err);
         }
     };
 
@@ -960,27 +972,14 @@ fn generate_from_fallback(
     report: &mut GenerationReport,
     plan_index: &PlanIndex,
 ) -> Result<GeneratedValue, GenerationError> {
-    if let Some(generator) = registry.generator("primitive.enum") {
-        if enum_index.values_for(column).is_some() {
-            let mut generator_ctx = GeneratorContext {
-                schema: ctx.schema,
-                table: &ctx.table.name,
-                column,
-                foreign_keys: &ctx.foreign_keys,
-                base_date: ctx.base_date,
-                row_index,
-                enum_values: enum_index.values_for(column),
-                row,
-                foreign: Some(foreign_context),
-            };
-            let value = generator.generate(&mut generator_ctx, None, rng)?;
-            report.record_generator_usage("primitive.enum");
-            record_pii_tags(report, column, generator.pii_tags());
-            return Ok(value);
-        }
+    if plan_index.strict {
+        return Err(GenerationError::Unsupported(format!(
+            "fallback generation forbidden in strict mode for '{}.{}.{}'",
+            ctx.schema, ctx.table.name, column.name
+        )));
     }
 
-    if let Some((generator_id, value, tags)) = generate_with_heuristic(
+    if let Some((generator_id, value, tags)) = generate_from_default_generator(
         ctx,
         column,
         row_index,
@@ -989,37 +988,12 @@ fn generate_from_fallback(
         enum_index,
         foreign_context,
         rng,
+        plan_index.global_locale.as_deref(),
     )? {
-        if plan_index.strict {
-            return Err(GenerationError::Unsupported(format!(
-                "heuristic generation forbidden in strict mode for '{}.{}.{}'",
-                ctx.schema, ctx.table.name, column.name
-            )));
-        }
-        report.record_heuristic();
-        if let Some(generator_id) = generator_id {
-            report.record_generator_usage(generator_id);
-        }
+        record_fallback_warning(report, ctx, column, Some(generator_id));
+        report.record_generator_usage(generator_id);
         record_pii_tags(report, column, tags);
-        let issue = issue_for_column(
-            "heuristic_used",
-            format!(
-                "heuristic generator used for '{}.{}.{}'",
-                ctx.schema, ctx.table.name, column.name
-            ),
-            ctx,
-            column,
-            generator_id,
-        );
-        record_warning(report, issue);
         return Ok(value);
-    }
-
-    if plan_index.strict {
-        return Err(GenerationError::Unsupported(format!(
-            "fallback generation forbidden in strict mode for '{}.{}.{}'",
-            ctx.schema, ctx.table.name, column.name
-        )));
     }
 
     record_fallback_warning(report, ctx, column, None);
@@ -1114,13 +1088,13 @@ fn generate_default(
 
     match normalized.as_str() {
         "gen_random_uuid()" | "uuid_generate_v4()" => {
-            let bytes: [u8; 16] = rng.r#gen();
+            let bytes: [u8; 16] = rng.random();
             Some(GeneratedValue::Uuid(
                 uuid::Uuid::from_bytes(bytes).to_string(),
             ))
         }
         "now()" | "current_timestamp" => {
-            let time = NaiveTime::from_hms_opt(12, 0, 0).unwrap_or_else(NaiveTime::default);
+            let time = NaiveTime::from_hms_opt(12, 0, 0).unwrap_or_default();
             Some(GeneratedValue::Timestamp(NaiveDateTime::new(
                 base_date, time,
             )))
@@ -1157,7 +1131,7 @@ fn normalize_default(default: &str) -> String {
     value
 }
 
-fn generate_with_heuristic(
+fn generate_from_default_generator(
     ctx: &TableContext<'_>,
     column: &datalchemy_core::Column,
     row_index: u64,
@@ -1166,91 +1140,52 @@ fn generate_with_heuristic(
     enum_index: &EnumIndex,
     foreign_context: &mut InMemoryForeignContext,
     rng: &mut ChaCha8Rng,
-) -> Result<
-    Option<(
-        Option<&'static str>,
-        GeneratedValue,
-        &'static [&'static str],
-    )>,
-    GenerationError,
-> {
-    if let Some(value) = heuristic_inline_value(column, rng) {
-        return Ok(Some((Some("heuristic.tipo"), value, EMPTY_TAGS)));
-    }
-
-    if let Some(generator_id) = heuristic_generator_id(column) {
-        if let Some(generator) = registry.generator(generator_id) {
-            let mut generator_ctx = GeneratorContext {
-                schema: ctx.schema,
-                table: &ctx.table.name,
-                column,
-                foreign_keys: &ctx.foreign_keys,
-                base_date: ctx.base_date,
-                row_index,
-                enum_values: enum_index.values_for(column),
-                row,
-                foreign: Some(foreign_context),
-            };
-            let value = generator.generate(&mut generator_ctx, None, rng)?;
-            return Ok(Some((Some(generator_id), value, generator.pii_tags())));
-        }
-    }
-
-    Ok(None)
+    locale: Option<&str>,
+) -> Result<Option<(&'static str, GeneratedValue, &'static [&'static str])>, GenerationError> {
+    let generator_id = default_generator_id_for_column(ctx, column, enum_index);
+    let Some(generator) = registry.generator(generator_id) else {
+        return Ok(None);
+    };
+    let mut generator_ctx = GeneratorContext {
+        schema: ctx.schema,
+        table: &ctx.table.name,
+        column,
+        foreign_keys: &ctx.foreign_keys,
+        base_date: ctx.base_date,
+        row_index,
+        enum_values: enum_index.values_for(column),
+        row,
+        foreign: Some(foreign_context),
+        generator_locale: locale,
+    };
+    let value = generator.generate(&mut generator_ctx, None, rng)?;
+    Ok(Some((generator_id, value, generator.pii_tags())))
 }
 
-fn heuristic_generator_id(column: &datalchemy_core::Column) -> Option<&'static str> {
-    let name = column.name.to_lowercase();
-    if name == "id" && normalize_type(&column.column_type) == "uuid" {
-        return Some("primitive.uuid.v4");
-    }
-    if name.contains("email") {
-        return Some("semantic.br.email.safe");
-    }
-    if name.contains("nome") || name.contains("name") {
-        return Some("semantic.br.name");
-    }
-    if name.contains("cpf") {
-        return Some("semantic.br.cpf");
-    }
-    if name.contains("cnpj") {
-        return Some("semantic.br.cnpj");
-    }
-    if name.contains("telefone") || name.contains("phone") {
-        return Some("semantic.br.phone");
-    }
-    if name.contains("cep") {
-        return Some("semantic.br.cep");
-    }
-    if name.contains("cidade") || name.contains("city") {
-        return Some("semantic.br.city");
-    }
-    if name == "uf" || name.contains("estado") {
-        return Some("semantic.br.uf");
-    }
-    if name.contains("endereco") || name.contains("logradouro") {
-        return Some("semantic.br.address");
-    }
-    if name.contains("ip") {
-        return Some("semantic.br.ip");
-    }
-    if name.contains("url") {
-        return Some("semantic.br.url");
-    }
-    None
-}
-
-fn heuristic_inline_value(
+fn default_generator_id_for_column(
+    ctx: &TableContext<'_>,
     column: &datalchemy_core::Column,
-    rng: &mut ChaCha8Rng,
-) -> Option<GeneratedValue> {
-    let name = column.name.to_lowercase();
-    if name == "tipo" {
-        let values = ["tarefa", "reuniao", "anotacao"];
-        let value = values[rng.gen_range(0..values.len())];
-        return Some(GeneratedValue::Text(value.to_string()));
+    enum_index: &EnumIndex,
+) -> &'static str {
+    if enum_index.values_for(column).is_some() {
+        return "primitive.enum";
     }
-    None
+    if ctx.email_columns.contains(&column.name.to_lowercase()) {
+        return "semantic.person.email";
+    }
+    let data_type = normalize_type(&column.column_type).to_lowercase();
+    match data_type.as_str() {
+        "uuid" => "primitive.uuid",
+        "smallint" | "integer" | "bigint" => "primitive.int",
+        "numeric" | "decimal" => "primitive.decimal.numeric",
+        "real" | "double precision" => "primitive.float",
+        "boolean" => "primitive.bool",
+        "date" => "primitive.date",
+        "time with time zone" | "time without time zone" => "primitive.time",
+        "timestamp with time zone" | "timestamp without time zone" => "primitive.timestamp",
+        "character varying" | "character" | "varchar" | "bpchar" | "text" => "primitive.text",
+        _ => "primitive.text",
+    }
 }
 
 fn fallback_for_type(
@@ -1262,36 +1197,36 @@ fn fallback_for_type(
     match data_type.as_str() {
         "uuid" => GeneratedValue::Uuid(random_uuid(rng)),
         "smallint" | "integer" | "bigint" => {
-            let value = rng.gen_range(1..=100000);
+            let value = rng.random_range(1..=100000);
             GeneratedValue::Int(value)
         }
         "numeric" => {
             if column.column_type.numeric_scale.unwrap_or(0) > 0 {
-                let value = rng.gen_range(0.0..=100000.0);
+                let value = rng.random_range(0.0..=100000.0);
                 GeneratedValue::Float(value)
             } else {
-                let value = rng.gen_range(1..=100000);
+                let value = rng.random_range(1..=100000);
                 GeneratedValue::Int(value)
             }
         }
-        "boolean" => GeneratedValue::Bool(rng.gen_bool(0.5)),
+        "boolean" => GeneratedValue::Bool(rng.random_bool(0.5)),
         "date" => {
-            let offset = rng.gen_range(0..=365) as i64;
+            let offset = rng.random_range(0..=365) as i64;
             GeneratedValue::Date(base_date + chrono::Duration::days(offset))
         }
         "timestamp with time zone" | "timestamp without time zone" => {
-            let offset = rng.gen_range(0..=365) as i64;
+            let offset = rng.random_range(0..=365) as i64;
             let date = base_date + chrono::Duration::days(offset);
-            let time = NaiveTime::from_hms_opt(12, 0, 0).unwrap_or_else(NaiveTime::default);
+            let time = NaiveTime::from_hms_opt(12, 0, 0).unwrap_or_default();
             GeneratedValue::Timestamp(NaiveDateTime::new(date, time))
         }
         "time with time zone" | "time without time zone" => {
-            let seconds = rng.gen_range(0..=86399);
+            let seconds = rng.random_range(0..=86399);
             let time = safe_time_from_seconds(seconds);
             GeneratedValue::Time(time)
         }
         _ => {
-            let mut value = format!("{}_{}", column.name, rng.r#gen::<u32>());
+            let mut value = format!("{}_{}", column.name, rng.random::<u32>());
             if let Some(max_len) = column.column_type.character_max_length {
                 value.truncate(max_len as usize);
             }
@@ -1319,7 +1254,7 @@ fn random_uuid(rng: &mut ChaCha8Rng) -> String {
 }
 
 fn safe_time_from_seconds(seconds: u32) -> NaiveTime {
-    NaiveTime::from_num_seconds_from_midnight_opt(seconds, 0).unwrap_or_else(NaiveTime::default)
+    NaiveTime::from_num_seconds_from_midnight_opt(seconds, 0).unwrap_or_default()
 }
 
 fn record_pii_tags(
@@ -1455,8 +1390,6 @@ fn log_issue(issue: &GenerationIssue) {
         message = %issue.message
     );
 }
-
-const EMPTY_TAGS: &[&str] = &[];
 
 fn enforce_not_null(
     ctx: &TableContext<'_>,
@@ -1752,11 +1685,32 @@ fn extract_current_date_columns(table: &Table) -> HashSet<String> {
     columns
 }
 
+fn extract_email_columns(table: &Table) -> HashSet<String> {
+    let mut columns = HashSet::new();
+    let re_position = regex::Regex::new(
+        r"(?i)position\(\(?\s*'\s*[^']*\s*'(?:::text)?\s*\)?\s+in\s+\(?\s*(\w+)\s*\)?\s*\)",
+    )
+    .ok();
+
+    for constraint in &table.constraints {
+        let Constraint::Check(check) = constraint else {
+            continue;
+        };
+        if let Some(re_position) = &re_position {
+            for caps in re_position.captures_iter(&check.expression) {
+                columns.insert(caps[1].to_lowercase());
+            }
+        }
+    }
+
+    columns
+}
+
 fn clamp_to_base_date(value: GeneratedValue, base_date: NaiveDate) -> GeneratedValue {
     match value {
         GeneratedValue::Date(_) => GeneratedValue::Date(base_date),
         GeneratedValue::Timestamp(_) => {
-            let time = NaiveTime::from_hms_opt(12, 0, 0).unwrap_or_else(NaiveTime::default);
+            let time = NaiveTime::from_hms_opt(12, 0, 0).unwrap_or_default();
             GeneratedValue::Timestamp(NaiveDateTime::new(base_date, time))
         }
         other => other,
@@ -1782,7 +1736,7 @@ fn generate_unique_value(
         }
         "timestamp with time zone" | "timestamp without time zone" => {
             let date = base_date + chrono::Duration::days(row_index as i64);
-            let time = NaiveTime::from_hms_opt(12, 0, 0).unwrap_or_else(NaiveTime::default);
+            let time = NaiveTime::from_hms_opt(12, 0, 0).unwrap_or_default();
             GeneratedValue::Timestamp(NaiveDateTime::new(date, time))
         }
         "time with time zone" | "time without time zone" => {
@@ -1791,18 +1745,11 @@ fn generate_unique_value(
             GeneratedValue::Time(time)
         }
         _ => {
-            let name = column.name.to_lowercase();
-            if name.contains("email") {
-                GeneratedValue::Text(format!("user{:05}@example.com", row_index + 1))
-            } else if name.contains("cnpj") {
-                GeneratedValue::Text(format!("{:014}", row_index + 1))
-            } else if name.contains("sku") {
-                GeneratedValue::Text(format!("SKU-{:05}", row_index + 1))
-            } else if name.contains("codigo") {
-                GeneratedValue::Text(format!("COD-{:05}", row_index + 1))
-            } else {
-                GeneratedValue::Text(format!("{}_{}", column.name, row_index + 1))
+            let mut value = format!("value_{:05}", row_index + 1);
+            if let Some(max_len) = column.column_type.character_max_length {
+                value.truncate(max_len as usize);
             }
+            GeneratedValue::Text(value)
         }
     }
 }
@@ -1814,15 +1761,18 @@ fn generate_unique_from_rule(
     base_date: NaiveDate,
 ) -> GeneratedValue {
     match rule.generator_id.as_str() {
-        "semantic.br.email.safe" => {
+        "semantic.br.email.safe"
+        | "semantic.person.email"
+        | "faker.internet.raw.SafeEmail"
+        | "faker.internet.raw.FreeEmail" => {
             GeneratedValue::Text(format!("user{:05}@example.com", row_index + 1))
         }
-        "primitive.uuid.v4" => {
+        "primitive.uuid" | "primitive.uuid.v4" => {
             let value = uuid::Uuid::from_u128(row_index as u128 + 1).to_string();
             GeneratedValue::Uuid(value)
         }
         "semantic.br.name" => GeneratedValue::Text(format!("Pessoa {}", row_index + 1)),
-        "primitive.int.range" | "primitive.int.sequence_hint" => {
+        "primitive.int" | "primitive.int.range" | "primitive.int.sequence_hint" => {
             let min = rule
                 .params
                 .as_ref()
@@ -1841,18 +1791,58 @@ fn generate_unique_from_rule(
             }
             GeneratedValue::Int(value)
         }
-        "primitive.date.range" | "primitive.timestamp.range" => {
+        "primitive.float" | "primitive.float.range" | "primitive.decimal.numeric" => {
+            let min = rule
+                .params
+                .as_ref()
+                .and_then(|params| params.get("min"))
+                .and_then(|value| value.as_f64())
+                .unwrap_or(0.0);
+            let max = rule
+                .params
+                .as_ref()
+                .and_then(|params| params.get("max"))
+                .and_then(|value| value.as_f64())
+                .unwrap_or(f64::MAX);
+            let mut value = min + row_index as f64 + 1.0;
+            if value > max {
+                value = max;
+            }
+            if rule.generator_id.as_str() == "primitive.decimal.numeric" {
+                let scale = rule
+                    .params
+                    .as_ref()
+                    .and_then(|params| params.get("scale"))
+                    .and_then(|value| value.as_i64())
+                    .unwrap_or(2)
+                    .max(0) as i32;
+                let factor = 10_f64.powi(scale);
+                value = (value * factor).round() / factor;
+            }
+            GeneratedValue::Float(value)
+        }
+        "primitive.date"
+        | "primitive.date.range"
+        | "primitive.timestamp"
+        | "primitive.timestamp.range" => {
             let date = base_date + chrono::Duration::days(row_index as i64);
-            if rule.generator_id.as_str() == "primitive.timestamp.range" {
-                let time = NaiveTime::from_hms_opt(12, 0, 0).unwrap_or_else(NaiveTime::default);
+            if rule.generator_id.as_str() == "primitive.timestamp"
+                || rule.generator_id.as_str() == "primitive.timestamp.range"
+            {
+                let time = NaiveTime::from_hms_opt(12, 0, 0).unwrap_or_default();
                 GeneratedValue::Timestamp(NaiveDateTime::new(date, time))
             } else {
                 GeneratedValue::Date(date)
             }
         }
+        "primitive.time" | "primitive.time.range" => {
+            let seconds = (row_index % 86400) as u32;
+            let time = safe_time_from_seconds(seconds);
+            GeneratedValue::Time(time)
+        }
         "semantic.br.cpf" => GeneratedValue::Text(format!("{:011}", row_index + 1)),
         "semantic.br.cnpj" => GeneratedValue::Text(format!("{:014}", row_index + 1)),
-        "primitive.text.pattern" | "primitive.text.lorem" => {
+        "primitive.text" | "primitive.text.pattern" | "primitive.text.lorem" => {
             GeneratedValue::Text(format!("{}_{}", column.name, row_index + 1))
         }
         _ => generate_unique_value(column, row_index, base_date),

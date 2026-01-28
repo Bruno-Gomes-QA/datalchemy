@@ -118,10 +118,10 @@ impl ForeignContext for InMemoryForeignContext {
 
 fn primary_key_column(table: &Table) -> Option<String> {
     for constraint in &table.constraints {
-        if let Constraint::PrimaryKey(pk) = constraint {
-            if pk.columns.len() == 1 {
-                return pk.columns.first().cloned();
-            }
+        if let Constraint::PrimaryKey(pk) = constraint
+            && pk.columns.len() == 1
+        {
+            return pk.columns.first().cloned();
         }
     }
     None

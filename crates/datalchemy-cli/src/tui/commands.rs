@@ -1602,6 +1602,7 @@ fn mock_plan(schema: &DatabaseSchema) -> Plan {
             schema_fingerprint: schema.schema_fingerprint.clone(),
             engine: schema.engine.clone(),
         },
+        global: None,
         targets,
         rules: Vec::new(),
         rules_unsupported: Vec::new(),

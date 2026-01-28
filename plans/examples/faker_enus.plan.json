@@ -1,0 +1,141 @@
+{
+  "plan_version": "0.2",
+  "seed": 42,
+  "schema_ref": {
+    "schema_version": "0.2",
+    "engine": "postgres"
+  },
+  "global": {
+    "locale": "en_US"
+  },
+  "targets": [
+    {
+      "schema": "crm",
+      "table": "usuarios",
+      "rows": 40
+    },
+    {
+      "schema": "crm",
+      "table": "empresas",
+      "rows": 30
+    },
+    {
+      "schema": "crm",
+      "table": "produtos",
+      "rows": 40
+    },
+    {
+      "schema": "crm",
+      "table": "funis",
+      "rows": 15
+    },
+    {
+      "schema": "crm",
+      "table": "fontes_lead",
+      "rows": 15
+    }
+  ],
+  "rules": [
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "nome",
+      "generator": "faker.name.raw.Name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "email",
+      "generator": "faker.internet.raw.SafeEmail"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "telefone",
+      "generator": "faker.phone_number.raw.PhoneNumber"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "razao_social",
+      "generator": "faker.company.raw.CompanyName"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "nome_fantasia",
+      "generator": "faker.company.raw.CatchPhrase"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "email",
+      "generator": "semantic.person.email"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "telefone",
+      "generator": "semantic.person.phone"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "sku",
+      "generator": "faker.barcode.raw.Isbn13"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "nome",
+      "generator": "faker.lorem.raw.Word"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "descricao",
+      "generator": "faker.markdown.raw.ItalicWord"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "funis",
+      "column": "nome",
+      "generator": "faker.company.raw.Buzzword"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "funis",
+      "column": "descricao",
+      "generator": "faker.company.raw.Bs"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "fontes_lead",
+      "column": "nome",
+      "generator": "faker.company.raw.Industry"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "fontes_lead",
+      "column": "descricao",
+      "generator": "faker.markdown.raw.Link"
+    }
+  ],
+  "options": {
+    "strict": false
+  }
+}

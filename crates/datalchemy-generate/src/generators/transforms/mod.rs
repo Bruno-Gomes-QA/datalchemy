@@ -48,7 +48,7 @@ impl Transform for NullRateTransform {
                 "transform.null_rate rate cannot be > 0 for NOT NULL column".to_string(),
             ));
         }
-        if rng.gen_bool(rate) {
+        if rng.random_bool(rate) {
             Ok(GeneratedValue::Null)
         } else {
             Ok(input)
@@ -296,7 +296,7 @@ impl Transform for WeightedChoiceTransform {
             ));
         }
 
-        let mut roll = rng.gen_range(0.0..total_weight);
+        let mut roll = rng.random_range(0.0..total_weight);
         for (value, weight) in entries {
             if roll <= weight {
                 return Ok(GeneratedValue::Text(value));
