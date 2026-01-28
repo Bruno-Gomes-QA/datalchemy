@@ -92,7 +92,6 @@ fn toposort(graph: &BTreeMap<String, BTreeSet<String>>) -> Result<Vec<String>, V
         .collect();
 
     let mut order = Vec::with_capacity(graph.len());
-    let mut indegree = indegree;
 
     while let Some(node) = ready.iter().next().cloned() {
         ready.remove(&node);

@@ -43,10 +43,10 @@ impl AssetsLoader {
 
     pub fn asset_missing(&self, relative: &str) -> bool {
         let cache = self.cache.read().ok();
-        if let Some(cache) = cache {
-            if let Some(AssetEntry::Missing) = cache.get(relative) {
-                return true;
-            }
+        if let Some(cache) = cache
+            && let Some(AssetEntry::Missing) = cache.get(relative)
+        {
+            return true;
         }
         false
     }

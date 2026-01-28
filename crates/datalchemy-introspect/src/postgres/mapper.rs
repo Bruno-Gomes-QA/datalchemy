@@ -165,8 +165,8 @@ pub fn map_enums(raw: Vec<RawEnumType>, opts: &IntrospectOptions) -> Vec<EnumTyp
         .collect()
 }
 
-pub fn sort_constraints(constraints: &mut Vec<Constraint>) {
-    constraints.sort_by(|left, right| constraint_key(left).cmp(&constraint_key(right)));
+pub fn sort_constraints(constraints: &mut [Constraint]) {
+    constraints.sort_by_key(constraint_key);
 }
 
 fn constraint_key(constraint: &Constraint) -> (u8, String, String) {

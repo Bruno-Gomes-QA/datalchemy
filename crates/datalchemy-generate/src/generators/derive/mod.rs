@@ -338,11 +338,11 @@ fn sanitize_identifier(value: &str) -> String {
         if ch.is_ascii_alphanumeric() {
             out.push(ch.to_ascii_lowercase());
             last_dot = false;
-        } else if ch.is_whitespace() || ch == '-' || ch == '_' || ch == '.' {
-            if !last_dot {
-                out.push('.');
-                last_dot = true;
-            }
+        } else if (ch.is_whitespace() || ch == '-' || ch == '_' || ch == '.')
+            && !last_dot
+        {
+            out.push('.');
+            last_dot = true;
         }
     }
     out.trim_matches('.').to_string()
@@ -360,7 +360,7 @@ fn derive_after(
                 .and_then(|value| value.as_i64())
                 .unwrap_or(86_400)
                 .max(0);
-            let delta = rng.gen_range(0..=max_seconds) as i64;
+            let delta = rng.random_range(0..=max_seconds);
             Ok(GeneratedValue::Timestamp(
                 *value + chrono::Duration::seconds(delta),
             ))
@@ -371,7 +371,7 @@ fn derive_after(
                 .and_then(|value| value.as_i64())
                 .unwrap_or(30)
                 .max(0);
-            let delta = rng.gen_range(0..=max_days) as i64;
+            let delta = rng.random_range(0..=max_days);
             Ok(GeneratedValue::Date(*value + chrono::Duration::days(delta)))
         }
         GeneratedValue::Time(value) => {
@@ -381,10 +381,10 @@ fn derive_after(
                 .unwrap_or(3_600)
                 .max(0);
             let start = value.num_seconds_from_midnight() as i64;
-            let delta = rng.gen_range(0..=max_seconds) as i64;
+            let delta = rng.random_range(0..=max_seconds);
             let end = (start + delta).min(86_399);
             let time = NaiveTime::from_num_seconds_from_midnight_opt(end as u32, 0)
-                .unwrap_or_else(NaiveTime::default);
+                .unwrap_or_default();
             Ok(GeneratedValue::Time(time))
         }
         GeneratedValue::Null => Ok(GeneratedValue::Null),

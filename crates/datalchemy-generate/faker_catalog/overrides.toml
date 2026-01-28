@@ -1,0 +1,341 @@
+[[alias]]
+id = "semantic.person.name"
+target = "faker.name.raw.Name"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.person.first_name"
+target = "faker.name.raw.FirstName"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.person.last_name"
+target = "faker.name.raw.LastName"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.person.title"
+target = "faker.name.raw.Title"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.person.suffix"
+target = "faker.name.raw.Suffix"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.person.username"
+target = "faker.internet.raw.Username"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.person.email"
+target = "faker.internet.raw.SafeEmail"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.person.free_email"
+target = "faker.internet.raw.FreeEmail"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.person.phone"
+target = "faker.phone_number.raw.PhoneNumber"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.person.cell"
+target = "faker.phone_number.raw.CellNumber"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.address.city"
+target = "faker.address.raw.CityName"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.address.state"
+target = "faker.address.raw.StateName"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.address.state_abbr"
+target = "faker.address.raw.StateAbbr"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.address.street"
+target = "faker.address.raw.StreetName"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.address.street_suffix"
+target = "faker.address.raw.StreetSuffix"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.address.postcode"
+target = "faker.address.raw.PostCode"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.address.zipcode"
+target = "faker.address.raw.ZipCode"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.address.building_number"
+target = "faker.address.raw.BuildingNumber"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.address.country"
+target = "faker.address.raw.CountryName"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.address.country_code"
+target = "faker.address.raw.CountryCode"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.address.timezone"
+target = "faker.address.raw.TimeZone"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.address.secondary"
+target = "faker.address.raw.SecondaryAddress"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.address.secondary_type"
+target = "faker.address.raw.SecondaryAddressType"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.company.name"
+target = "faker.company.raw.CompanyName"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.company.suffix"
+target = "faker.company.raw.CompanySuffix"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.company.industry"
+target = "faker.company.raw.Industry"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.company.profession"
+target = "faker.company.raw.Profession"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.company.catch_phrase"
+target = "faker.company.raw.CatchPhrase"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.company.buzzword"
+target = "faker.company.raw.Buzzword"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.company.bs"
+target = "faker.company.raw.Bs"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.company.bs_noun"
+target = "faker.company.raw.BsNoun"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.company.bs_verb"
+target = "faker.company.raw.BsVerb"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.company.bs_adj"
+target = "faker.company.raw.BsAdj"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.finance.currency_code"
+target = "faker.currency.raw.CurrencyCode"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.finance.currency_name"
+target = "faker.currency.raw.CurrencyName"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.finance.currency_symbol"
+target = "faker.currency.raw.CurrencySymbol"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.finance.bic"
+target = "faker.finance.raw.Bic"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.finance.isin"
+target = "faker.finance.raw.Isin"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.internet.domain_suffix"
+target = "faker.internet.raw.DomainSuffix"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.internet.ipv4"
+target = "faker.internet.raw.IPv4"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.internet.ipv6"
+target = "faker.internet.raw.IPv6"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.internet.mac"
+target = "faker.internet.raw.MACAddress"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.internet.user_agent"
+target = "faker.internet.raw.UserAgent"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.internet.password"
+target = "faker.internet.raw.Password"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.internet.free_email_provider"
+target = "faker.internet.raw.FreeEmailProvider"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.lorem.word"
+target = "faker.lorem.raw.Word"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.markdown.bold"
+target = "faker.markdown.raw.BoldWord"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.markdown.italic"
+target = "faker.markdown.raw.ItalicWord"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.markdown.link"
+target = "faker.markdown.raw.Link"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.color.hex"
+target = "faker.color.raw.HexColor"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.color.rgb"
+target = "faker.color.raw.RgbColor"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.color.hsl"
+target = "faker.color.raw.HslColor"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.barcode.isbn10"
+target = "faker.barcode.raw.Isbn10"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.barcode.isbn13"
+target = "faker.barcode.raw.Isbn13"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.time.date"
+target = "faker.time.raw.Date"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.time.datetime"
+target = "faker.time.raw.DateTime"
+kind = "text"
+locales = ["en_US", "pt_BR"]
+
+[[alias]]
+id = "semantic.http.status_code"
+target = "faker.http.raw.ValidStatusCode"
+kind = "text"
+locales = ["en_US", "pt_BR"]

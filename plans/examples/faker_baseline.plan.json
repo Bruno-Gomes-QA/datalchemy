@@ -1,0 +1,88 @@
+{
+  "plan_version": "0.2",
+  "seed": 42,
+  "schema_ref": {
+    "schema_version": "0.2",
+    "engine": "postgres"
+  },
+  "targets": [
+    {
+      "schema": "crm",
+      "table": "usuarios",
+      "rows": 50
+    },
+    {
+      "schema": "crm",
+      "table": "empresas",
+      "rows": 50
+    },
+    {
+      "schema": "crm",
+      "table": "leads",
+      "rows": 100
+    }
+  ],
+  "rules": [
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "nome",
+      "generator": {
+        "id": "semantic.person.name",
+        "locale": "pt_BR"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "email",
+      "generator": {
+        "id": "semantic.person.email",
+        "locale": "pt_BR"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "nome_fantasia",
+      "generator": {
+        "id": "semantic.address.city",
+        "locale": "pt_BR"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "score",
+      "generator": {
+        "id": "primitive.int",
+        "locale": "pt_BR",
+        "params": {
+          "min": 0,
+          "max": 100
+        }
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "data_criacao",
+      "generator": {
+        "id": "primitive.timestamp",
+        "locale": "pt_BR",
+        "params": {
+          "min": "2024-01-01T00:00:00",
+          "max": "2024-12-31T23:59:59"
+        }
+      }
+    }
+  ],
+  "options": {
+    "strict": false
+  }
+}
