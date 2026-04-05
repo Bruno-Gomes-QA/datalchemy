@@ -1,372 +1,771 @@
 {
   "plan_version": "0.2",
-  "seed": 999,
+  "seed": 2026,
   "schema_ref": {
     "schema_version": "0.2",
     "engine": "postgres"
   },
+  "global": {
+    "locale": "pt_BR"
+  },
   "targets": [
-    { "schema": "crm", "table": "empresas", "rows": 40 },
-    { "schema": "crm", "table": "contatos", "rows": 100 },
-    { "schema": "crm", "table": "fontes_lead", "rows": 4 },
-    { "schema": "crm", "table": "funis", "rows": 2 },
-    { "schema": "crm", "table": "etapas_funil", "rows": 8 },
-    { "schema": "crm", "table": "listas_precos", "rows": 5 },
-    { "schema": "crm", "table": "produtos", "rows": 50 },
-    { "schema": "crm", "table": "itens_lista_precos", "rows": 20 },
-    { "schema": "crm", "table": "usuarios", "rows": 10 },
-    { "schema": "crm", "table": "leads", "rows": 100 },
-    { "schema": "crm", "table": "oportunidades", "rows": 50 },
-    { "schema": "crm", "table": "atividades", "rows": 200 },
-    { "schema": "crm", "table": "anotacoes", "rows": 5 },
-    { "schema": "crm", "table": "cotacoes", "rows": 50 },
-    { "schema": "crm", "table": "itens_cotacao", "rows": 20 },
-    { "schema": "crm", "table": "faturas", "rows": 50 },
-    { "schema": "crm", "table": "itens_fatura", "rows": 20 },
-    { "schema": "crm", "table": "pagamentos", "rows": 20 },
-    { "schema": "crm", "table": "reunioes", "rows": 5 },
-    { "schema": "crm", "table": "tarefas", "rows": 5 }
+    {
+      "schema": "crm",
+      "table": "usuarios",
+      "rows": 25,
+      "comment": "Equipe de vendas e suporte"
+    },
+    {
+      "schema": "crm",
+      "table": "empresas",
+      "rows": 100,
+      "comment": "Empresas clientes e prospects"
+    },
+    {
+      "schema": "crm",
+      "table": "contatos",
+      "rows": 100,
+      "comment": "Contatos das empresas (decisores, influenciadores)"
+    },
+    {
+      "schema": "crm",
+      "table": "fontes_lead",
+      "rows": 12,
+      "comment": "Canais de aquisição de leads"
+    },
+    {
+      "schema": "crm",
+      "table": "funis",
+      "rows": 4,
+      "comment": "Funis de vendas (B2B, B2C, Enterprise, Renovação)"
+    },
+    {
+      "schema": "crm",
+      "table": "etapas_funil",
+      "rows": 12,
+      "comment": "Etapas dos funis (5 etapas por funil)"
+    },
+    {
+      "schema": "crm",
+      "table": "produtos",
+      "rows": 30,
+      "comment": "Catálogo de produtos/serviços"
+    },
+    {
+      "schema": "crm",
+      "table": "listas_precos",
+      "rows": 5,
+      "comment": "Tabelas de preços (Varejo, Atacado, Premium, etc)"
+    },
+    {
+      "schema": "crm",
+      "table": "itens_lista_precos",
+      "rows": 25,
+      "comment": "Preços por produto em cada lista"
+    },
+    {
+      "schema": "crm",
+      "table": "leads",
+      "rows": 100,
+      "comment": "Leads captados de diversas fontes"
+    },
+    {
+      "schema": "crm",
+      "table": "oportunidades",
+      "rows": 60,
+      "comment": "Oportunidades de negócio em andamento"
+    },
+    {
+      "schema": "crm",
+      "table": "atividades",
+      "rows": 150,
+      "comment": "Ligações, emails, reuniões, tarefas"
+    },
+    {
+      "schema": "crm",
+      "table": "anotacoes",
+      "rows": 80,
+      "comment": "Notas sobre atividades"
+    },
+    {
+      "schema": "crm",
+      "table": "reunioes",
+      "rows": 80,
+      "comment": "Detalhes de reuniões"
+    },
+    {
+      "schema": "crm",
+      "table": "tarefas",
+      "rows": 120,
+      "comment": "Detalhes de tarefas pendentes"
+    },
+    {
+      "schema": "crm",
+      "table": "cotacoes",
+      "rows": 100,
+      "comment": "Propostas comerciais"
+    },
+    {
+      "schema": "crm",
+      "table": "itens_cotacao",
+      "rows": 40,
+      "comment": "Itens das cotações"
+    },
+    {
+      "schema": "crm",
+      "table": "faturas",
+      "rows": 80,
+      "comment": "Faturas emitidas"
+    },
+    {
+      "schema": "crm",
+      "table": "itens_fatura",
+      "rows": 40,
+      "comment": "Itens das faturas"
+    },
+    {
+      "schema": "crm",
+      "table": "pagamentos",
+      "rows": 60,
+      "comment": "Pagamentos recebidos"
+    }
   ],
   "rules": [
     {
       "type": "column_generator",
       "schema": "crm",
+      "table": "usuarios",
+      "column": "nome",
+      "generator": "semantic.br.name",
+      "comment": "Nomes brasileiros completos"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "email",
+      "generator": "semantic.br.email.safe",
+      "comment": "Email brasileiro seguro"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "telefone",
+      "generator": "semantic.br.phone",
+      "comment": "Telefone brasileiro formato (XX) XXXXX-XXXX"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "ativo",
+      "generator": "primitive.bool",
+      "comment": "92% dos usuários estão ativos"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "data_criacao",
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2022-01-01T00:00:00",
+        "max": "2025-12-31T23:59:59"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "data_atualizacao",
+      "generator": "derive.updated_after_created",
+      "params": {
+        "input_columns": [
+          "data_criacao"
+        ],
+        "max_seconds": 31536000
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
       "table": "empresas",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
+      "column": "razao_social",
+      "generator": "semantic.br.company.name",
+      "comment": "Razão social brasileira"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "empresas",
       "column": "nome_fantasia",
-      "generator": "semantic.br.company.name"
+      "generator": "faker.company.raw.CatchPhrase",
+      "comment": "Nome fantasia criativo"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "empresas",
       "column": "cnpj",
-      "generator": "semantic.br.cnpj"
+      "generator": "semantic.br.cnpj",
+      "comment": "CNPJ válido brasileiro"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "empresas",
-      "column": "data_fundacao",
-      "generator": "primitive.date.range",
-      "params": { "min": "2000-01-01", "max": "2020-01-01" }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "contatos",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "contatos",
-      "column": "nome",
-      "generator": "semantic.br.name"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "contatos",
       "column": "email",
-      "generator": "semantic.br.email.safe"
+      "generator": "semantic.br.email.safe",
+      "comment": "Email corporativo seguro"
     },
     {
       "type": "column_generator",
       "schema": "crm",
-      "table": "contatos",
-      "column": "cargo",
-      "generator": "primitive.text.pattern",
-      "params": { "pattern": "(Diretor|Gerente|Analista|Vendedor|CEO|CTO|CFO|Assistente|Coordenador)" }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "fontes_lead",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "fontes_lead",
-      "column": "nome",
-      "generator": "primitive.text.pattern",
-      "params": { "pattern": "(Google Ads|Facebook Ads|Instagram|Linkedin|Indicação|Evento|Email Marketing|Busca Orgânica|Parceiro)" }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "funis",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "funis",
-      "column": "nome",
-      "generator": "primitive.text.pattern",
-      "params": { "pattern": "(Vendas Enterprise|Vendas SMB|Pós-venda|Renovação|Parcerias)" }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "etapas_funil",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "etapas_funil",
-      "column": "nome",
-      "generator": "primitive.text.pattern",
-      "params": { "pattern": "(Prospecção|Qualificação|Apresentação|Demo|Proposta|Negociação|Fechamento|Onboarding)" }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "etapas_funil",
-      "column": "ordem",
-      "generator": "primitive.int.range",
-      "params": { "min": 1, "max": 10 }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "listas_precos",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "listas_precos",
-      "column": "nome",
-      "generator": "primitive.text.pattern",
-      "params": { "pattern": "Tabela (2024|2025|2026|Varejo|Atacado|Distribuidor|Parceiro)" }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "produtos",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "produtos",
-      "column": "nome",
-      "generator": "semantic.br.product.name"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "produtos",
-      "column": "codigo",
-      "generator": "primitive.text.pattern",
-      "params": { "pattern": "PRD-[0-9]{4}" }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "produtos",
-      "column": "preco_base",
-      "generator": "primitive.float.range",
-      "params": { "min": 100.0, "max": 5000.0 }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "itens_lista_precos",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "itens_lista_precos",
-      "column": "preco",
-      "generator": "primitive.float.range",
-      "params": { "min": 90.0, "max": 4900.0 }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "usuarios",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "usuarios",
-      "column": "nome",
-      "generator": "semantic.br.name"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "usuarios",
-      "column": "email",
-      "generator": "semantic.br.email.safe"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "leads",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "leads",
-      "column": "nome",
-      "generator": "semantic.br.name"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "leads",
-      "column": "email",
-      "generator": "semantic.br.email.safe"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "leads",
+      "table": "empresas",
       "column": "telefone",
       "generator": "semantic.br.phone"
     },
     {
       "type": "column_generator",
       "schema": "crm",
-      "table": "leads",
-      "column": "cargo",
-      "generator": "primitive.text.pattern",
-      "params": { "pattern": "(Diretor|Gerente|Analista|Coordenador)" }
+      "table": "empresas",
+      "column": "site",
+      "generator": "semantic.br.url",
+      "comment": "URL do site da empresa"
     },
     {
       "type": "column_generator",
       "schema": "crm",
-      "table": "leads",
-      "column": "empresa",
-      "generator": "semantic.br.company.name"
+      "table": "empresas",
+      "column": "ativo",
+      "generator": "primitive.bool"
     },
     {
       "type": "column_generator",
       "schema": "crm",
-      "table": "oportunidades",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
+      "table": "empresas",
+      "column": "data_criacao",
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2020-01-01T00:00:00",
+        "max": "2025-12-31T23:59:59"
+      }
     },
     {
       "type": "column_generator",
       "schema": "crm",
-      "table": "oportunidades",
+      "table": "empresas",
+      "column": "data_atualizacao",
+      "generator": "derive.updated_after_created",
+      "params": {
+        "input_columns": [
+          "data_criacao"
+        ],
+        "max_seconds": 15552000
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
       "column": "nome",
+      "generator": "semantic.person.first_name",
+      "comment": "Primeiro nome do contato"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "sobrenome",
+      "generator": "semantic.person.last_name",
+      "comment": "Sobrenome do contato"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "email",
+      "generator": "semantic.br.email.safe",
+      "comment": "Email único seguro"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "telefone",
+      "generator": "semantic.person.cell",
+      "comment": "Celular do contato"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "cargo",
+      "generator": "faker.job.raw.Title",
+      "comment": "Cargo profissional"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "data_nascimento",
+      "generator": "primitive.date",
+      "params": {
+        "min": "1960-01-01",
+        "max": "2000-12-31"
+      },
+      "comment": "Data de nascimento (25-65 anos)"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "contatos",
+      "column": "data_criacao",
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2021-01-01T00:00:00",
+        "max": "2025-12-31T23:59:59"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "fontes_lead",
+      "column": "nome",
+      "generator": "domain.logistics.shipment_status",
+      "comment": "Fonte de lead"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "fontes_lead",
+      "column": "descricao",
+      "generator": "faker.lorem.raw.Word",
+      "comment": "Descrição do canal"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "fontes_lead",
+      "column": "ativo",
+      "generator": "primitive.bool"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "fontes_lead",
+      "column": "data_criacao",
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2020-01-01T00:00:00",
+        "max": "2023-12-31T23:59:59"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "funis",
+      "column": "nome",
+      "generator": "domain.crm.pipeline_name",
+      "comment": "Tipos de funil de vendas"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "funis",
+      "column": "descricao",
+      "generator": "faker.company.raw.Bs",
+      "comment": "Descrição estratégica"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "funis",
+      "column": "ativo",
+      "generator": "primitive.bool"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "funis",
+      "column": "data_criacao",
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2020-01-01T00:00:00",
+        "max": "2022-01-01T00:00:00"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "etapas_funil",
+      "column": "nome",
+      "generator": "domain.crm.lead_stage",
+      "comment": "Etapas do pipeline de vendas"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "etapas_funil",
+      "column": "ordem",
+      "generator": "primitive.int",
+      "params": {
+        "min": 1,
+        "max": 10
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "etapas_funil",
+      "column": "probabilidade",
+      "generator": "primitive.int",
+      "params": {
+        "min": 5,
+        "max": 95
+      },
+      "comment": "Probabilidade de fechamento (%)"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "sku",
       "generator": "primitive.text.pattern",
-      "params": { "pattern": "Oportunidade [A-Z]{3}-[0-9]{3}" }
+      "params": {
+        "pattern": "PRD-[A-Z]{3}-[0-9]{4}"
+      },
+      "comment": "SKU no formato PRD-XXX-0000"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "nome",
+      "generator": "domain.logistics.carrier",
+      "comment": "Produtos/serviços de software"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "descricao",
+      "generator": "faker.lorem.raw.Word",
+      "comment": "Descrição detalhada"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "ativo",
+      "generator": "primitive.bool"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "preco_base",
+      "generator": "primitive.decimal.numeric",
+      "params": {
+        "min": 99.0,
+        "max": 49999.0,
+        "scale": 2
+      },
+      "comment": "Preço base de R$99 a R$49.999"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "data_criacao",
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2019-01-01T00:00:00",
+        "max": "2024-12-31T23:59:59"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "listas_precos",
+      "column": "nome",
+      "generator": "domain.finance.transaction_type"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "listas_precos",
+      "column": "moeda",
+      "generator": "domain.finance.transaction_type",
+      "comment": "Moeda da tabela"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "listas_precos",
+      "column": "ativo",
+      "generator": "primitive.bool"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "listas_precos",
+      "column": "data_inicio",
+      "generator": "primitive.date",
+      "params": {
+        "min": "2024-01-01",
+        "max": "2025-06-30"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "listas_precos",
+      "column": "data_fim",
+      "generator": "primitive.date",
+      "params": {
+        "min": "2025-07-01",
+        "max": "2026-12-31"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "itens_lista_precos",
+      "column": "preco",
+      "generator": "primitive.decimal.numeric",
+      "params": {
+        "min": 50.0,
+        "max": 99999.0,
+        "scale": 2
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "status",
+      "generator": "domain.crm.lead_stage",
+      "comment": "Status do lead no funil"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "score",
+      "generator": "primitive.int",
+      "params": {
+        "min": 0,
+        "max": 100
+      },
+      "comment": "Score de qualificação 0-100"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "data_criacao",
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2024-01-01T00:00:00",
+        "max": "2025-12-31T23:59:59"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "leads",
+      "column": "data_qualificacao",
+      "generator": "derive.end_after_start",
+      "params": {
+        "input_columns": [
+          "data_criacao"
+        ],
+        "min_seconds": 86400,
+        "max_seconds": 2592000
+      },
+      "comment": "Qualificação ocorre 1-30 dias após criação"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "oportunidades",
+      "column": "titulo",
+      "generator": "faker.company.raw.Buzzword",
+      "comment": "Título descritivo da oportunidade"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "oportunidades",
       "column": "valor_estimado",
-      "generator": "primitive.float.range",
-      "params": { "min": 1000.0, "max": 100000.0 }
+      "generator": "primitive.decimal.numeric",
+      "params": {
+        "min": 5000.0,
+        "max": 500000.0,
+        "scale": 2
+      },
+      "comment": "Valor estimado R$5k a R$500k"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "oportunidades",
+      "column": "status",
+      "generator": "domain.crm.lead_stage"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "oportunidades",
       "column": "data_abertura",
-      "generator": "primitive.date.range",
-      "params": { "min": "2025-01-01", "max": "2025-06-30" }
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2024-01-01T00:00:00",
+        "max": "2025-12-31T23:59:59"
+      }
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "oportunidades",
       "column": "data_fechamento",
-      "generator": "primitive.date.range",
-      "params": { "min": "2025-07-01", "max": "2025-12-31" }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "atividades",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
+      "generator": "derive.end_after_start",
+      "params": {
+        "input_columns": [
+          "data_abertura"
+        ],
+        "min_seconds": 604800,
+        "max_seconds": 15552000
+      },
+      "comment": "Fechamento 7-180 dias após abertura"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "atividades",
       "column": "tipo",
-      "generator": "domain.crm.activity_type"
+      "generator": "domain.crm.activity_type",
+      "comment": "Tipo de atividade de vendas"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "atividades",
+      "column": "status",
+      "generator": "faker.lorem.raw.Word"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "atividades",
       "column": "assunto",
-      "generator": "primitive.text.pattern",
-      "params": { "pattern": "(Reunião|Call|Email|Almoço|Visita) com (Cliente|Lead|Parceiro)" }
+      "generator": "semantic.br.city",
+      "comment": "Assuntos reais de vendas"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "atividades",
       "column": "descricao",
-      "generator": "primitive.text.lorem"
+      "generator": "faker.lorem.raw.Word",
+      "comment": "Descrição detalhada da atividade"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "atividades",
       "column": "data_inicio",
-      "generator": "primitive.timestamp.range",
-      "params": { "min": "2025-06-01T08:00:00", "max": "2025-06-30T18:00:00" }
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2024-06-01T08:00:00",
+        "max": "2025-12-31T18:00:00"
+      }
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "atividades",
       "column": "data_fim",
-      "generator": "primitive.timestamp.range",
-      "params": { "min": "2025-07-01T08:00:00", "max": "2025-07-01T18:00:00" }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "anotacoes",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
+      "generator": "derive.end_after_start",
+      "params": {
+        "input_columns": [
+          "data_inicio"
+        ],
+        "min_seconds": 0,
+        "max_seconds": 604800
+      }
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "anotacoes",
       "column": "conteudo",
-      "generator": "primitive.text.lorem"
+      "generator": "faker.lorem.raw.Word",
+      "comment": "Anotações reais de vendedores"
     },
     {
       "type": "column_generator",
       "schema": "crm",
-      "table": "cotacoes",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
+      "table": "anotacoes",
+      "column": "criado_em",
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2024-06-01T00:00:00",
+        "max": "2025-12-31T23:59:59"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "reunioes",
+      "column": "local",
+      "generator": "faker.lorem.raw.Word"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "reunioes",
+      "column": "link_reuniao",
+      "generator": "faker.lorem.raw.Word"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "reunioes",
+      "column": "duracao_minutos",
+      "generator": "primitive.int",
+      "params": {
+        "min": 15,
+        "max": 120
+      },
+      "comment": "Duração de 15min a 2h"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "tarefas",
+      "column": "status",
+      "generator": "faker.lorem.raw.Word"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "tarefas",
+      "column": "prioridade",
+      "generator": "faker.lorem.raw.Word"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "tarefas",
+      "column": "data_limite",
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2025-01-01T00:00:00",
+        "max": "2026-06-30T23:59:59"
+      }
     },
     {
       "type": "column_generator",
@@ -374,61 +773,69 @@
       "table": "cotacoes",
       "column": "codigo",
       "generator": "primitive.text.pattern",
-      "params": { "pattern": "COT-[0-9]{6}" }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "cotacoes",
-      "column": "validade",
-      "generator": "primitive.date.range",
-      "params": { "min": "2025-08-01", "max": "2025-12-31" }
+      "params": {
+        "pattern": "COT-2025-[0-9]{5}"
+      },
+      "comment": "Código da cotação COT-2025-XXXXX"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "cotacoes",
       "column": "data_emissao",
-      "generator": "primitive.date.range",
-      "params": { "min": "2025-01-01", "max": "2025-06-30" }
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2024-06-01T00:00:00",
+        "max": "2025-12-31T23:59:59"
+      }
     },
     {
       "type": "column_generator",
       "schema": "crm",
-      "table": "itens_cotacao",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
+      "table": "cotacoes",
+      "column": "validade",
+      "generator": "primitive.int",
+      "params": {
+        "min": 7,
+        "max": 60
+      },
+      "comment": "Validade em dias (7-60)"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "itens_cotacao",
       "column": "quantidade",
-      "generator": "primitive.int.range",
-      "params": { "min": 1, "max": 10 }
+      "generator": "primitive.int",
+      "params": {
+        "min": 1,
+        "max": 100
+      }
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "itens_cotacao",
       "column": "preco_unitario",
-      "generator": "primitive.float.range",
-      "params": { "min": 50.0, "max": 2000.0 }
+      "generator": "primitive.decimal.numeric",
+      "params": {
+        "min": 100.0,
+        "max": 50000.0,
+        "scale": 2
+      }
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "itens_cotacao",
       "column": "desconto_percentual",
-      "generator": "primitive.float.range",
-      "params": { "min": 0.0, "max": 15.0 }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "faturas",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
+      "generator": "primitive.decimal.numeric",
+      "params": {
+        "min": 0.0,
+        "max": 30.0,
+        "scale": 2
+      },
+      "comment": "Desconto de 0% a 30%"
     },
     {
       "type": "column_generator",
@@ -436,121 +843,120 @@
       "table": "faturas",
       "column": "numero",
       "generator": "primitive.text.pattern",
-      "params": { "pattern": "NF-[0-9]{6}" }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "faturas",
-      "column": "valor_total",
-      "generator": "primitive.float.range",
-      "params": { "min": 100.0, "max": 10000.0 }
+      "params": {
+        "pattern": "NF-[0-9]{6}"
+      },
+      "comment": "Número da nota fiscal"
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "faturas",
       "column": "data_emissao",
-      "generator": "primitive.date.range",
-      "params": { "min": "2025-01-01", "max": "2025-06-30" }
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2024-06-01T00:00:00",
+        "max": "2025-12-31T23:59:59"
+      }
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "faturas",
       "column": "data_vencimento",
-      "generator": "primitive.date.range",
-      "params": { "min": "2025-07-01", "max": "2025-12-31" }
+      "generator": "derive.end_after_start",
+      "params": {
+        "input_columns": [
+          "data_emissao"
+        ],
+        "min_seconds": 1296000,
+        "max_seconds": 3888000
+      },
+      "comment": "Vencimento 15-45 dias após emissão"
     },
     {
       "type": "column_generator",
       "schema": "crm",
-      "table": "itens_fatura",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
+      "table": "faturas",
+      "column": "status",
+      "generator": "domain.finance.invoice_status"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "faturas",
+      "column": "valor_total",
+      "generator": "primitive.decimal.numeric",
+      "params": {
+        "min": 1000.0,
+        "max": 250000.0,
+        "scale": 2
+      }
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "itens_fatura",
       "column": "quantidade",
-      "generator": "primitive.int.range",
-      "params": { "min": 1, "max": 10 }
+      "generator": "primitive.int",
+      "params": {
+        "min": 1,
+        "max": 50
+      }
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "itens_fatura",
       "column": "preco_unitario",
-      "generator": "primitive.float.range",
-      "params": { "min": 50.0, "max": 2000.0 }
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "pagamentos",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
+      "generator": "primitive.decimal.numeric",
+      "params": {
+        "min": 100.0,
+        "max": 50000.0,
+        "scale": 2
+      }
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "pagamentos",
       "column": "valor",
-      "generator": "primitive.float.range",
-      "params": { "min": 50.0, "max": 5000.0 }
+      "generator": "primitive.decimal.numeric",
+      "params": {
+        "min": 500.0,
+        "max": 100000.0,
+        "scale": 2
+      }
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "pagamentos",
       "column": "data_pagamento",
-      "generator": "primitive.date.range",
-      "params": { "min": "2025-01-01", "max": "2025-12-31" }
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2024-06-01T00:00:00",
+        "max": "2025-12-31T23:59:59"
+      }
     },
     {
       "type": "column_generator",
       "schema": "crm",
       "table": "pagamentos",
-      "column": "referencia",
-      "generator": "primitive.text.pattern",
-      "params": { "pattern": "REF-[A-Z0-9]{8}" }
+      "column": "status",
+      "generator": "faker.lorem.raw.Word"
     },
     {
       "type": "column_generator",
       "schema": "crm",
-      "table": "reunioes",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "reunioes",
-      "column": "pauta",
-      "generator": "primitive.text.lorem"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "reunioes",
-      "column": "resultado",
-      "generator": "primitive.text.lorem"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "tarefas",
-      "column": "id",
-      "generator": "primitive.uuid.v4"
-    },
-    {
-      "type": "column_generator",
-      "schema": "crm",
-      "table": "tarefas",
-      "column": "prioridade",
-      "generator": "primitive.text.pattern",
-      "params": { "pattern": "(Alta|Média|Baixa)" }
+      "table": "pagamentos",
+      "column": "metodo",
+      "generator": "domain.finance.payment_method",
+      "comment": "Métodos de pagamento brasileiros"
     }
-  ]
+  ],
+  "options": {
+    "strict": false,
+    "null_rate": 0.05
+  }
 }
