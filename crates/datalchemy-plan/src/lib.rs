@@ -11,8 +11,9 @@ pub mod validate;
 pub use errors::{IssueSeverity, PlanError, ValidationIssue, ValidationReport};
 pub use model::{
     ColumnGeneratorRule, ConstraintKind, ConstraintMode, ConstraintPolicyRule, ForeignKeyMode,
-    ForeignKeyStrategyRule, InsertOrder, Plan, PlanOptions, Rule, RuleReference, SchemaRef, Target,
-    TargetStrategy, TransformRule, UnsupportedRule,
+    ForeignKeyStrategyRule, GeneratorRef, GeneratorSpec, InsertOrder, Plan, PlanGlobal,
+    PlanOptions, Rule, RuleReference, SchemaRef, Target, TargetStrategy, TransformRule,
+    UnsupportedRule,
 };
 pub use schema::plan_json_schema;
 pub use validate::{
@@ -20,4 +21,4 @@ pub use validate::{
 };
 
 /// Current plan contract version for `plan.json` artifacts.
-pub const PLAN_VERSION: &str = "0.1";
+pub const PLAN_VERSION: &str = "0.2";

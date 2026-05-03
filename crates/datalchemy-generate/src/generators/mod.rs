@@ -11,6 +11,7 @@ use crate::foreign::ForeignContext;
 
 pub mod derive;
 pub mod domain;
+pub mod faker_rs;
 pub mod primitives;
 pub mod semantic;
 pub mod transforms;
@@ -98,6 +99,7 @@ pub struct GeneratorContext<'a> {
     pub enum_values: Option<&'a [String]>,
     pub row: &'a RowContext,
     pub foreign: Option<&'a mut dyn ForeignContext>,
+    pub generator_locale: Option<&'a str>,
 }
 
 /// Context for transforms.
@@ -151,6 +153,7 @@ impl GeneratorRegistry {
         semantic::register(&mut registry);
         derive::register(&mut registry);
         domain::register(&mut registry);
+        faker_rs::register(&mut registry);
         registry
     }
 
@@ -164,6 +167,10 @@ impl GeneratorRegistry {
 
     pub fn generator(&self, id: &str) -> Option<&dyn Generator> {
         self.generators.get(id).map(|generator| generator.as_ref())
+    }
+
+    pub fn generator_ids(&self) -> Vec<&'static str> {
+        self.generators.keys().copied().collect()
     }
 
     pub fn transform(&self, id: &str) -> Option<&dyn Transform> {

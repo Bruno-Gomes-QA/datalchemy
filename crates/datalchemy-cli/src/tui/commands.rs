@@ -7,17 +7,19 @@ use serde_json::Value;
 use datalchemy_core::{DatabaseSchema, redact_connection_string, validate_schema};
 use datalchemy_eval::{EvaluateOptions, EvaluationEngine, collect_schema_metrics};
 use datalchemy_generate::{GenerateOptions, GenerationEngine};
-use datalchemy_introspect::{IntrospectOptions, introspect_postgres_with_options};
+use datalchemy_introspect::{
+    IntrospectOptions, introspect_postgres_with_options, introspect_sqlite_with_options,
+};
 use datalchemy_plan::{
-    PLAN_VERSION, Plan, SchemaRef, Target, validate_plan, validate_plan_against_schema,
-    validate_plan_json,
+    ColumnGeneratorRule, GeneratorRef, PLAN_VERSION, Plan, PlanGlobal, Rule, SchemaRef, Target,
+    validate_plan, validate_plan_against_schema, validate_plan_json,
 };
 
 use crate::CliError;
 use crate::tui::secrets::{VaultMeta, decrypt_from_file, encrypt_to_file, load_env_file};
-use crate::tui::state::{App, AppEvent, PaletteEntry, SetupStep, UiState};
+use crate::tui::state::{App, AppEvent, PaletteEntry, PromptContext, SetupStep, UiState};
 use crate::tui::utils::{
-    append_line, command_with_id, extract_flag_value, list_dirs, list_preview_files,
+    append_line, command_with_id, csv_preview, extract_flag_value, list_dirs, list_preview_files,
     move_dir_contents, open_in_editor, read_head_lines, read_tail_lines, set_private_permissions,
 };
 use crate::workspace::{
@@ -27,6 +29,8 @@ use crate::workspace::{
     run_doctor, save_profiles, save_settings, write_bytes_atomic, write_json_atomic,
 };
 use sqlx::{Row, postgres::PgPoolOptions};
+
+use crate::tui::conn::{is_sqlite, is_supported_connection};
 
 pub fn execute_command(app: &mut App, input: &str, bypass_approval: bool) -> Result<(), CliError> {
     let mut parts = input.split_whitespace();
@@ -60,83 +64,96 @@ pub fn execute_command(app: &mut App, input: &str, bypass_approval: bool) -> Res
         "/secrets" => cmd_secrets(app, parts.collect(), bypass_approval, input),
         "/llm" => cmd_llm(app, parts.collect(), bypass_approval, input),
         _ => {
-            app.push_message(format!("unknown command: {command}"));
+            app.push_message(format!("unknown command: {command}. type /help for list."));
             Ok(())
         }
     }
 }
 
-pub fn cmd_help(app: &mut App) -> Result<(), CliError> {
-    app.push_message("COMMANDS");
-    app.push_message("workspace:");
-    if app.paths.root.exists() {
-        app.push_message("  /reset");
-    } else {
-        app.push_message("  /init");
+/// Start an interactive multi-step prompt flow.
+fn start_prompt(app: &mut App, ctx: PromptContext) {
+    if let Some(label) = ctx.current_prompt() {
+        app.push_message(label.to_string());
     }
-    app.push_message("  /status");
-    app.push_message("  /doctor");
-    app.push_message("  /logs [<run_id>]");
-    app.push_message("  /open <path>");
-    app.push_message("");
-    app.push_message("db + profiles:");
-    app.push_message("  /profiles list");
-    app.push_message("  /profiles new <name> <conn_string>");
-    app.push_message("  /profiles set <name>");
-    app.push_message("  /profiles delete <name>");
-    app.push_message("  /db session");
-    app.push_message("  /db change");
-    app.push_message("  /db show-current");
-    app.push_message("  /db test");
-    app.push_message("  /db privileges");
-    app.push_message("");
-    app.push_message("pipeline:");
-    app.push_message("  /introspect [--schema <name> ...]");
-    app.push_message("  /runs list");
-    app.push_message("  /runs set <run_id>");
-    app.push_message("  /runs inspect <run_id>");
-    app.push_message("  /runs delete <run_id>");
-    app.push_message("  /plans list");
-    app.push_message("  /plans set <plan_id>");
-    app.push_message("  /plan new");
-    app.push_message("  /plan edit");
-    app.push_message("  /plan validate");
-    app.push_message("  /generate");
-    app.push_message("  /out list");
-    app.push_message("  /out preview <out_id>");
-    app.push_message("  /eval [<out_id>]");
-    app.push_message("");
-    app.push_message("settings:");
-    app.push_message("  /settings show");
-    app.push_message("  /settings set <key> <value>");
-    app.push_message("");
-    app.push_message("llm + secrets:");
-    app.push_message("  /llm models");
-    app.push_message("  /llm set <provider> <model>");
-    app.push_message("  /llm off");
-    app.push_message("  /secrets status");
-    app.push_message("  /secrets import-env");
-    app.push_message("  /secrets store-session <passphrase>");
-    app.push_message("  /secrets unlock <passphrase>");
-    app.push_message("  /secrets delete");
-    app.push_message("");
-    app.push_message("/help");
-    app.push_message("/exit");
-    app.push_message("note: avoid passing secrets on the command line.");
+    app.input_clear();
+    app.ui_state = UiState::Setup(SetupStep::Prompt(ctx));
+}
+
+pub fn cmd_help(app: &mut App) -> Result<(), CliError> {
+    app.push_raw("COMMANDS");
+    app.push_raw("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    app.push_raw("workspace:");
+    if app.paths.root.exists() {
+        app.push_raw("  /reset                  delete workspace and re-setup");
+    } else {
+        app.push_raw("  /init                   create workspace");
+    }
+    app.push_raw("  /status                 show current configuration");
+    app.push_raw("  /doctor                 diagnose workspace issues");
+    app.push_raw("  /logs [<run_id>]        show log tail");
+    app.push_raw("  /open <path>            preview a file");
+    app.push_raw("");
+    app.push_raw("db + profiles:");
+    app.push_raw("  /profiles list          list profiles");
+    app.push_raw("  /profiles new <n> <url> create profile");
+    app.push_raw("  /profiles set <name>    set active profile");
+    app.push_raw("  /profiles delete <name> remove profile");
+    app.push_raw("  /db session             set ephemeral connection");
+    app.push_raw("  /db change              update active connection");
+    app.push_raw("  /db show-current        show connection details");
+    app.push_raw("  /db test                test connectivity");
+    app.push_raw("  /db privileges          inspect user/db info");
+    app.push_raw("");
+    app.push_raw("pipeline:");
+    app.push_raw("  /introspect             capture schema.json from DB");
+    app.push_raw("  /runs list              list introspection runs");
+    app.push_raw("  /runs set <id>          set active run");
+    app.push_raw("  /runs inspect <id>      show run details");
+    app.push_raw("  /runs delete <id>       delete run");
+    app.push_raw("  /plan new               create plan from schema");
+    app.push_raw("  /plan edit              edit plan.json in editor");
+    app.push_raw("  /plan show              show current plan summary");
+    app.push_raw("  /plan validate          validate plan vs schema");
+    app.push_raw("  /plans list             list all plans");
+    app.push_raw("  /plans set <id>         set active plan");
+    app.push_raw("  /generate               generate CSV outputs");
+    app.push_raw("  /out list               list generated outputs");
+    app.push_raw("  /out preview <id>       preview CSV files");
+    app.push_raw("  /eval [<out_id>]        evaluate last output");
+    app.push_raw("");
+    app.push_raw("settings:");
+    app.push_raw("  /settings show          show all settings");
+    app.push_raw("  /settings set <k> <v>   update a setting");
+    app.push_raw("");
+    app.push_raw("secrets:");
+    app.push_raw("  /secrets status         vault status");
+    app.push_raw("  /secrets import-env     load .env into session");
+    app.push_raw("  /secrets store-session  store session (encrypted)");
+    app.push_raw("  /secrets unlock <pass>  unlock vault");
+    app.push_raw("  /secrets delete         delete vault");
+    app.push_raw("");
+    app.push_raw("navigation:");
+    app.push_raw("  Tab         autocomplete command");
+    app.push_raw("  Up/Down     navigate palette / schema list");
+    app.push_raw("  Esc         go back / clear input");
+    app.push_raw("  Ctrl+A/E    home / end of input");
+    app.push_raw("  Ctrl+W      delete word backward");
+    app.push_raw("  Ctrl+U      clear input line");
+    app.push_raw("  PageUp/Down scroll messages");
+    app.push_raw("  /exit       quit");
     Ok(())
 }
 
 fn cmd_status(app: &mut App) -> Result<(), CliError> {
-    app.push_message("");
-    app.push_message("WORKSPACE STATUS");
-    app.push_message("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    app.push_raw("");
+    app.push_raw("WORKSPACE STATUS");
+    app.push_raw("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     app.push_message(format!("Root:      {}", app.paths.root.display()));
     app.push_message(format!(
         "Profile:   {}",
         app.settings.active_profile.as_deref().unwrap_or("none")
     ));
     app.push_message(format!("Mode:      {}", app.mode_display()));
-    app.push_message(format!("LLM:       {}", app.llm_display()));
 
     let env_conn = std::env::var("DATABASE_URL").ok();
     let file_conn = if env_conn.is_none() {
@@ -162,11 +179,10 @@ fn cmd_status(app: &mut App) -> Result<(), CliError> {
     };
     app.push_message(format!("Connection: {conn_status}"));
 
-    // Stats
     let run_count = app.iter_runs().count();
     let plan_count = app.iter_plans().count();
     let out_count = list_dirs(&app.paths.out_dir)?.len();
-    app.push_message("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    app.push_raw("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     app.push_message(format!(
         "Runs: {}  |  Plans: {}  |  Outputs: {}",
         run_count, plan_count, out_count
@@ -179,8 +195,7 @@ fn cmd_status(app: &mut App) -> Result<(), CliError> {
         "Active Plan: {}",
         app.settings.active_plan_id.as_deref().unwrap_or("none")
     ));
-
-    app.push_message("");
+    app.push_raw("");
     Ok(())
 }
 
@@ -231,7 +246,7 @@ fn cmd_reset(app: &mut App) -> Result<(), CliError> {
         return Ok(());
     }
     app.messages.clear();
-    app.input.clear();
+    app.input_clear();
     app.ui_state = UiState::Setup(SetupStep::ConfirmReset);
     Ok(())
 }
@@ -243,13 +258,13 @@ fn cmd_settings(
     raw: &str,
 ) -> Result<(), CliError> {
     if args.is_empty() {
-        app.push_message("usage: /settings show | /settings set <key> <value>");
+        app.input_set("/settings ".to_string());
         return Ok(());
     }
 
     if args[0] == "show" {
-        app.push_message("SETTINGS");
-        app.push_message("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        app.push_raw("SETTINGS");
+        app.push_raw("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         app.push_message(format!(
             "approval_policy: {:?}",
             app.settings.approval_policy
@@ -278,7 +293,7 @@ fn cmd_settings(
     }
 
     if args.len() < 3 || args[0] != "set" {
-        app.push_message("usage: /settings set <key> <value>");
+        app.input_set("/settings set ".to_string());
         return Ok(());
     }
 
@@ -326,7 +341,7 @@ fn cmd_profiles(
     raw: &str,
 ) -> Result<(), CliError> {
     if args.is_empty() {
-        app.push_message("usage: /profiles list | new | set | delete");
+        app.input_set("/profiles ".to_string());
         return Ok(());
     }
 
@@ -352,7 +367,16 @@ fn cmd_profiles(
     match args[0] {
         "new" => {
             if args.len() < 3 {
-                app.push_message("usage: /profiles new <name> <conn_string>");
+                start_prompt(
+                    app,
+                    PromptContext::new(
+                        "/profiles new",
+                        vec![
+                            "Profile name:",
+                            "Database connection string (postgres:// or sqlite://):",
+                        ],
+                    ),
+                );
                 return Ok(());
             }
             if !bypass_approval && app.requires_approval() {
@@ -374,7 +398,7 @@ fn cmd_profiles(
         }
         "set" => {
             if args.len() < 2 {
-                app.push_message("usage: /profiles set <name>");
+                app.input_set("/profiles set ".to_string());
                 return Ok(());
             }
             if !bypass_approval && app.requires_approval() {
@@ -393,7 +417,7 @@ fn cmd_profiles(
         }
         "delete" => {
             if args.len() < 2 {
-                app.push_message("usage: /profiles delete <name>");
+                app.input_set("/profiles delete ".to_string());
                 return Ok(());
             }
             if !bypass_approval && app.requires_approval() {
@@ -413,7 +437,7 @@ fn cmd_profiles(
             app.push_message("profile deleted.");
         }
         _ => {
-            app.push_message("usage: /profiles list | new | set | delete");
+            app.input_set("/profiles ".to_string());
         }
     }
     Ok(())
@@ -421,26 +445,20 @@ fn cmd_profiles(
 
 fn cmd_db(app: &mut App, args: Vec<&str>) -> Result<(), CliError> {
     if args.is_empty() {
-        // Trigger subcommand palette by setting input with space
-        app.input = "/db ".to_string();
-        // Since we are inside the command handler, the input is already drained.
-        // Creating a new input state will be picked up by the next render loop.
-        // The command palette logic will see "/db " and show subcommands.
+        app.input_set("/db ".to_string());
         return Ok(());
     }
 
     match args[0] {
         "session" => {
-            app.push_message("");
-            app.push_message("Session connection (not saved).");
-            app.push_message("Paste Postgres connection string:");
+            app.push_message("Session connection (not saved). Paste database connection string:");
             app.ui_state = UiState::Setup(SetupStep::DbSession);
-            app.input.clear();
+            app.input_clear();
         }
         "show-current" => {
-            app.push_message("");
-            app.push_message("DATABASE CONNECTION");
-            app.push_message("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            app.push_raw("");
+            app.push_raw("DATABASE CONNECTION");
+            app.push_raw("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
             let env_conn = std::env::var("DATABASE_URL").ok();
             let file_conn = if env_conn.is_none() {
@@ -481,20 +499,16 @@ fn cmd_db(app: &mut App, args: Vec<&str>) -> Result<(), CliError> {
             } else {
                 app.push_message("Status:   No connection configured");
             }
-            app.push_message("");
+            app.push_raw("");
         }
         "change" => {
-            // Pipeline like welcome
-            app.push_message("");
             if app.settings.active_profile.is_none() {
                 app.push_message("missing active profile. use /profiles new or /profiles set.");
                 return Ok(());
             }
-            app.push_message("Update session connection for active profile.");
-            app.push_message("Paste Postgres connection string:");
+            app.push_message("Update session connection. Paste database connection string:");
             app.ui_state = UiState::Setup(SetupStep::DbChange);
-            // Clear any residual input
-            app.input.clear();
+            app.input_clear();
         }
         "test" => {
             let conn = match app.resolve_connection_string() {
@@ -506,20 +520,37 @@ fn cmd_db(app: &mut App, args: Vec<&str>) -> Result<(), CliError> {
             };
             app.push_message("Testing connectivity...");
             let tx = app.tx.clone();
+            let is_sq = is_sqlite(&conn);
             app.runtime.spawn(async move {
-                match PgPoolOptions::new()
-                    .acquire_timeout(std::time::Duration::from_secs(5))
-                    .connect(&conn)
-                    .await
-                {
-                    Ok(_) => {
-                        tx.send(AppEvent::Log("Connection successful!".into())).ok();
+                if is_sq {
+                    match sqlx::sqlite::SqlitePoolOptions::new()
+                        .acquire_timeout(std::time::Duration::from_secs(5))
+                        .connect(&conn)
+                        .await
+                    {
+                        Ok(_) => {
+                            tx.send(AppEvent::Log("Connection successful!".into())).ok();
+                        }
+                        Err(e) => {
+                            tx.send(AppEvent::Log(format!("Connection failed: {}", e)))
+                                .ok();
+                        }
                     }
-                    Err(e) => {
-                        tx.send(AppEvent::Log(format!("Connection failed: {}", e)))
-                            .ok();
-                    }
-                };
+                } else {
+                    match PgPoolOptions::new()
+                        .acquire_timeout(std::time::Duration::from_secs(5))
+                        .connect(&conn)
+                        .await
+                    {
+                        Ok(_) => {
+                            tx.send(AppEvent::Log("Connection successful!".into())).ok();
+                        }
+                        Err(e) => {
+                            tx.send(AppEvent::Log(format!("Connection failed: {}", e)))
+                                .ok();
+                        }
+                    };
+                }
             });
         }
         "privileges" => {
@@ -532,41 +563,70 @@ fn cmd_db(app: &mut App, args: Vec<&str>) -> Result<(), CliError> {
             };
             app.push_message("Fetching info...");
             let tx = app.tx.clone();
+            let is_sq = is_sqlite(&conn);
             app.runtime.spawn(async move {
-                match PgPoolOptions::new()
-                    .acquire_timeout(std::time::Duration::from_secs(5))
-                    .connect(&conn)
-                    .await
-                {
-                    Ok(pool) => {
-                        let q = sqlx::query("SELECT current_user, current_database(), version()");
-                        match q.fetch_one(&pool).await {
-                            Ok(row) => {
-                                let user: String = row.try_get("current_user").unwrap_or_default();
-                                let db: String =
-                                    row.try_get("current_database").unwrap_or_default();
-                                let ver: String = row.try_get("version").unwrap_or_default();
-                                let short_ver = ver.split_whitespace().next().unwrap_or("?");
-                                tx.send(AppEvent::Log(format!(
-                                    "User: {}, DB: {}, Ver: {}",
-                                    user, db, short_ver
-                                )))
-                                .ok();
-                            }
-                            Err(e) => {
-                                tx.send(AppEvent::Log(format!("Query failed: {}", e))).ok();
+                if is_sq {
+                    match sqlx::sqlite::SqlitePoolOptions::new()
+                        .acquire_timeout(std::time::Duration::from_secs(5))
+                        .connect(&conn)
+                        .await
+                    {
+                        Ok(pool) => {
+                            let q = sqlx::query("SELECT sqlite_version() AS ver");
+                            match q.fetch_one(&pool).await {
+                                Ok(row) => {
+                                    let ver: String = row.try_get("ver").unwrap_or_default();
+                                    tx.send(AppEvent::Log(format!("Engine: SQLite, Ver: {}", ver)))
+                                        .ok();
+                                }
+                                Err(e) => {
+                                    tx.send(AppEvent::Log(format!("Query failed: {}", e))).ok();
+                                }
                             }
                         }
+                        Err(e) => {
+                            tx.send(AppEvent::Log(format!("Connection failed: {}", e)))
+                                .ok();
+                        }
                     }
-                    Err(e) => {
-                        tx.send(AppEvent::Log(format!("Connection failed: {}", e)))
-                            .ok();
-                    }
-                };
+                } else {
+                    match PgPoolOptions::new()
+                        .acquire_timeout(std::time::Duration::from_secs(5))
+                        .connect(&conn)
+                        .await
+                    {
+                        Ok(pool) => {
+                            let q =
+                                sqlx::query("SELECT current_user, current_database(), version()");
+                            match q.fetch_one(&pool).await {
+                                Ok(row) => {
+                                    let user: String =
+                                        row.try_get("current_user").unwrap_or_default();
+                                    let db: String =
+                                        row.try_get("current_database").unwrap_or_default();
+                                    let ver: String = row.try_get("version").unwrap_or_default();
+                                    let short_ver = ver.split_whitespace().next().unwrap_or("?");
+                                    tx.send(AppEvent::Log(format!(
+                                        "User: {}, DB: {}, Ver: {}",
+                                        user, db, short_ver
+                                    )))
+                                    .ok();
+                                }
+                                Err(e) => {
+                                    tx.send(AppEvent::Log(format!("Query failed: {}", e))).ok();
+                                }
+                            }
+                        }
+                        Err(e) => {
+                            tx.send(AppEvent::Log(format!("Connection failed: {}", e)))
+                                .ok();
+                        }
+                    };
+                }
             });
         }
         _ => {
-            app.push_message("usage: /db [session|change|show-current|test|privileges]");
+            app.input_set("/db ".to_string());
         }
     }
     Ok(())
@@ -641,15 +701,28 @@ fn cmd_introspect(
     let logs_path = run_dir.join("logs.ndjson");
     append_line(&logs_path, "{\"event\":\"run_started\"}")?;
 
+    app.start_task("Introspecting database...");
+    let is_sq = is_sqlite(&conn);
     let result = app.runtime.block_on(async {
-        let pool = sqlx::postgres::PgPoolOptions::new()
-            .max_connections(5)
-            .acquire_timeout(Duration::from_secs(10))
-            .connect(&conn)
-            .await?;
-        let schema = introspect_postgres_with_options(&pool, options).await?;
-        Ok::<DatabaseSchema, CliError>(schema)
+        if is_sq {
+            let pool = sqlx::sqlite::SqlitePoolOptions::new()
+                .max_connections(5)
+                .acquire_timeout(Duration::from_secs(10))
+                .connect(&conn)
+                .await?;
+            let schema = introspect_sqlite_with_options(&pool, options).await?;
+            Ok::<DatabaseSchema, CliError>(schema)
+        } else {
+            let pool = sqlx::postgres::PgPoolOptions::new()
+                .max_connections(5)
+                .acquire_timeout(Duration::from_secs(10))
+                .connect(&conn)
+                .await?;
+            let schema = introspect_postgres_with_options(&pool, options).await?;
+            Ok::<DatabaseSchema, CliError>(schema)
+        }
     });
+    app.finish_task();
 
     match result {
         Ok(schema) => {
@@ -707,7 +780,7 @@ fn cmd_runs(
     raw: &str,
 ) -> Result<(), CliError> {
     if args.is_empty() {
-        app.push_message("usage: /runs list | set <run_id> | inspect <run_id> | delete <run_id>");
+        app.input_set("/runs ".to_string());
         return Ok(());
     }
 
@@ -718,8 +791,8 @@ fn cmd_runs(
                 app.push_message("no runs found.");
                 return Ok(());
             }
-            app.push_message("RUNS");
-            app.push_message("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            app.push_raw("RUNS");
+            app.push_raw("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             for run in runs {
                 let active = app.settings.active_run_id.as_deref() == Some(run.as_str());
                 let label = if active { "active" } else { " " };
@@ -732,7 +805,7 @@ fn cmd_runs(
         }
         "set" => {
             if args.len() < 2 {
-                app.push_message("usage: /runs set <run_id>");
+                app.input_set("/runs set ".to_string());
                 return Ok(());
             }
             if !bypass_approval && app.requires_approval() {
@@ -746,7 +819,7 @@ fn cmd_runs(
         }
         "inspect" => {
             if args.len() < 2 {
-                app.push_message("usage: /runs inspect <run_id>");
+                app.input_set("/runs inspect ".to_string());
                 return Ok(());
             }
             let run_id = args[1];
@@ -757,8 +830,8 @@ fn cmd_runs(
             }
             let manifest: RunManifest =
                 serde_json::from_str(&std::fs::read_to_string(manifest_path)?)?;
-            app.push_message("RUN DETAILS");
-            app.push_message("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            app.push_raw("RUN DETAILS");
+            app.push_raw("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
             app.push_message(format!("run_id:           {}", manifest.run_id));
             app.push_message(format!("status:           {:?}", manifest.status));
             app.push_message(format!("db_profile:       {}", manifest.db_profile));
@@ -773,7 +846,7 @@ fn cmd_runs(
                 "finished_at:      {}",
                 manifest.finished_at.as_deref().unwrap_or("running")
             ));
-            app.push_message("options:");
+            app.push_raw("options:");
             app.push_message(format!(
                 "  schemas: {:?}",
                 manifest
@@ -809,7 +882,7 @@ fn cmd_runs(
         }
         "delete" => {
             if args.len() < 2 {
-                app.push_message("usage: /runs delete <run_id>");
+                app.input_set("/runs delete ".to_string());
                 return Ok(());
             }
             if !bypass_approval && app.requires_approval() {
@@ -830,9 +903,7 @@ fn cmd_runs(
             app.push_message("run deleted.");
         }
         _ => {
-            app.push_message(
-                "usage: /runs list | set <run_id> | inspect <run_id> | delete <run_id>",
-            );
+            app.input_set("/runs ".to_string());
         }
     }
     Ok(())
@@ -845,7 +916,7 @@ fn cmd_plans(
     raw: &str,
 ) -> Result<(), CliError> {
     if args.is_empty() {
-        app.push_message("usage: /plans list | set <plan_id>");
+        app.input_set("/plans ".to_string());
         return Ok(());
     }
 
@@ -864,7 +935,7 @@ fn cmd_plans(
 
     if args[0] == "set" {
         if args.len() < 2 {
-            app.push_message("usage: /plans set <plan_id>");
+            app.input_set("/plans set ".to_string());
             return Ok(());
         }
         if !bypass_approval && app.requires_approval() {
@@ -878,7 +949,7 @@ fn cmd_plans(
         return Ok(());
     }
 
-    app.push_message("usage: /plans list | set <plan_id>");
+    app.input_set("/plans ".to_string());
     Ok(())
 }
 
@@ -889,15 +960,16 @@ fn cmd_plan(
     raw: &str,
 ) -> Result<(), CliError> {
     if args.is_empty() {
-        app.push_message("usage: /plan new|edit|validate");
+        app.input_set("/plan ".to_string());
         return Ok(());
     }
     match args[0] {
         "new" => cmd_plan_new(app, args.clone(), bypass_approval, raw),
         "edit" => cmd_plan_edit(app, bypass_approval, raw),
+        "show" => cmd_plan_show(app),
         "validate" => cmd_plan_validate(app),
         _ => {
-            app.push_message("usage: /plan new|edit|validate");
+            app.input_set("/plan ".to_string());
             Ok(())
         }
     }
@@ -932,7 +1004,10 @@ fn cmd_plan_new(
     let plan_dir = app.paths.plans_dir.join(&plan_id);
     std::fs::create_dir_all(&plan_dir)?;
 
-    let plan = mock_plan(&schema);
+    app.start_task("Generating smart plan...");
+    let plan = smart_plan(&schema);
+    app.finish_task();
+
     let plan_json = serde_json::to_vec_pretty(&plan)?;
     write_bytes_atomic(&plan_dir.join("plan.json"), &plan_json)?;
 
@@ -941,13 +1016,9 @@ fn cmd_plan_new(
         status: ArtifactStatus::Ok,
         schema_run_id: run_id,
         schema_fingerprint: schema.schema_fingerprint.clone(),
-        provider: provider_label(&app.settings),
-        model: app
-            .settings
-            .llm_model
-            .clone()
-            .unwrap_or_else(|| "mock".to_string()),
-        mock: true,
+        provider: "heuristic".to_string(),
+        model: "smart_plan".to_string(),
+        mock: false,
         artifact_version: crate::workspace::ARTIFACT_VERSION.to_string(),
         cli_version: crate::workspace::CLI_VERSION.to_string(),
         created_at: Utc::now().to_rfc3339(),
@@ -955,15 +1026,94 @@ fn cmd_plan_new(
     };
     write_json_atomic(&plan_dir.join("plan.meta.json"), &meta)?;
 
-    write_bytes_atomic(&plan_dir.join("prompt.txt"), b"mock plan generated")?;
     write_bytes_atomic(
-        &plan_dir.join("llm_transcript.jsonl"),
-        b"{\"role\":\"system\",\"content\":\"mock\"}\n",
+        &plan_dir.join("prompt.txt"),
+        b"smart plan generated by heuristic engine",
     )?;
+
+    // Count assigned generators for feedback
+    let gen_count = plan.rules.len();
+    let table_count = plan.targets.len();
 
     app.settings.active_plan_id = Some(plan_id);
     save_settings(&app.paths, &app.settings)?;
-    app.push_message("plan created.");
+    app.push_message(format!(
+        "plan created: {table_count} tables, {gen_count} generator rules, {} rows total.",
+        plan.targets.iter().map(|t| t.rows).sum::<u64>()
+    ));
+    Ok(())
+}
+
+fn cmd_plan_show(app: &mut App) -> Result<(), CliError> {
+    let plan_id = match &app.settings.active_plan_id {
+        Some(id) => id.clone(),
+        None => {
+            app.push_message("missing active plan. use /plan new.");
+            return Ok(());
+        }
+    };
+
+    let plan_path = app.paths.plans_dir.join(&plan_id).join("plan.json");
+    if !plan_path.exists() {
+        app.push_message("plan.json not found.");
+        return Ok(());
+    }
+
+    let plan_json: Value = serde_json::from_str(&std::fs::read_to_string(&plan_path)?)?;
+    let plan = parse_plan(&plan_json)?;
+
+    app.push_raw("PLAN SUMMARY");
+    app.push_raw("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    app.push_message(format!("plan_id:      {}", plan_id));
+    app.push_message(format!("plan_version: {}", plan.plan_version));
+    app.push_message(format!("seed:         {}", plan.seed));
+    if let Some(global) = &plan.global {
+        if let Some(locale) = &global.locale {
+            app.push_message(format!("locale:       {}", locale));
+        }
+    }
+    app.push_raw("");
+    app.push_raw("TARGETS:");
+    for target in &plan.targets {
+        app.push_message(format!(
+            "  {}.{}: {} rows",
+            target.schema, target.table, target.rows
+        ));
+    }
+    app.push_raw("");
+    app.push_raw(format!("RULES: {} total", plan.rules.len()));
+    for rule in &plan.rules {
+        match rule {
+            Rule::ColumnGenerator(cg) => {
+                app.push_message(format!(
+                    "  {}.{}.{} -> {}",
+                    cg.schema,
+                    cg.table,
+                    cg.column,
+                    cg.generator.id()
+                ));
+            }
+            Rule::ConstraintPolicy(cp) => {
+                app.push_message(format!(
+                    "  {}.{} constraint {:?} -> {:?}",
+                    cp.schema, cp.table, cp.constraint, cp.mode
+                ));
+            }
+            Rule::ForeignKeyStrategy(fk) => {
+                app.push_message(format!(
+                    "  {}.{} fk_strategy -> {:?}",
+                    fk.schema, fk.table, fk.mode
+                ));
+            }
+        }
+    }
+    if !plan.rules_unsupported.is_empty() {
+        app.push_raw(format!(
+            "UNSUPPORTED: {} rules",
+            plan.rules_unsupported.len()
+        ));
+    }
+    app.push_raw("");
     Ok(())
 }
 
@@ -994,8 +1144,13 @@ fn cmd_plan_edit(app: &mut App, bypass_approval: bool, raw: &str) -> Result<(), 
         return Ok(());
     }
 
-    open_in_editor(&plan_path)?;
-    app.push_message("plan edited. run /plan validate.");
+    match open_in_editor(&plan_path) {
+        Ok(()) => app.push_message("plan edited. run /plan validate."),
+        Err(_) => {
+            app.push_message("could not open editor. set $EDITOR or $VISUAL env var.");
+            app.push_message(format!("file: {}", plan_path.display()));
+        }
+    }
     Ok(())
 }
 
@@ -1126,7 +1281,11 @@ fn cmd_generate(
     };
     let engine = GenerationEngine::new(options);
 
-    match engine.run(&schema, &plan) {
+    app.start_task("Generating CSV data...");
+    let gen_result = engine.run(&schema, &plan);
+    app.finish_task();
+
+    match gen_result {
         Ok(result) => {
             move_dir_contents(&result.run_dir, &final_dir)?;
             write_json_atomic(&final_dir.join("generation_report.json"), &result.report)?;
@@ -1149,7 +1308,7 @@ fn cmd_generate(
 
 fn cmd_out(app: &mut App, args: Vec<&str>) -> Result<(), CliError> {
     if args.is_empty() {
-        app.push_message("usage: /out list | preview <out_id>");
+        app.input_set("/out ".to_string());
         return Ok(());
     }
 
@@ -1165,20 +1324,64 @@ fn cmd_out(app: &mut App, args: Vec<&str>) -> Result<(), CliError> {
         return Ok(());
     }
 
-    if args[0] == "preview" && args.len() > 1 {
-        let path = app.paths.out_dir.join(args[1]);
+    if args[0] == "preview" {
+        let out_id = if args.len() > 1 {
+            args[1].to_string()
+        } else if let Some(last) = &app.last_out_id {
+            last.clone()
+        } else {
+            app.push_message("no outputs found. run /generate first.");
+            return Ok(());
+        };
+
+        let path = app.paths.out_dir.join(&out_id);
         if !path.exists() {
             app.push_message("output not found.");
             return Ok(());
         }
+
         let entries = list_preview_files(&path)?;
-        for entry in entries {
-            app.push_message(entry);
+        let csv_files: Vec<&String> = entries.iter().filter(|e| e.ends_with(".csv")).collect();
+
+        if csv_files.is_empty() {
+            app.push_message("no CSV files found in output.");
+            for entry in &entries {
+                app.push_message(format!("  {entry}"));
+            }
+            return Ok(());
+        }
+
+        app.push_raw(format!("OUTPUT PREVIEW: {out_id}"));
+        app.push_raw("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+        for csv_file in &csv_files {
+            let csv_path = path.join(csv_file);
+            app.push_raw(format!("── {} ──", csv_file));
+            match csv_preview(&csv_path, 5) {
+                Ok(lines) => {
+                    for line in lines {
+                        app.push_raw(line);
+                    }
+                }
+                Err(e) => {
+                    app.push_message(format!("  error reading: {e}"));
+                }
+            }
+            app.push_raw("");
+        }
+
+        // Also list non-csv files
+        let other: Vec<&String> = entries.iter().filter(|e| !e.ends_with(".csv")).collect();
+        if !other.is_empty() {
+            app.push_raw("other files:");
+            for entry in other {
+                app.push_message(format!("  {entry}"));
+            }
         }
         return Ok(());
     }
 
-    app.push_message("usage: /out list | preview <out_id>");
+    app.input_set("/out ".to_string());
     Ok(())
 }
 
@@ -1259,7 +1462,11 @@ fn cmd_eval(
     let manifest_path = eval_dir.join("eval_manifest.json");
     write_json_atomic(&manifest_path, &manifest)?;
 
-    match engine.run(&schema, &plan, &dataset_dir) {
+    app.start_task("Evaluating dataset...");
+    let eval_result = engine.run(&schema, &plan, &dataset_dir);
+    app.finish_task();
+
+    match eval_result {
         Ok(result) => {
             write_json_atomic(&eval_dir.join("evaluation_report.json"), &result.metrics)?;
             app.write_profile_config(&eval_dir)?;
@@ -1311,14 +1518,14 @@ fn cmd_logs(app: &mut App, args: Vec<&str>) -> Result<(), CliError> {
     }
     let lines = read_tail_lines(&path, 50)?;
     for line in lines {
-        app.push_message(line);
+        app.push_raw(line);
     }
     Ok(())
 }
 
 fn cmd_open(app: &mut App, args: Vec<&str>) -> Result<(), CliError> {
     if args.is_empty() {
-        app.push_message("usage: /open <path>");
+        start_prompt(app, PromptContext::new("/open", vec!["File path:"]));
         return Ok(());
     }
     let path = PathBuf::from(args[0]);
@@ -1328,7 +1535,7 @@ fn cmd_open(app: &mut App, args: Vec<&str>) -> Result<(), CliError> {
     }
     let lines = read_head_lines(&path, 80)?;
     for line in lines {
-        app.push_message(line);
+        app.push_raw(line);
     }
     Ok(())
 }
@@ -1340,7 +1547,7 @@ fn cmd_secrets(
     raw: &str,
 ) -> Result<(), CliError> {
     if args.is_empty() {
-        app.push_message("usage: /secrets status|import-env|store-session|unlock|delete");
+        app.input_set("/secrets ".to_string());
         return Ok(());
     }
 
@@ -1368,7 +1575,10 @@ fn cmd_secrets(
         }
         "store-session" => {
             if args.len() < 2 {
-                app.push_message("usage: /secrets store-session <passphrase>");
+                start_prompt(
+                    app,
+                    PromptContext::new("/secrets store-session", vec!["Passphrase:"]),
+                );
                 return Ok(());
             }
             if !bypass_approval && app.requires_approval() {
@@ -1394,7 +1604,10 @@ fn cmd_secrets(
         }
         "unlock" => {
             if args.len() < 2 {
-                app.push_message("usage: /secrets unlock <passphrase>");
+                start_prompt(
+                    app,
+                    PromptContext::new("/secrets unlock", vec!["Passphrase:"]),
+                );
                 return Ok(());
             }
             let passphrase = args[1];
@@ -1435,7 +1648,7 @@ fn cmd_secrets(
             app.push_message("vault deleted.");
         }
         _ => {
-            app.push_message("usage: /secrets status|import-env|store-session|unlock|delete");
+            app.input_set("/secrets ".to_string());
         }
     }
     Ok(())
@@ -1448,16 +1661,19 @@ fn cmd_llm(
     raw: &str,
 ) -> Result<(), CliError> {
     if args.is_empty() {
-        app.push_message(format!(
-            "llm: enabled={} provider={:?} model={}",
-            app.settings.llm_enabled,
-            app.settings.llm_provider,
-            app.settings.llm_model.as_deref().unwrap_or("none")
-        ));
+        app.input_set("/llm ".to_string());
         return Ok(());
     }
 
     match args[0] {
+        "status" => {
+            app.push_message(format!(
+                "llm: enabled={} provider={:?} model={}",
+                app.settings.llm_enabled,
+                app.settings.llm_provider,
+                app.settings.llm_model.as_deref().unwrap_or("none")
+            ));
+        }
         "models" => {
             let models = app.llm_models.models.clone();
             for model in models {
@@ -1477,7 +1693,10 @@ fn cmd_llm(
         }
         "set" => {
             if args.len() < 3 {
-                app.push_message("usage: /llm set <provider> <model>");
+                start_prompt(
+                    app,
+                    PromptContext::new("/llm set", vec!["Provider (gemini):", "Model name:"]),
+                );
                 return Ok(());
             }
             if !bypass_approval && app.requires_approval() {
@@ -1492,11 +1711,15 @@ fn cmd_llm(
             app.push_message("llm settings updated.");
         }
         _ => {
-            app.push_message("usage: /llm models|set|off");
+            app.input_set("/llm ".to_string());
         }
     }
     Ok(())
 }
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 fn parse_approval_policy(value: &str) -> Result<ApprovalPolicy, CliError> {
     match value {
@@ -1581,16 +1804,56 @@ fn parse_plan(plan_json: &Value) -> Result<Plan, CliError> {
     serde_json::from_value(plan_json.clone()).map_err(|err| CliError::Plan(err.to_string()))
 }
 
-fn mock_plan(schema: &DatabaseSchema) -> Plan {
+fn provider_label(settings: &WorkspaceSettings) -> String {
+    match settings.llm_provider {
+        LlmProvider::Gemini => "gemini".to_string(),
+        LlmProvider::Off => "off".to_string(),
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Smart plan generation (heuristic-based, no LLM)
+// ---------------------------------------------------------------------------
+
+/// Generate a smart plan by analyzing column names and types from the schema.
+/// Uses heuristic matching to assign appropriate faker-rs generators.
+fn smart_plan(schema: &DatabaseSchema) -> Plan {
     let mut targets = Vec::new();
+    let mut rules = Vec::new();
+
     for db_schema in &schema.schemas {
         for table in &db_schema.tables {
             targets.push(Target {
                 schema: db_schema.name.clone(),
                 table: table.name.clone(),
-                rows: 10,
+                rows: 50,
                 strategy: None,
             });
+
+            for column in &table.columns {
+                // Skip identity/generated columns
+                if column.identity.is_some() || column.generated.is_some() {
+                    continue;
+                }
+                // Skip columns with serial-like defaults (sequences)
+                if let Some(ref def) = column.default {
+                    let lower = def.to_lowercase();
+                    if lower.contains("nextval(") || lower.contains("gen_random_uuid") {
+                        continue;
+                    }
+                }
+
+                if let Some(gen_id) = guess_generator(&column.name, &column.column_type) {
+                    rules.push(Rule::ColumnGenerator(ColumnGeneratorRule {
+                        schema: db_schema.name.clone(),
+                        table: table.name.clone(),
+                        column: column.name.clone(),
+                        generator: GeneratorRef::Id(gen_id),
+                        params: None,
+                        transforms: Vec::new(),
+                    }));
+                }
+            }
         }
     }
 
@@ -1602,19 +1865,195 @@ fn mock_plan(schema: &DatabaseSchema) -> Plan {
             schema_fingerprint: schema.schema_fingerprint.clone(),
             engine: schema.engine.clone(),
         },
+        global: Some(PlanGlobal {
+            locale: Some("pt_BR".to_string()),
+        }),
         targets,
-        rules: Vec::new(),
+        rules,
         rules_unsupported: Vec::new(),
         options: None,
     }
 }
 
-fn provider_label(settings: &WorkspaceSettings) -> String {
-    match settings.llm_provider {
-        LlmProvider::Gemini => "gemini".to_string(),
-        LlmProvider::Off => "off".to_string(),
+/// Heuristic generator mapping based on column name patterns and SQL types.
+fn guess_generator(col_name: &str, col_type: &datalchemy_core::ColumnType) -> Option<String> {
+    let name = col_name.to_lowercase();
+    let udt = col_type.udt_name.to_lowercase();
+    let dtype = col_type.data_type.to_lowercase();
+
+    // --- UUID type ---
+    if udt == "uuid" {
+        return Some("primitive.uuid".to_string());
     }
+
+    // --- Boolean type ---
+    if udt == "bool" || dtype.contains("boolean") {
+        return Some("primitive.bool".to_string());
+    }
+
+    // --- Name-based heuristics (check before generic type fallback) ---
+
+    // Email
+    if name.contains("email") || name.contains("e_mail") {
+        return Some("semantic.person.email".to_string());
+    }
+
+    // Phone / telefone
+    if name.contains("phone")
+        || name.contains("telefone")
+        || name.contains("celular")
+        || name.contains("fone")
+    {
+        return Some("faker.phone_number.raw.PhoneNumber".to_string());
+    }
+
+    // Person name patterns
+    if name == "nome"
+        || name == "name"
+        || name == "nome_completo"
+        || name == "full_name"
+        || name == "fullname"
+    {
+        return Some("faker.name.raw.Name".to_string());
+    }
+    if name == "primeiro_nome" || name == "first_name" || name == "firstname" {
+        return Some("faker.name.raw.FirstName".to_string());
+    }
+    if name == "sobrenome" || name == "last_name" || name == "lastname" || name == "ultimo_nome" {
+        return Some("faker.name.raw.LastName".to_string());
+    }
+
+    // Company
+    if name.contains("empresa")
+        || name.contains("company")
+        || name == "razao_social"
+        || name == "nome_fantasia"
+    {
+        return Some("faker.company.raw.CompanyName".to_string());
+    }
+
+    // Address
+    if name.contains("endereco") || name.contains("address") || name == "logradouro" {
+        return Some("faker.address.raw.StreetName".to_string());
+    }
+    if name == "cidade" || name == "city" {
+        return Some("faker.address.raw.CityName".to_string());
+    }
+    if name == "estado" || name == "state" || name == "uf" {
+        return Some("faker.address.raw.StateName".to_string());
+    }
+    if name == "cep"
+        || name == "zip"
+        || name == "zipcode"
+        || name == "zip_code"
+        || name == "codigo_postal"
+    {
+        return Some("faker.address.raw.ZipCode".to_string());
+    }
+    if name == "pais" || name == "country" {
+        return Some("faker.address.raw.CountryName".to_string());
+    }
+
+    // URL / website
+    if name.contains("url") || name.contains("website") || name.contains("site") {
+        return Some("faker.internet.raw.DomainSuffix".to_string());
+    }
+
+    // Description / text
+    if name.contains("descricao")
+        || name.contains("description")
+        || name.contains("observacao")
+        || name.contains("obs")
+        || name.contains("notas")
+        || name.contains("notes")
+        || name.contains("comentario")
+    {
+        return Some("faker.lorem.raw.Sentence".to_string());
+    }
+
+    // Title / titulo
+    if name == "titulo" || name == "title" || name == "assunto" || name == "subject" {
+        return Some("faker.lorem.raw.Words".to_string());
+    }
+
+    // Monetary / valor
+    if name.contains("valor")
+        || name.contains("preco")
+        || name.contains("price")
+        || name.contains("amount")
+        || name.contains("custo")
+        || name.contains("cost")
+        || name.contains("salario")
+        || name.contains("salary")
+    {
+        return Some("primitive.float".to_string());
+    }
+
+    // Quantity / count
+    if name.contains("quantidade")
+        || name.contains("qty")
+        || name.contains("quantity")
+        || name.contains("count")
+        || name.contains("total")
+    {
+        return Some("primitive.int".to_string());
+    }
+
+    // Percentage
+    if name.contains("percentual") || name.contains("percent") || name.contains("taxa") {
+        return Some("primitive.float".to_string());
+    }
+
+    // Status / tipo / category (enum-like text)
+    if name == "status"
+        || name == "tipo"
+        || name == "type"
+        || name == "categoria"
+        || name == "category"
+    {
+        // For enum-like, let the generator engine use fallback
+        return None;
+    }
+
+    // --- Type-based fallback ---
+
+    // Timestamps
+    if udt.contains("timestamp") || dtype.contains("timestamp") {
+        return Some("primitive.timestamp".to_string());
+    }
+    if udt == "date" || dtype == "date" {
+        return Some("primitive.date".to_string());
+    }
+    if udt == "time" || dtype.contains("time without") {
+        return Some("primitive.time".to_string());
+    }
+
+    // Numeric types
+    if udt == "int2" || udt == "int4" || udt == "int8" || udt == "serial" || udt == "bigserial" {
+        return Some("primitive.int".to_string());
+    }
+    if udt == "float4" || udt == "float8" || udt == "numeric" || udt == "decimal" || udt == "money"
+    {
+        return Some("primitive.float".to_string());
+    }
+
+    // JSON
+    if udt == "json" || udt == "jsonb" {
+        return Some("primitive.json".to_string());
+    }
+
+    // Text: only if it's a non-trivial text column
+    if udt == "text" || udt == "varchar" || udt.starts_with("varchar") || udt == "bpchar" {
+        // Generic text columns get a lorem generator
+        return Some("faker.lorem.raw.Word".to_string());
+    }
+
+    None
 }
+
+// ---------------------------------------------------------------------------
+// Command log sanitization
+// ---------------------------------------------------------------------------
 
 pub fn sanitize_command_for_log(input: &str) -> String {
     let parts: Vec<&str> = input.split_whitespace().collect();
@@ -1646,7 +2085,10 @@ pub fn sanitize_command_for_log(input: &str) -> String {
     let redacted: Vec<String> = parts
         .into_iter()
         .map(|part| {
-            if part.starts_with("postgres://") || part.starts_with("postgresql://") {
+            if part.starts_with("postgres://")
+                || part.starts_with("postgresql://")
+                || part.starts_with("sqlite://")
+            {
                 "<redacted>".to_string()
             } else {
                 part.to_string()
@@ -1656,222 +2098,203 @@ pub fn sanitize_command_for_log(input: &str) -> String {
     redacted.join(" ")
 }
 
+// ---------------------------------------------------------------------------
+// Command palette
+// ---------------------------------------------------------------------------
+
 pub fn command_palette_matches(app: &App, input: &str) -> Vec<PaletteEntry> {
     if !input.starts_with('/') {
         return Vec::new();
     }
 
-    // Check if we are matching subcommands
-    let parts: Vec<&str> = input.split_whitespace().collect();
-
-    // If we have "/db " (prefix + space), show db subcommands
-    // Note: input.starts_with("/db ") handles the case where user typed space
-    // and if parts.len() >= 1.
-    if input.starts_with("/db ") {
-        let _sub_query = if parts.len() > 1 { parts[1] } else { "" };
-        let entries = vec![
-            PaletteEntry {
-                command: "/db session",
-                description: "set ephemeral connection string",
-            },
-            PaletteEntry {
-                command: "/db change",
-                description: "interactive connection setup wizard",
-            },
-            PaletteEntry {
-                command: "/db show-current",
-                description: "show active connection details",
-            },
-            PaletteEntry {
-                command: "/db test",
-                description: "test connectivity",
-            },
-            PaletteEntry {
-                command: "/db privileges",
-                description: "inspect user privileges",
-            },
-        ];
-
-        return entries
-            .into_iter()
-            .filter(|e| e.command.starts_with(input.trim()))
-            .collect();
-    }
-
-    if input.starts_with("/profiles ") {
-        let entries = vec![
-            PaletteEntry {
-                command: "/profiles list",
-                description: "list profiles",
-            },
-            PaletteEntry {
-                command: "/profiles new",
-                description: "create profile",
-            },
-            PaletteEntry {
-                command: "/profiles set",
-                description: "set active profile",
-            },
-            PaletteEntry {
-                command: "/profiles delete",
-                description: "remove profile",
-            },
-        ];
-        return entries
-            .into_iter()
-            .filter(|e| e.command.starts_with(input.trim()))
-            .collect();
-    }
-
-    if input.starts_with("/plan ") {
-        let entries = vec![
-            PaletteEntry {
-                command: "/plan new",
-                description: "create a mock plan",
-            },
-            PaletteEntry {
-                command: "/plan edit",
-                description: "edit plan.json",
-            },
-            PaletteEntry {
-                command: "/plan validate",
-                description: "validate plan.json",
-            },
-        ];
-        return entries
-            .into_iter()
-            .filter(|e| e.command.starts_with(input.trim()))
-            .collect();
-    }
-
-    if input.starts_with("/runs ") {
-        let entries = vec![
-            PaletteEntry {
-                command: "/runs list",
-                description: "list runs",
-            },
-            PaletteEntry {
-                command: "/runs set",
-                description: "set active run",
-            },
-            PaletteEntry {
-                command: "/runs inspect",
-                description: "show run details",
-            },
-            PaletteEntry {
-                command: "/runs delete",
-                description: "delete run",
-            },
-        ];
-        return entries
-            .into_iter()
-            .filter(|e| e.command.starts_with(input.trim()))
-            .collect();
-    }
-
-    if input.starts_with("/plans ") {
-        let entries = vec![
-            PaletteEntry {
-                command: "/plans list",
-                description: "list plans",
-            },
-            PaletteEntry {
-                command: "/plans set",
-                description: "set active plan",
-            },
-        ];
-        return entries
-            .into_iter()
-            .filter(|e| e.command.starts_with(input.trim()))
-            .collect();
-    }
-
-    if input.starts_with("/out ") {
-        let entries = vec![
-            PaletteEntry {
-                command: "/out list",
-                description: "list outputs",
-            },
-            PaletteEntry {
-                command: "/out preview",
-                description: "list files for out_id",
-            },
-        ];
-        return entries
-            .into_iter()
-            .filter(|e| e.command.starts_with(input.trim()))
-            .collect();
-    }
-
-    if input.starts_with("/settings ") {
-        let entries = vec![
-            PaletteEntry {
-                command: "/settings show",
-                description: "show settings",
-            },
-            PaletteEntry {
-                command: "/settings set",
-                description: "update settings",
-            },
-        ];
-        return entries
-            .into_iter()
-            .filter(|e| e.command.starts_with(input.trim()))
-            .collect();
-    }
-
-    if input.starts_with("/secrets ") {
-        let entries = vec![
-            PaletteEntry {
-                command: "/secrets status",
-                description: "vault status",
-            },
-            PaletteEntry {
-                command: "/secrets import-env",
-                description: "load .env into session",
-            },
-            PaletteEntry {
-                command: "/secrets store-session",
-                description: "store session secrets",
-            },
-            PaletteEntry {
-                command: "/secrets unlock",
-                description: "unlock vault",
-            },
-            PaletteEntry {
-                command: "/secrets delete",
-                description: "delete vault",
-            },
-        ];
-        return entries
-            .into_iter()
-            .filter(|e| e.command.starts_with(input.trim()))
-            .collect();
-    }
-
-    if input.starts_with("/llm ") {
-        let entries = vec![
-            PaletteEntry {
-                command: "/llm models",
-                description: "list models",
-            },
-            PaletteEntry {
-                command: "/llm set",
-                description: "set provider/model",
-            },
-            PaletteEntry {
-                command: "/llm off",
-                description: "disable llm",
-            },
-        ];
-        return entries
-            .into_iter()
-            .filter(|e| e.command.starts_with(input.trim()))
-            .collect();
-    }
-
-    // Default main command matching
     let query = input.trim();
+
+    // --- Dynamic subcommand palettes with real data ---
+
+    // /profiles set <name> — show existing profile names
+    if input.starts_with("/profiles set ") {
+        let mut entries = Vec::new();
+        let mut names: Vec<String> = app.profiles.profiles.keys().cloned().collect();
+        names.sort();
+        for name in names {
+            entries.push(pe(&format!("/profiles set {}", name), "set active profile"));
+        }
+        return filter_entries(entries, query);
+    }
+    // /profiles delete <name> — show existing profile names
+    if input.starts_with("/profiles delete ") {
+        let mut entries = Vec::new();
+        let mut names: Vec<String> = app.profiles.profiles.keys().cloned().collect();
+        names.sort();
+        for name in names {
+            entries.push(pe(&format!("/profiles delete {}", name), "remove profile"));
+        }
+        return filter_entries(entries, query);
+    }
+    // /runs set|inspect|delete <run_id> — show existing run IDs
+    if input.starts_with("/runs set ") {
+        let runs: Vec<String> = app.iter_runs().collect();
+        let entries: Vec<PaletteEntry> = runs
+            .iter()
+            .map(|r| pe(&format!("/runs set {}", r), "set active run"))
+            .collect();
+        return filter_entries(entries, query);
+    }
+    if input.starts_with("/runs inspect ") {
+        let runs: Vec<String> = app.iter_runs().collect();
+        let entries: Vec<PaletteEntry> = runs
+            .iter()
+            .map(|r| pe(&format!("/runs inspect {}", r), "show run details"))
+            .collect();
+        return filter_entries(entries, query);
+    }
+    if input.starts_with("/runs delete ") {
+        let runs: Vec<String> = app.iter_runs().collect();
+        let entries: Vec<PaletteEntry> = runs
+            .iter()
+            .map(|r| pe(&format!("/runs delete {}", r), "delete run"))
+            .collect();
+        return filter_entries(entries, query);
+    }
+    // /plans set <plan_id> — show existing plan IDs
+    if input.starts_with("/plans set ") {
+        let plans: Vec<String> = app.iter_plans().collect();
+        let entries: Vec<PaletteEntry> = plans
+            .iter()
+            .map(|p| pe(&format!("/plans set {}", p), "set active plan"))
+            .collect();
+        return filter_entries(entries, query);
+    }
+    // /out preview <out_id> — show existing output IDs
+    if input.starts_with("/out preview ") {
+        let outs = list_dirs(&app.paths.out_dir).unwrap_or_default();
+        let entries: Vec<PaletteEntry> = outs
+            .iter()
+            .map(|o| pe(&format!("/out preview {}", o), "preview output"))
+            .collect();
+        return filter_entries(entries, query);
+    }
+    // /settings set <key> <value> — show valid values for a key
+    if input.starts_with("/settings set ") {
+        let after = input.trim_start_matches("/settings set ").trim();
+        let parts: Vec<&str> = after.split_whitespace().collect();
+        if parts.len() >= 1 && !after.is_empty() && !after.ends_with(' ') {
+            // User is typing a key name, show valid keys
+            return filter_entries(settings_key_palette(), query);
+        }
+        if parts.len() == 1 && after.ends_with(' ') {
+            // Key selected, show valid values
+            let key = parts[0];
+            return filter_entries(settings_value_palette(key), query);
+        }
+        if parts.len() >= 2 {
+            // Key + partial value, show valid values filtered
+            let key = parts[0];
+            return filter_entries(settings_value_palette(key), query);
+        }
+        // No key typed yet, show all keys
+        return filter_entries(settings_key_palette(), query);
+    }
+
+    // --- Static subcommand palettes ---
+
+    if input.starts_with("/db ") {
+        return filter_entries(
+            vec![
+                pe("/db session", "set ephemeral connection string"),
+                pe("/db change", "interactive connection setup"),
+                pe("/db show-current", "show active connection details"),
+                pe("/db test", "test connectivity"),
+                pe("/db privileges", "inspect user privileges"),
+            ],
+            query,
+        );
+    }
+    if input.starts_with("/profiles ") {
+        return filter_entries(
+            vec![
+                pe("/profiles list", "list profiles"),
+                pe("/profiles new", "create profile"),
+                pe("/profiles set", "set active profile"),
+                pe("/profiles delete", "remove profile"),
+            ],
+            query,
+        );
+    }
+    if input.starts_with("/plan ") {
+        return filter_entries(
+            vec![
+                pe("/plan new", "generate smart plan from schema"),
+                pe("/plan edit", "edit plan.json in editor"),
+                pe("/plan show", "show current plan summary"),
+                pe("/plan validate", "validate plan against schema"),
+            ],
+            query,
+        );
+    }
+    if input.starts_with("/runs ") {
+        return filter_entries(
+            vec![
+                pe("/runs list", "list runs"),
+                pe("/runs set", "set active run"),
+                pe("/runs inspect", "show run details"),
+                pe("/runs delete", "delete run"),
+            ],
+            query,
+        );
+    }
+    if input.starts_with("/plans ") {
+        return filter_entries(
+            vec![
+                pe("/plans list", "list plans"),
+                pe("/plans set", "set active plan"),
+            ],
+            query,
+        );
+    }
+    if input.starts_with("/out ") {
+        return filter_entries(
+            vec![
+                pe("/out list", "list outputs"),
+                pe("/out preview", "preview CSV content"),
+            ],
+            query,
+        );
+    }
+    if input.starts_with("/settings ") {
+        return filter_entries(
+            vec![
+                pe("/settings show", "show settings"),
+                pe("/settings set", "update settings"),
+            ],
+            query,
+        );
+    }
+    if input.starts_with("/secrets ") {
+        return filter_entries(
+            vec![
+                pe("/secrets status", "vault status"),
+                pe("/secrets import-env", "load .env into session"),
+                pe("/secrets store-session", "store session secrets"),
+                pe("/secrets unlock", "unlock vault"),
+                pe("/secrets delete", "delete vault"),
+            ],
+            query,
+        );
+    }
+    if input.starts_with("/llm ") {
+        return filter_entries(
+            vec![
+                pe("/llm status", "show llm configuration"),
+                pe("/llm models", "list models"),
+                pe("/llm set", "set provider/model"),
+                pe("/llm off", "disable llm"),
+            ],
+            query,
+        );
+    }
+
+    // Main palette
     let entries = command_palette_entries(app);
     if query == "/" {
         return entries;
@@ -1882,101 +2305,97 @@ pub fn command_palette_matches(app: &App, input: &str) -> Vec<PaletteEntry> {
         .collect()
 }
 
+fn settings_key_palette() -> Vec<PaletteEntry> {
+    vec![
+        pe(
+            "/settings set approval_policy",
+            "always_allow | ask_each_time",
+        ),
+        pe("/settings set mode", "readonly_csv | insert | explore"),
+        pe("/settings set privacy", "normal | paranoid"),
+        pe("/settings set llm_enabled", "true | false"),
+        pe("/settings set llm_provider", "gemini | off"),
+        pe("/settings set llm_model", "model name"),
+    ]
+}
+
+fn settings_value_palette(key: &str) -> Vec<PaletteEntry> {
+    match key {
+        "approval_policy" => vec![
+            pe(
+                "/settings set approval_policy always_allow",
+                "auto-approve writes",
+            ),
+            pe(
+                "/settings set approval_policy ask_each_time",
+                "prompt before writes",
+            ),
+        ],
+        "mode" => vec![
+            pe("/settings set mode readonly_csv", "read-only CSV output"),
+            pe("/settings set mode insert", "insert directly into DB"),
+            pe("/settings set mode explore", "explore schema only"),
+        ],
+        "privacy" => vec![
+            pe("/settings set privacy normal", "show connection details"),
+            pe("/settings set privacy paranoid", "hide all connection info"),
+        ],
+        "llm_enabled" => vec![
+            pe("/settings set llm_enabled true", "enable LLM"),
+            pe("/settings set llm_enabled false", "disable LLM"),
+        ],
+        "llm_provider" => vec![
+            pe("/settings set llm_provider gemini", "Google Gemini"),
+            pe("/settings set llm_provider off", "disable provider"),
+        ],
+        _ => Vec::new(),
+    }
+}
+
+fn pe(command: &str, description: &str) -> PaletteEntry {
+    PaletteEntry {
+        command: command.to_string(),
+        description: description.to_string(),
+    }
+}
+
+fn filter_entries(entries: Vec<PaletteEntry>, query: &str) -> Vec<PaletteEntry> {
+    entries
+        .into_iter()
+        .filter(|e| e.command.starts_with(query))
+        .collect()
+}
+
 pub fn command_palette_entries(app: &App) -> Vec<PaletteEntry> {
     let mut entries = vec![
-        PaletteEntry {
-            command: "/profiles",
-            description: "manage db profiles",
-        },
-        PaletteEntry {
-            command: "/db",
-            description: "set session connection",
-        },
-        PaletteEntry {
-            command: "/introspect",
-            description: "capture schema.json",
-        },
-        PaletteEntry {
-            command: "/runs",
-            description: "manage runs",
-        },
-        PaletteEntry {
-            command: "/plans",
-            description: "manage plans",
-        },
-        PaletteEntry {
-            command: "/plan new",
-            description: "create a mock plan",
-        },
-        PaletteEntry {
-            command: "/plan edit",
-            description: "edit plan.json",
-        },
-        PaletteEntry {
-            command: "/plan validate",
-            description: "validate plan.json",
-        },
-        PaletteEntry {
-            command: "/generate",
-            description: "generate CSV output",
-        },
-        PaletteEntry {
-            command: "/out",
-            description: "list outputs",
-        },
-        PaletteEntry {
-            command: "/eval",
-            description: "evaluate last output",
-        },
-        PaletteEntry {
-            command: "/doctor",
-            description: "diagnose workspace",
-        },
-        PaletteEntry {
-            command: "/logs",
-            description: "show logs tail",
-        },
-        PaletteEntry {
-            command: "/open",
-            description: "preview a file",
-        },
-        PaletteEntry {
-            command: "/secrets",
-            description: "vault + env helpers",
-        },
-        PaletteEntry {
-            command: "/llm",
-            description: "configure LLM",
-        },
+        pe("/profiles", "manage db profiles"),
+        pe("/db", "database connection"),
+        pe("/introspect", "capture schema.json"),
+        pe("/runs", "manage runs"),
+        pe("/plans", "manage plans"),
+        pe("/plan new", "generate smart plan from schema"),
+        pe("/plan edit", "edit plan.json in editor"),
+        pe("/plan show", "show plan summary"),
+        pe("/plan validate", "validate plan against schema"),
+        pe("/generate", "generate CSV output"),
+        pe("/out", "list / preview outputs"),
+        pe("/eval", "evaluate last output"),
+        pe("/doctor", "diagnose workspace"),
+        pe("/logs", "show logs tail"),
+        pe("/open", "preview a file"),
+        pe("/secrets", "vault + env helpers"),
+        pe("/llm", "configure LLM"),
+        pe("/status", "workspace configuration"),
+        pe("/settings", "configure workspace"),
     ];
 
-    entries.push(PaletteEntry {
-        command: "/status",
-        description: "show current configuration",
-    });
-    entries.push(PaletteEntry {
-        command: "/settings",
-        description: "configure workspace",
-    });
     if app.paths.root.exists() {
-        entries.push(PaletteEntry {
-            command: "/reset",
-            description: "delete workspace and restart",
-        });
+        entries.push(pe("/reset", "delete workspace and restart"));
     } else {
-        entries.push(PaletteEntry {
-            command: "/init",
-            description: "create workspace",
-        });
+        entries.push(pe("/init", "create workspace"));
     }
-    entries.push(PaletteEntry {
-        command: "/help",
-        description: "show command list",
-    });
-    entries.push(PaletteEntry {
-        command: "/exit",
-        description: "quit",
-    });
+    entries.push(pe("/help", "show command list"));
+    entries.push(pe("/exit", "quit"));
 
     entries
 }

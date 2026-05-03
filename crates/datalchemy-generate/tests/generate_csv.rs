@@ -33,14 +33,18 @@ fn generate_is_deterministic() {
     let out_dir_a = temp_out_dir("run_a");
     let out_dir_b = temp_out_dir("run_b");
 
-    let mut options = GenerateOptions::default();
-    options.out_dir = out_dir_a.clone();
+    let options = GenerateOptions {
+        out_dir: out_dir_a.clone(),
+        ..Default::default()
+    };
 
     let engine = GenerationEngine::new(options);
     let result_a = engine.run(&schema, &plan).expect("run generation A");
 
-    let mut options = GenerateOptions::default();
-    options.out_dir = out_dir_b.clone();
+    let options = GenerateOptions {
+        out_dir: out_dir_b.clone(),
+        ..Default::default()
+    };
 
     let engine = GenerationEngine::new(options);
     let result_b = engine.run(&schema, &plan).expect("run generation B");
@@ -61,8 +65,10 @@ fn generate_respects_row_counts() {
     let (plan, schema) = load_plan_and_schema();
 
     let out_dir = temp_out_dir("run_rows");
-    let mut options = GenerateOptions::default();
-    options.out_dir = out_dir;
+    let options = GenerateOptions {
+        out_dir,
+        ..Default::default()
+    };
 
     let engine = GenerationEngine::new(options);
     let result = engine.run(&schema, &plan).expect("run generation");

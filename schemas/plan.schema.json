@@ -11,6 +11,17 @@
     "targets"
   ],
   "properties": {
+    "global": {
+      "description": "Optional plan-level globals (locale, etc).",
+      "anyOf": [
+        {
+          "$ref": "#/definitions/PlanGlobal"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "options": {
       "description": "Optional plan-level options.",
       "anyOf": [
@@ -91,6 +102,36 @@
         "disable"
       ]
     },
+    "GeneratorRef": {
+      "description": "Generator reference; accepts legacy string id or full spec.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/definitions/GeneratorSpec"
+        }
+      ]
+    },
+    "GeneratorSpec": {
+      "description": "Generator spec with optional locale and params.",
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "locale": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "params": true
+      }
+    },
     "InsertOrder": {
       "description": "Supported insert ordering strategies.",
       "oneOf": [
@@ -102,6 +143,19 @@
           ]
         }
       ]
+    },
+    "PlanGlobal": {
+      "description": "Optional plan-level globals shared by all rules.",
+      "type": "object",
+      "properties": {
+        "locale": {
+          "description": "Default locale for generators.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
     },
     "PlanOptions": {
       "description": "Optional plan-level options (reserved for future use).",
@@ -141,10 +195,10 @@
               "type": "string"
             },
             "generator": {
-              "type": "string"
+              "$ref": "#/definitions/GeneratorRef"
             },
             "params": {
-              "description": "Generator parameters (shape depends on the generator)."
+              "description": "Legacy generator parameters (deprecated; prefer generator.params)."
             },
             "schema": {
               "type": "string"

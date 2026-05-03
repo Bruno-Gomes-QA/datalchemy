@@ -1,0 +1,212 @@
+{
+  "plan_version": "0.2",
+  "seed": 42,
+  "schema_ref": {
+    "schema_version": "0.2",
+    "engine": "postgres"
+  },
+  "global": {
+    "locale": "pt_BR"
+  },
+  "targets": [
+    {
+      "schema": "crm",
+      "table": "usuarios",
+      "rows": 50
+    },
+    {
+      "schema": "crm",
+      "table": "empresas",
+      "rows": 40
+    },
+    {
+      "schema": "crm",
+      "table": "produtos",
+      "rows": 60
+    },
+    {
+      "schema": "crm",
+      "table": "funis",
+      "rows": 20
+    },
+    {
+      "schema": "crm",
+      "table": "fontes_lead",
+      "rows": 20
+    },
+    {
+      "schema": "crm",
+      "table": "listas_precos",
+      "rows": 15
+    }
+  ],
+  "rules": [
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "nome",
+      "generator": "faker.name.raw.Name"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "email",
+      "generator": "semantic.person.email"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "telefone",
+      "generator": "faker.phone_number.raw.PhoneNumber"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "usuarios",
+      "column": "data_criacao",
+      "generator": "primitive.timestamp",
+      "params": {
+        "min": "2024-01-01T00:00:00",
+        "max": "2024-12-31T23:59:59"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "razao_social",
+      "generator": "faker.company.raw.CompanyName"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "nome_fantasia",
+      "generator": "faker.company.raw.CatchPhrase"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "email",
+      "generator": "semantic.person.email"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "telefone",
+      "generator": "semantic.person.phone"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "empresas",
+      "column": "site",
+      "generator": "faker.internet.raw.DomainSuffix"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "sku",
+      "generator": "faker.barcode.raw.Isbn13"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "nome",
+      "generator": "faker.lorem.raw.Word"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "descricao",
+      "generator": "faker.markdown.raw.ItalicWord"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "produtos",
+      "column": "preco_base",
+      "generator": "primitive.decimal.numeric",
+      "params": {
+        "min": 10.0,
+        "max": 9999.99,
+        "scale": 2
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "funis",
+      "column": "nome",
+      "generator": "faker.company.raw.Buzzword"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "funis",
+      "column": "descricao",
+      "generator": "faker.company.raw.Bs"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "fontes_lead",
+      "column": "nome",
+      "generator": "faker.company.raw.Industry"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "fontes_lead",
+      "column": "descricao",
+      "generator": "faker.markdown.raw.Link"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "listas_precos",
+      "column": "nome",
+      "generator": "faker.company.raw.CompanySuffix"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "listas_precos",
+      "column": "moeda",
+      "generator": "faker.currency.raw.CurrencyCode"
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "listas_precos",
+      "column": "data_inicio",
+      "generator": "primitive.date",
+      "params": {
+        "min": "2024-01-01",
+        "max": "2024-06-30"
+      }
+    },
+    {
+      "type": "column_generator",
+      "schema": "crm",
+      "table": "listas_precos",
+      "column": "data_fim",
+      "generator": "primitive.date",
+      "params": {
+        "min": "2024-07-01",
+        "max": "2024-12-31"
+      }
+    }
+  ],
+  "options": {
+    "strict": false
+  }
+}

@@ -7,16 +7,19 @@ edition.workspace = true
 csv = "1.3.1"
 datalchemy-core = { path = "../datalchemy-core" }
 datalchemy-plan = { path = "../datalchemy-plan" }
-rand = "0.8.5"
-rand_chacha = "0.3.1"
+fake = { version = "=4.4.0", default-features = true, features = ["derive", "chrono", "chrono-tz", "time", "uuid", "ulid", "serde_json", "random_color", "email_address", "geo", "http", "rust_decimal"] }
+http = "1.4.0"
+rand = "0.9.0"
+rand_chacha = "0.9.0"
 regex = "1.11.2"
 serde.workspace = true
 serde_json.workspace = true
+time = "0.3.44"
 thiserror.workspace = true
 uuid.workspace = true
 chrono.workspace = true
 hex = "0.4.3"
-rand_regex = "0.17.0"
+rand_regex = "0.18.1"
 sha2 = "0.10.8"
 tracing.workspace = true
 tracing-subscriber.workspace = true

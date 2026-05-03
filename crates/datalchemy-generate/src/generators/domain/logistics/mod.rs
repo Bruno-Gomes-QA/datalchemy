@@ -26,7 +26,7 @@ impl Generator for TrackingCodeGenerator {
     ) -> Result<GeneratedValue, GenerationError> {
         let mut digits = String::new();
         for _ in 0..10 {
-            let value = rng.gen_range(0..=9);
+            let value = rng.random_range(0..=9);
             digits.push_str(&value.to_string());
         }
         Ok(GeneratedValue::Text(format!("BR{digits}")))
@@ -82,14 +82,14 @@ impl Generator for DimensionsGenerator {
         _params: Option<&Value>,
         rng: &mut dyn rand::RngCore,
     ) -> Result<GeneratedValue, GenerationError> {
-        let length = rng.gen_range(10..=100);
-        let width = rng.gen_range(10..=100);
-        let height = rng.gen_range(5..=80);
+        let length = rng.random_range(10..=100);
+        let width = rng.random_range(10..=100);
+        let height = rng.random_range(5..=80);
         Ok(GeneratedValue::Text(format!("{length}x{width}x{height}")))
     }
 }
 
 fn pick(values: &[&str], rng: &mut dyn rand::RngCore) -> String {
-    let idx = rng.gen_range(0..values.len());
+    let idx = rng.random_range(0..values.len());
     values[idx].to_string()
 }

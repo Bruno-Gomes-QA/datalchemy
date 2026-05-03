@@ -42,7 +42,7 @@ pub fn redact_connection_string(conn: &str) -> RedactedConnection {
             }
         }
 
-        let host_part = host_part.splitn(2, '?').next().unwrap_or("");
+        let host_part = host_part.split('?').next().unwrap_or("");
         let (host_port, path) = if let Some(slash_idx) = host_part.find('/') {
             (&host_part[..slash_idx], &host_part[slash_idx + 1..])
         } else {

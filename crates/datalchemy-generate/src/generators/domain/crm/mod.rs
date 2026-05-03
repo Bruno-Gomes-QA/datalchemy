@@ -67,7 +67,7 @@ impl Generator for DealValueGenerator {
                 "domain.crm.deal_value min must be <= max".to_string(),
             ));
         }
-        let value = rng.gen_range(min..=max);
+        let value = rng.random_range(min..=max);
         Ok(GeneratedValue::Float(round_currency(value)))
     }
 }
@@ -91,7 +91,7 @@ impl Generator for PipelineNameGenerator {
 }
 
 fn pick(values: &[&str], rng: &mut dyn rand::RngCore) -> String {
-    let idx = rng.gen_range(0..values.len());
+    let idx = rng.random_range(0..values.len());
     values[idx].to_string()
 }
 

@@ -39,21 +39,22 @@ fn primitive_int_range_rejects_invalid_bounds() {
     let column = test_column("quantidade", "integer", false);
     let row = RowContext::new();
     let foreign_keys: &[ForeignKey] = &[];
-    let ctx = GeneratorContext {
+    let mut ctx = GeneratorContext {
         schema: "crm",
         table: "itens_cotacao",
         column: &column,
         foreign_keys,
-        base_date: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap_or_else(NaiveDate::default),
+        base_date: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap_or_default(),
         row_index: 0,
         enum_values: None,
         row: &row,
         foreign: None,
+        generator_locale: None,
     };
     let params = json!({"min": 10, "max": 1});
     let mut rng = ChaCha8Rng::seed_from_u64(1);
 
-    let result = generator.generate(&ctx, Some(&params), &mut rng);
+    let result = generator.generate(&mut ctx, Some(&params), &mut rng);
     assert!(matches!(result, Err(GenerationError::InvalidPlan(_))));
 }
 
@@ -68,7 +69,7 @@ fn null_rate_transform_rejects_not_null_column() {
         schema: "crm",
         table: "usuarios",
         column: &column,
-        base_date: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap_or_else(NaiveDate::default),
+        base_date: NaiveDate::from_ymd_opt(2024, 1, 1).unwrap_or_default(),
         row_index: 0,
         strict: false,
     };

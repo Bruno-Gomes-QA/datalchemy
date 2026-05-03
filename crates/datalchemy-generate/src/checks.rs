@@ -220,24 +220,23 @@ fn evaluate_comparison(column: &str, op: &str, rhs: &str, ctx: &CheckContext<'_>
         None => return CheckOutcome::Unsupported,
     };
 
-    if let Some(num) = left.as_f64() {
-        if let Some(rhs_val) = parse_numeric_or_column(rhs, ctx).and_then(|v| v.as_f64()) {
-            return compare_f64(num, rhs_val, op);
-        }
+    if let Some(num) = left.as_f64()
+        && let Some(rhs_val) = parse_numeric_or_column(rhs, ctx).and_then(|v| v.as_f64())
+    {
+        return compare_f64(num, rhs_val, op);
     }
 
-    if let Some(date) = left.as_date() {
-        if let Some(rhs_date) =
+    if let Some(date) = left.as_date()
+        && let Some(rhs_date) =
             parse_date_literal(rhs, ctx.base_date).or_else(|| parse_column_date(rhs, ctx))
-        {
-            return compare_date(date, rhs_date, op);
-        }
+    {
+        return compare_date(date, rhs_date, op);
     }
 
-    if let Some(text) = left.as_str() {
-        if let Some(rhs_text) = parse_text_literal(rhs) {
-            return compare_text(text, &rhs_text, op);
-        }
+    if let Some(text) = left.as_str()
+        && let Some(rhs_text) = parse_text_literal(rhs)
+    {
+        return compare_text(text, &rhs_text, op);
     }
 
     CheckOutcome::Unsupported

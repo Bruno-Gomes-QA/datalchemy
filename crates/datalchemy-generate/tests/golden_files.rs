@@ -9,7 +9,9 @@ use datalchemy_core::{
     Schema, Table, TableKind,
 };
 use datalchemy_generate::{GenerateOptions, GenerationEngine};
-use datalchemy_plan::{ColumnGeneratorRule, Plan, PlanOptions, Rule, SchemaRef, Target};
+use datalchemy_plan::{
+    ColumnGeneratorRule, GeneratorRef, Plan, PlanOptions, Rule, SchemaRef, Target,
+};
 
 fn hash_file(path: &Path) -> Result<String, std::io::Error> {
     let mut file = File::open(path)?;
@@ -137,6 +139,10 @@ fn schema_fixture() -> DatabaseSchema {
     }
 }
 
+fn gen_id(id: &str) -> GeneratorRef {
+    GeneratorRef::Id(id.to_string())
+}
+
 fn plan_fixture() -> Plan {
     let mut rules = Vec::new();
 
@@ -144,7 +150,7 @@ fn plan_fixture() -> Plan {
         schema: "public".to_string(),
         table: "users".to_string(),
         column: "id".to_string(),
-        generator: "primitive.uuid.v4".to_string(),
+        generator: gen_id("primitive.uuid.v4"),
         params: None,
         transforms: Vec::new(),
     }));
@@ -152,7 +158,7 @@ fn plan_fixture() -> Plan {
         schema: "public".to_string(),
         table: "users".to_string(),
         column: "name".to_string(),
-        generator: "primitive.text.pattern".to_string(),
+        generator: gen_id("primitive.text.pattern"),
         params: Some(serde_json::json!({"pattern": "User-####"})),
         transforms: Vec::new(),
     }));
@@ -160,7 +166,7 @@ fn plan_fixture() -> Plan {
         schema: "public".to_string(),
         table: "users".to_string(),
         column: "email".to_string(),
-        generator: "derive.email_from_name".to_string(),
+        generator: gen_id("derive.email_from_name"),
         params: Some(serde_json::json!({"input_columns": ["name"], "domain": "example.com"})),
         transforms: Vec::new(),
     }));
@@ -168,7 +174,7 @@ fn plan_fixture() -> Plan {
         schema: "public".to_string(),
         table: "users".to_string(),
         column: "created_at".to_string(),
-        generator: "primitive.timestamp.range".to_string(),
+        generator: gen_id("primitive.timestamp.range"),
         params: Some(
             serde_json::json!({"min": "2024-01-01T00:00:00", "max": "2024-01-10T23:59:59"}),
         ),
@@ -179,7 +185,7 @@ fn plan_fixture() -> Plan {
         schema: "public".to_string(),
         table: "orders".to_string(),
         column: "id".to_string(),
-        generator: "primitive.uuid.v4".to_string(),
+        generator: gen_id("primitive.uuid.v4"),
         params: None,
         transforms: Vec::new(),
     }));
@@ -187,7 +193,7 @@ fn plan_fixture() -> Plan {
         schema: "public".to_string(),
         table: "orders".to_string(),
         column: "user_id".to_string(),
-        generator: "derive.fk".to_string(),
+        generator: gen_id("derive.fk"),
         params: None,
         transforms: Vec::new(),
     }));
@@ -195,7 +201,7 @@ fn plan_fixture() -> Plan {
         schema: "public".to_string(),
         table: "orders".to_string(),
         column: "user_email".to_string(),
-        generator: "derive.parent_value".to_string(),
+        generator: gen_id("derive.parent_value"),
         params: Some(serde_json::json!({
             "input_columns": ["user_id"],
             "parent_schema": "public",
@@ -208,7 +214,7 @@ fn plan_fixture() -> Plan {
         schema: "public".to_string(),
         table: "orders".to_string(),
         column: "price".to_string(),
-        generator: "primitive.float.range".to_string(),
+        generator: gen_id("primitive.float.range"),
         params: Some(serde_json::json!({"min": 10.0, "max": 120.0})),
         transforms: Vec::new(),
     }));
@@ -216,7 +222,7 @@ fn plan_fixture() -> Plan {
         schema: "public".to_string(),
         table: "orders".to_string(),
         column: "qty".to_string(),
-        generator: "primitive.int.range".to_string(),
+        generator: gen_id("primitive.int.range"),
         params: Some(serde_json::json!({"min": 1, "max": 5})),
         transforms: Vec::new(),
     }));
@@ -224,7 +230,7 @@ fn plan_fixture() -> Plan {
         schema: "public".to_string(),
         table: "orders".to_string(),
         column: "discount".to_string(),
-        generator: "primitive.float.range".to_string(),
+        generator: gen_id("primitive.float.range"),
         params: Some(serde_json::json!({"min": 0.0, "max": 5.0})),
         transforms: Vec::new(),
     }));
@@ -232,7 +238,7 @@ fn plan_fixture() -> Plan {
         schema: "public".to_string(),
         table: "orders".to_string(),
         column: "total".to_string(),
-        generator: "derive.money_total".to_string(),
+        generator: gen_id("derive.money_total"),
         params: Some(serde_json::json!({"input_columns": ["price", "qty", "discount"]})),
         transforms: Vec::new(),
     }));
@@ -240,7 +246,7 @@ fn plan_fixture() -> Plan {
         schema: "public".to_string(),
         table: "orders".to_string(),
         column: "created_at".to_string(),
-        generator: "primitive.timestamp.range".to_string(),
+        generator: gen_id("primitive.timestamp.range"),
         params: Some(
             serde_json::json!({"min": "2024-01-01T00:00:00", "max": "2024-01-10T23:59:59"}),
         ),
@@ -250,19 +256,20 @@ fn plan_fixture() -> Plan {
         schema: "public".to_string(),
         table: "orders".to_string(),
         column: "updated_at".to_string(),
-        generator: "derive.updated_after_created".to_string(),
+        generator: gen_id("derive.updated_after_created"),
         params: Some(serde_json::json!({"input_columns": ["created_at"], "max_seconds": 86400})),
         transforms: Vec::new(),
     }));
 
     Plan {
-        plan_version: "0.1".to_string(),
+        plan_version: "0.2".to_string(),
         seed: 123,
         schema_ref: SchemaRef {
             schema_version: "0.2".to_string(),
             schema_fingerprint: None,
             engine: "postgres".to_string(),
         },
+        global: None,
         targets: vec![
             Target {
                 schema: "public".to_string(),
@@ -310,8 +317,8 @@ fn golden_files_are_stable() {
     let users_hash = hash_file(&users_csv).expect("hash users");
     let orders_hash = hash_file(&orders_csv).expect("hash orders");
 
-    let expected_users = "c356748b70cbb9e719feb6da053340c245ad1230f8db4f081660d01f4a109911";
-    let expected_orders = "7e445de7a7c92f6ca59441e7ec32017522d9d497479da034c7729b614b598bc8";
+    let expected_users = "207afbc6d6c7b5c003576e8f8f0ec9baa5cd0e074f636a2c4055ea418b06fb03";
+    let expected_orders = "80838befbd8928fa6d2e609e40310dc175ef56c1f8a3006cc99fba752ee40dc0";
 
     assert_eq!(users_hash, expected_users, "users hash mismatch");
     assert_eq!(orders_hash, expected_orders, "orders hash mismatch");
