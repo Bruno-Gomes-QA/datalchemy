@@ -1,0 +1,10 @@
+services:
+  sqlite:
+    image: keinos/sqlite3:latest
+    container_name: datalchemy-sqlite
+    volumes:
+      - sqlite-data:/data
+    entrypoint: ["tail", "-f", "/dev/null"]
+
+volumes:
+  sqlite-data:

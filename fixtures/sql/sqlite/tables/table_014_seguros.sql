@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS seguros (
+    id_seguro INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    valor_diario REAL NOT NULL
+);

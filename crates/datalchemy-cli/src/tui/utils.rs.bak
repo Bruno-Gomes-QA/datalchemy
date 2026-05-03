@@ -136,73 +136,13 @@ pub fn command_with_id(raw: &str, flag: &str, value: &str) -> String {
     }
 }
 
-/// Return visible portion of input and the cursor x offset, given a cursor byte position.
-pub fn clipped_input(
-    input: &str,
-    total_width: usize,
-    prefix_len: usize,
-    cursor_pos: usize,
-) -> (String, u16) {
+pub fn clipped_input(input: &str, total_width: usize, prefix_len: usize) -> (String, u16) {
     let max_len = total_width.saturating_sub(prefix_len + 1);
-    if max_len == 0 {
-        return (String::new(), 0);
-    }
-
-    // Compute char-level cursor offset
-    let cursor_chars = input[..cursor_pos].chars().count();
-    let total_chars = input.chars().count();
-
-    if total_chars <= max_len {
-        // Everything fits
-        return (input.to_string(), cursor_chars as u16);
-    }
-
-    // Need to window: keep cursor visible
-    let start_char = if cursor_chars < max_len {
-        0
+    if input.len() <= max_len {
+        (input.to_string(), input.len() as u16)
     } else {
-        cursor_chars - max_len + 1
-    };
-
-    let visible: String = input.chars().skip(start_char).take(max_len).collect();
-    let cursor_x = cursor_chars.saturating_sub(start_char) as u16;
-    (visible, cursor_x)
-}
-
-/// Read a CSV file and return a formatted preview (first N rows with headers).
-pub fn csv_preview(path: &Path, max_rows: usize) -> Result<Vec<String>, CliError> {
-    let file = std::fs::File::open(path)?;
-    let reader = std::io::BufReader::new(file);
-    let mut lines_iter = reader.lines();
-    let mut result = Vec::new();
-
-    // Read header
-    let header = match lines_iter.next() {
-        Some(Ok(h)) => h,
-        _ => return Ok(vec!["(empty file)".to_string()]),
-    };
-
-    let columns: Vec<&str> = header.split(',').collect();
-    let col_count = columns.len();
-    result.push(format!("  {}", columns.join(" | ")));
-    result.push(format!("  {}", "-".repeat(header.len().min(120))));
-
-    let mut row_count = 0;
-    for line in lines_iter.take(max_rows) {
-        if let Ok(l) = line {
-            let fields: Vec<&str> = l.splitn(col_count, ',').collect();
-            result.push(format!("  {}", fields.join(" | ")));
-            row_count += 1;
-        }
+        let start = input.len() - max_len;
+        let visible = &input[start..];
+        (visible.to_string(), max_len as u16)
     }
-
-    // Count remaining
-    let total_file = std::fs::File::open(path)?;
-    let total_reader = std::io::BufReader::new(total_file);
-    let total_lines = total_reader.lines().count().saturating_sub(1); // minus header
-    if total_lines > row_count {
-        result.push(format!("  ... ({} more rows)", total_lines - row_count));
-    }
-
-    Ok(result)
 }
